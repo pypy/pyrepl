@@ -68,7 +68,7 @@ class restore_history(commands.Command):
     def do(self):
         r = self.reader
         if r.historyi != len(r.history):
-            if r.get_buffer() != r.history[r.historyi]:
+            if r.get_unicode() != r.history[r.historyi]:
                 r.buffer = list(r.history[r.historyi])
                 r.pos = len(r.buffer)
                 r.dirty = 1
@@ -218,7 +218,7 @@ class HistoricalReader(R):
             isearch_keymap, invalid_cls=isearch_end)
         
     def select_item(self, i):
-        self.transient_history[self.historyi] = self.get_buffer()
+        self.transient_history[self.historyi] = self.get_unicode()
         buf = self.transient_history.get(i)
         if buf is None:
             buf = self.history[i]
@@ -231,7 +231,7 @@ class HistoricalReader(R):
         if i <> len(self.history):
             return self.transient_history.get(i, self.history[i])
         else:
-            return self.transient_history.get(i, self.get_buffer())
+            return self.transient_history.get(i, self.get_unicode())
 
     R_prepare = R.prepare
     def prepare(self):
@@ -263,7 +263,7 @@ class HistoricalReader(R):
         st = self.isearch_term
         p = self.pos
         i = self.historyi
-        s = self.get_buffer()
+        s = self.get_unicode()
         forwards = self.isearch_direction == ISEARCH_DIRECTION_FORWARDS
         while 1:
             if forwards:
@@ -291,7 +291,7 @@ class HistoricalReader(R):
     R_finish = R.finish
     def finish(self):
         self.R_finish()
-        ret = self.get_buffer()
+        ret = self.get_unicode()
         for i, t in self.transient_history.items():
             if i < len(self.history) and i != self.historyi:
                 self.history[i] = t

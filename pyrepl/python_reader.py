@@ -53,7 +53,7 @@ def eat_it(*args):
 class maybe_accept(commands.Command):
     def do(self):
         r = self.reader
-        text = r.get_buffer()
+        text = r.get_unicode()
         try:
             # ooh, look at the hack:
             code = r.compiler("#coding:utf-8\n"+text.encode('utf-8'))
@@ -118,7 +118,7 @@ class PythonicReader(CR):
             self.commands[c.__name__.replace('_', '-')] = c        
     
     def get_completions(self, stem):
-        b = self.get_buffer()
+        b = self.get_unicode()
         m = import_line_prog.match(b)
         if m:
             mod = m.group("mod")
@@ -223,7 +223,7 @@ class ReaderConsole(code.InteractiveInterpreter):
             self.prepare()
         else:
             if self.reader.finished:
-                text = self.reader.get_buffer()
+                text = self.reader.get_unicode()
                 self.restore()
                 if text:
                     self.execute(text)

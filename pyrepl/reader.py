@@ -252,7 +252,7 @@ feeling more loquacious than I am now."""
         everything down and starts from scratch, which whilst not
         especially efficient is certainly simple(r).
         """
-        lines = self.get_buffer().split("\n")
+        lines = self.get_unicode().split("\n")
         screen = []
         screeninfo = []
         w = self.console.width - 1
@@ -544,10 +544,6 @@ feeling more loquacious than I am now."""
         return u''.join(self.buffer).encode(self.console.encoding)
 
     def get_unicode(self):
-        """Return the current buffer as a unicode string."""
-        return u''.join(self.buffer)
-
-    def get_buffer(self):
         """Return the current buffer as a unicode string."""
         return u''.join(self.buffer)
 
