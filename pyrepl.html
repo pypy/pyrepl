@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<!DOCTYPE html 
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "DTD/xhtml1-strict.dtd">
+<html>
+ <head>
+  <title>~mwh/hacks/pyrepl</title>
+  <link rel="stylesheet" type="text/css" href="../style.css" />
+ </head>
+<body>
+<p class="header">
+&lt;<a href="../index.html">home</a>&gt;
+&lt;<a href="../personal.html">personal</a>&gt;
+&lt;hacks&gt;
+&lt;<a href="../links.html">links</a>&gt;
+&lt;<a href="../quotes.html">quotes</a>&gt;
+&lt;<a href="../details.html">details</a>&gt;
+&lt;<a href="../summaries/index.html">summaries</a>&gt;
+</p>
+<p class="header" style="background-color: #dddddd">
+<a href="../hacks/index.html">~mwh/hacks:</a>
+&lt;<a href="http://bytecodehacks.sourceforge.net/">bytecodehacks</a>&gt;
+&lt;<a href="../hacks/xmms-py.html">xmms-py</a>&gt;
+&lt;<a href="../hacks/pyicqlib.html">pyicqlib</a>&gt;
+&lt;<a href="../hacks/pyrepl.html">pyrepl</a>&gt;
+</p>
+
+<h1>pyrepl</h1>
+
+<p>
+For ages now, I've been working on and off on a replacement for
+readline for use from Python.  readline is undoubtedly great, but a
+couple of things irritate me about it.  One is the inability to do
+sane multi-line editing.  Have you ever typed something like:
+</p>
+<pre>
+&gt;&gt;&gt; for i in range(10):
+...     for i in range(10):
+...         print i*j
+</pre>
+<p>
+into a Python top-level?  Grr, that "i" on the second line should have
+been a "j".  Wouldn't it be nice if you could just press "up" on your
+keyboard and fix it?  This was one of the aims I kept in mind when
+writing pyrepl (or pyrl as I used to call it, but that name's <a
+href="http://www.algonet.se/~jsjogren/oscar/cython/">taken</a>).
+</p>
+<p>
+Another irritation of readline is the GPL.  I'm not even nearly as
+anti-GPL as some, but I don't want to have to GPL my program just so I
+can use readline.
+</p>
+<p>
+0.7 adds to the version that runs an a terminal an experimental
+version that runs in a pygame surface.  A long term goal is
+Mathematica-like notebooks, but that's a loong way off...
+</p>
+<p>
+Anyway, after many months of intermittent toil I present:
+</p>
+<p style="font-size: larger; text-align: center">
+<a href="pyrepl-0.7.2.tar.gz">pyrepl 0.7.2</a>
+</p>
+<p style="font-size: smaller; text-align: center">
+(0.7.2 fixes a number of silly small typos and slips)
+</p>
+<p style="font-size: smaller; text-align: center">
+(the significant change since 0.7 is inclusion of a working setup.py...)
+</p>
+<p>
+<p style="text-align: center">
+For more details on the changes since 0.6, you can read the <a href="pyrepl-CHANGES">CHANGES</a> file.
+</p>
+<p>
+Dependencies: Python 2.1 with the termios and curses modules built (I
+don't really use curses, but I need the terminfo functions that live
+in the curses module), or pygame installed (if you want to live on the
+bleeding edge).
+</p>
+<p>
+There are probably portability gremlins in some of the ioctl using
+code.  Fixes gratefully received!
+</p>
+<p>
+Features:
+</p>
+<ul>
+<li>
+sane multi-line editing
+</li>
+<li>
+history, with incremental search
+</li>
+<li>
+completion, including displaying of available options
+</li>
+<li>
+a fairly large subset of the readline emacs-mode key bindings (adding
+more is mostly just a matter of typing)
+</li>
+<li>
+Deliberately liberal, Python-style license
+</li>
+<li>
+a new python top-level that I really like; possibly my favourite
+feature I've yet added is the ability to type
+<pre>
+-&gt;&gt; from __f
+</pre>
+and hit TAB to get
+<pre>
+-&gt;&gt; from __future__
+</pre>
+then you type " import n" and hit tab again to get:
+<pre>
+-&gt;&gt; from __future__ import nested_scopes
+</pre>
+(this is very addictive!).
+</li>
+<li>
+no global variables, so you can run two independent
+readers without having their histories interfering.
+</li>
+<li>
+An experimental version that runs in a pygame surface.
+</li>x
+</ul>
+<p>
+pyrepl currently consists of four major classes:
+</p>
+<pre>
+Reader &lt;- HistoricalReader &lt;- CompletingReader &lt;- PythonReader
+</pre>
+<p>
+There's also a <tt>UnixConsole</tt> class that handles the low-level
+details.
+</p>
+<p>
+Each of these lives in it's own file, and there are a bunch of support
+files (including a C module that just provides a bit of a speed up -
+building it is strictly optional).
+</p>
+<p>
+IMHO, the best way to get a feel for how it works is to type
+</p>
+<pre>
+$ python pythoni
+</pre>
+<p>
+and just play around.  If you're used to readline's emacs-mode, you
+should feel right at home.  One point that might confuse: because the
+arrow keys are used to move up and down in the command currently being
+edited, you need to use ^P and ^N to move through the history.
+</p>
+
+<p class="header">
+&lt;<a href="../index.html">home</a>&gt;
+&lt;<a href="../personal.html">personal</a>&gt;
+&lt;hacks&gt;
+&lt;<a href="../links.html">links</a>&gt;
+&lt;<a href="../quotes.html">quotes</a>&gt;
+&lt;<a href="../details.html">details</a>&gt;
+&lt;<a href="../summaries/index.html">summaries</a>&gt;
+</p>
+<address>
+<a href="http://validator.w3.org/check/referer">
+     <img class="w3link"
+          src="http://validator.w3.org/images/vxhtml10" 
+          alt="Valid XHTML 1.0!" />
+ </a>
+ <a href="http://jigsaw.w3.org/css-validator/check/referer">
+     <img class="w3link"
+          src="http://jigsaw.w3.org/css-validator/images/vcss.gif" 
+          alt="Valid CSS!" />
+</a>
+Last updated: $Date: 2002/12/12 11:47:57 $. Comments to <a
+href="mailto:mwh@python.net">mwh@python.net</a>.
+<br />
+<a href="http://www.anybrowser.org/campaign/">
+Best viewed with any browser</a>.  Except netscape 4 with javascript
+on...
+</address>
+</body>
+</html>
+
