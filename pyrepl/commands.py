@@ -32,9 +32,10 @@ import sys, os
 class Command(object):
     finish = 0
     kills_digit_arg = 1
-    def __init__(self, reader, event):
+    def __init__(self, reader, (event_name, event)):
         self.reader = reader
         self.event = event
+        self.event_name = event_name
     def do(self):
         pass
 
@@ -347,6 +348,11 @@ class invalid_key(Command):
     def do(self):
         s = self.event
         self.reader.error("`%s' not bound"%s)
+
+class invalid_command(Command):
+    def do(self):
+        s = self.event_name
+        self.reader.error("command `%s' not known"%s)
 
 class qIHelp(Command):
     def do(self):

@@ -49,7 +49,7 @@ class KeymapTranslator(InputTranslator):
         if isinstance(d, dict):
             if self.verbose:
                 print "transition"
-            self.stack.append((key, self.stack + [key]))
+            self.stack.append(key)
             self.k = d
         else:
             if d is None:
