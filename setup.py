@@ -1,4 +1,4 @@
-#   Copyright 2000-2003 Michael Hudson mwh@python.net
+#   Copyright 2000-2004 Michael Hudson mwh@python.net
 #
 #                        All Rights Reserved
 #
@@ -32,11 +32,11 @@ command line interfaces, featuring:
 
 setup(
     name = "pyrepl",
-    version = "0.8.0",
+    version = "0.8.1",
     author = "Michael Hudson",
     author_email = "mwh@python.net",
-    url = "http://starship.python.net/crew/mwh/hacks/pyrepl.html",
-    licence = "MIT X11 style",
+    url = "http://codespeak.net/pyrepl/",
+    license = "MIT X11 style",
     description = "A library for building flexible command line interfaces",
     platforms = ["unix", "linux"],
     packages = ["pyrepl"],
