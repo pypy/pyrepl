@@ -56,7 +56,8 @@ def _make_module_list():
     for dir in sys.path:
         if dir == '':
             dir = '.'
-        _packages[''] += _make_module_list_dir(dir, suffs)
+        if os.path.isdir(dir):
+            _packages[''] += _make_module_list_dir(dir, suffs)
     _packages[''].sort()
 
 def find_modules(stem):
