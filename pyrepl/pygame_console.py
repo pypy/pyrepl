@@ -17,6 +17,14 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+# the pygame console is currently thoroughly broken.
+
+# there's a fundamental difference from the UnixConsole: here we're
+# the terminal emulator too, in effect.  This means, e.g., for pythoni
+# we really need a separate process (or thread) to monitor for ^C
+# during command execution and zap the executor process.  Making this
+# work on non-Unix is expected to be even more entertaining.
+
 from pygame.locals import *
 from pyrepl.console import Console, Event
 from pyrepl import pygame_keymap
