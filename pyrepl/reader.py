@@ -462,7 +462,7 @@ feeling more loquacious than I am now."""
         try:
             cmd_class = self.commands[event.name]
         except KeyError:
-            self.insert(event.name)
+            self.msg = " %s not written yet"%(event.name,)
             self.refresh()
             self.console.beep()
             return
