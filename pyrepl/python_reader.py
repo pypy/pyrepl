@@ -81,8 +81,8 @@ def mk_saver(reader):
     return saver
 
 python_keymap = cr.completing_keymap + (
-    ('\\n', 'maybe-accept'),
-    ('\\M-\\n', 'self-insert'))
+    (r'\n', 'maybe-accept'),
+    (r'\M-\n', 'self-insert'))
 
 class PythonicReader(CR):
     keymap = python_keymap
@@ -135,7 +135,7 @@ class PythonicReader(CR):
                 l = module_lister._packages[mod]
             except KeyError:
                 try:
-                    mod = __import__(mod, self.locals, self.locals, [1])
+                    mod = __import__(mod, self.locals, self.locals, [''])
                     return [x for x in dir(mod) if x.startswith(name)]
                 except ImportError:
                     pass
@@ -313,6 +313,8 @@ def main(use_pygame_console=0):
         print "Python", sys.version, "on", sys.platform
         print 'Type "copyright", "credits" or "license" for more information.'
         sys.path.insert(0, os.getcwd())
+
+        module_lister._make_module_list()
 
         mainmod = new.module('__main__')
         sys.modules['__main__'] = mainmod

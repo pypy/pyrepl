@@ -59,9 +59,6 @@ def _make_module_list():
         _packages[''] += _make_module_list_dir(dir, suffs)
     _packages[''].sort()
 
-if len(_packages) == 0:
-    _make_module_list()
-
 def find_modules(stem):
     l = stem.split('.')
     pack = '.'.join(l[:-1])
