@@ -19,7 +19,6 @@
 
 from pyrepl import historical_reader, commands, reader
 from pyrepl.historical_reader import HistoricalReader as HR
-import sys, string, marshal
 
 completing_keymap = historical_reader.history_keymap + (
     (r'\t', 'complete'),)
