@@ -22,7 +22,6 @@ from pyrepl.console import Console, Event
 from pyrepl import pygame_keymap
 import pygame
 import types
-import sys
 
 lmargin = 5
 rmargin = 5
