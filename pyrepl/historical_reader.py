@@ -33,6 +33,8 @@ isearch_keymap = tuple(
      (r'\C-g', 'isearch-cancel'),
      (r'\<backspace>', 'isearch-backspace')])
 
+del c
+
 ISEARCH_DIRECTION_NONE = ''
 ISEARCH_DIRECTION_BACKWARDS = 'r'
 ISEARCH_DIRECTION_FORWARDS = 'f'

@@ -49,9 +49,6 @@ class CmdReader(CR):
         self.CR_init()
         self.completions = completions
 
-    def install_keymap(self):
-        self.console.install_keymap(keymap)
-
     def get_completions(self, stem):
         if len(stem) != self.pos:
             return []

@@ -17,7 +17,7 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import termios, curses, select, os, struct, types, errno
+import termios, curses, select, os, struct, errno
 import signal, re, time, sys
 from fcntl import ioctl
 from pyrepl.fancy_termios import tcgetattr, tcsetattr
@@ -36,23 +36,6 @@ def _my_getstr(cap, optional=0):
         raise RuntimeError, \
               "terminal doesn't have the required '%s' capability"%cap
     return r
-
-_keysets = {}
-
-def keyset(con=None):
-    if con is None:
-        term, fd = os.environ["TERM"], 0
-    else:
-        term, fd = con.term, con.input_fd
-    try:
-        return _keysets[(term, fd)]
-    except KeyError:
-        set = {'space' : ' ', 'tab' : '\t', 'hash' : '#',
-               "escape":"\033", "return":"\n", 'backslash':'\\'}
-        for key, code in _keynames.items():
-            set[key] = curses.tigetstr(code)
-        set["backspace"] = termios.tcgetattr(fd)[6][termios.VERASE]
-        return _keysets.setdefault((term, fd), set)
 
 # at this point, can we say: AAAAAAAAAAAAAAAAAAAAAARGH!
 def maybe_add_baudrate(dict, rate):

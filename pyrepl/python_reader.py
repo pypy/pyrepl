@@ -23,7 +23,7 @@ from pyrepl.historical_reader import HistoricalReader
 from pyrepl import completing_reader, reader
 from pyrepl import copy_code, commands, completer
 from pyrepl import module_lister
-import new, codeop, sys, os, re, code, traceback
+import new, sys, os, re, code, traceback
 import atexit, warnings
 try:
     import cPickle as pickle
@@ -151,8 +151,8 @@ class ReaderConsole(code.InteractiveInterpreter):
         try:
             execfile(initfile, self.locals, self.locals)
         except:
-            traceback.print_exception(sys.exc_type, sys.exc_value,
-                                      sys.exc_traceback.tb_next)
+            etype, value, tb = sys.exc_info()
+            traceback.print_exception(etype, value, tb.tb_next)
 
     def execute(self, text):
         try:

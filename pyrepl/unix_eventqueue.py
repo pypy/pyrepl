@@ -22,7 +22,7 @@
 
 from pyrepl import keymap
 from pyrepl.console import Event
-import curses, termios
+import curses
 from termios import tcgetattr, VERASE
 
 _keynames = {

@@ -525,7 +525,7 @@ feeling more loquacious than I am now."""
 
             self.do_cmd(cmd)
             return 1
-
+    
     def readline(self):
         """Read a line.  The implementation of this method also shows
         how to drive Reader if you want more control over the event
