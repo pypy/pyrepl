@@ -289,7 +289,7 @@ class transpose_characters(EditCommand):
         b = r.buffer
         s = r.pos - 1
         if s < 0:
-            self.error("")
+            r.error("cannot transpose at start of buffer")
         else:
             if s == len(b):
                 s -= 1
