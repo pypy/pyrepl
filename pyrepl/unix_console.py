@@ -71,7 +71,7 @@ def keyset(term=None):
         return _keysets[term]
     except KeyError:
         set = {'space' : ' ', 'tab' : '\t', 'hash' : '#',
-               "escape":"\033", "return":"\n"}
+               "escape":"\033", "return":"\n", 'backslash':'\\'}
         for key, code in _keynames.items():
             set[key] = curses.tigetstr(code)
         return _keysets.setdefault(term, set)
