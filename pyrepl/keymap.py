@@ -37,10 +37,7 @@ All characters other than the backslash represent themselves.  In the
 traditional manner, a backslash introduces a escape sequence.
 
 The extension to readline is that the sequence \\<KEY> denotes the
-sequence of charaters produced by hitting KEY.  This gets a bit messy
-because the results of such depend on your terminal.  If your terminal's
-terminfo entry doesn't describe KEY, trying to parse any keyspec
-containing \\<KEY> will return None.
+sequence of charaters produced by hitting KEY.
 
 Examples:
 
@@ -54,9 +51,6 @@ Examples:
 `\\<tab>', `\\<TAB>', `\\t', `\\011', '\\x09', '\\X09', '\\C-i', '\\C-I'
    - all of these are the tab character.  Can you think of any more?
 """
-
-# XXX it's actually possible to test this module, so it should have a
-# XXX test suite.
 
 from curses import ascii
 
@@ -160,7 +154,7 @@ def _parse_key1(key, s):
             ret = key[s]
             s += 1
     if ctrl:
-        if len(ret) > 2:
+        if len(ret) > 1:
             raise KeySpecError, "\\C- must be followed by a character"
         ret = ascii.ctrl(ret)
     if meta:
