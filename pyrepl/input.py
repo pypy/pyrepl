@@ -55,7 +55,7 @@ class KeymapTranslator(InputTranslator):
             if d is None:
                 if self.verbose:
                     print "invalid"
-                if self.stack or unicodedata.category(key) == 'C':
+                if self.stack or len(key) > 1 or unicodedata.category(key) == 'C':
                     self.results.append(
                         (self.invalid_cls, self.stack + [key]))
                 else:
