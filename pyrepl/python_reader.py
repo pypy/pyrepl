@@ -174,7 +174,7 @@ class ReaderConsole(code.InteractiveInterpreter):
                         # can't have warnings spewed onto terminal
                         sv = warnings.showwarning
                         warnings.showwarning = eat_it
-                        l = self.reader.readline()
+                        l = unicode(self.reader.readline(), 'utf-8')
                     finally:
                         warnings.showwarning = sv
                 except KeyboardInterrupt:
@@ -199,7 +199,8 @@ class ReaderConsole(code.InteractiveInterpreter):
 
     def handle1(self, block=1):
         try:
-            self.reader.handle1(block)
+            r = 1
+            r = self.reader.handle1(block)
         except KeyboardInterrupt:
             self.restore()
             print "KeyboardInterrupt"
@@ -211,6 +212,7 @@ class ReaderConsole(code.InteractiveInterpreter):
                 if text:
                     self.execute(text)
                 self.prepare()
+        return r
 
     def tkfilehandler(self, file, mask):
         try:
@@ -225,6 +227,7 @@ class ReaderConsole(code.InteractiveInterpreter):
         _tkinter.createfilehandler(
             self.reader.console.input_fd, _tkinter.READABLE,
             self.tkfilehandler)
+        
         self.exc_info = None
         while 1:
             # dooneevent will return 0 without blocking if there are
@@ -284,7 +287,14 @@ class ReaderConsole(code.InteractiveInterpreter):
             else:
                 break
 
-def main(use_pygame_console=0):
+    def cocoainteract(self, inputfilehandle=None, outputfilehandle=None):
+        # only call this when there's a run loop already going!
+        # note that unlike the other *interact methods, this returns immediately
+        from cocoasupport import CocoaInteracter
+        self.cocoainteracter = CocoaInteracter.alloc().init(self, inputfilehandle, outputfilehandle)
+        
+        
+def main(use_pygame_console=0, interactmethod="interact"):
     si, se, so = sys.stdin, sys.stderr, sys.stdout
     try:
         if 0 and use_pygame_console: # pygame currently borked
@@ -332,7 +342,7 @@ def main(use_pygame_console=0):
 
         rc = ReaderConsole(con, mainmod.__dict__)
         rc.run_user_init_file()
-        rc.tkinteract()
+        getattr(rc, interactmethod)()
     finally:
         sys.stdin, sys.stderr, sys.stdout = si, se, so
 
