@@ -525,6 +525,10 @@ feeling more loquacious than I am now."""
 
             self.do_cmd(cmd)
             return 1
+
+    def push_char(self, char):
+        self.console.push_char(char)
+        self.handle1(0)
     
     def readline(self):
         """Read a line.  The implementation of this method also shows

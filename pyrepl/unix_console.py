@@ -151,6 +151,7 @@ class UnixConsole(Console):
         self.__move = self.__move_short
 
         self.event_queue = unix_eventqueue.EventQueue(self.input_fd)
+        self.partial_char = ''
 
     def change_encoding(self, encoding):
         self.encoding = encoding
@@ -376,35 +377,35 @@ class UnixConsole(Console):
         self.height, self.width = self.getheightwidth()
         self.event_queue.insert(Event('resize', None))
 
+    def push_char(self, char):
+        self.partial_char += char
+        try:
+            c = unicode(self.partial_char, self.encoding)
+        except UnicodeError, e:
+            if len(e.args) > 4 and \
+                   e.args[4] == 'unexpected end of data':
+                pass
+            else:
+                raise
+        else:
+            self.partial_char = ''
+            self.event_queue.push(c)
+        
     def get_event(self, block=1):
         while self.event_queue.empty():
             while 1: # All hail Unix!
                 try:
-                    c = ''
-                    while 1:
-                        c += os.read(self.input_fd, 1)
-                        try:
-                            c = unicode(c, self.encoding)
-                        except UnicodeError, e:
-                            if len(e.args) > 4 and \
-                               e.args[4] == 'unexpected end of data':
-                                continue
-                            else:
-                                raise
-                        else:
-                            break
-                        
+                    self.push_char(os.read(self.input_fd, 1))
                 except IOError, err:
                     if err.errno == errno.EINTR:
                         if not self.event_queue.empty():
                             return self.event_queue.get()
                         else:
-                            continue # be explicit
+                            continue
                     else:
                         raise
                 else:
                     break
-            self.event_queue.push(c)
             if not block:
                 break
         return self.event_queue.get()

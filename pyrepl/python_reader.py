@@ -286,6 +286,28 @@ class ReaderConsole(code.InteractiveInterpreter):
             else:
                 break
 
+    def twistedinteract(self):
+        from twisted.internet import reactor
+        outerself = self
+        class Me(object):
+            def fileno(self):
+                """ We want to select on FD 0 """
+                return 0
+
+            def doRead(self):
+                """called when input is ready"""
+                outerself.handle1()
+
+            def logPrefix(self): return 'PyRepl'
+            
+        reactor.addReader(Me())
+        self.prepare()
+        try:
+            reactor.run()
+        finally:
+            self.restore()
+        
+
     def cocoainteract(self, inputfilehandle=None, outputfilehandle=None):
         # only call this when there's a run loop already going!
         # note that unlike the other *interact methods, this returns immediately
@@ -293,7 +315,7 @@ class ReaderConsole(code.InteractiveInterpreter):
         self.cocoainteracter = CocoaInteracter.alloc().init(self, inputfilehandle, outputfilehandle)
         
         
-def main(use_pygame_console=0, interactmethod="interact"):
+def main(use_pygame_console=0, interactmethod="twistedinteract"):
     si, se, so = sys.stdin, sys.stderr, sys.stdout
     try:
         if 0 and use_pygame_console: # pygame currently borked
