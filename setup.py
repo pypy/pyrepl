@@ -32,16 +32,15 @@ command line interfaces, featuring:
 
 setup(
     name = "pyrepl",
-    version = "0.7.2",
+    version = "0.8.0",
     author = "Michael Hudson",
     author_email = "mwh@python.net",
     url = "http://starship.python.net/crew/mwh/hacks/pyrepl.html",
     licence = "MIT X11 style",
     description = "A library for building flexible command line interfaces",
     platforms = ["unix", "linux"],
-
     packages = ["pyrepl"],
-    ext_modules = [Extension("_pyrepl_utils", ["pyrepl_utilsmodule.c"])],
+    #ext_modules = [Extension("_pyrepl_utils", ["pyrepl_utilsmodule.c"])],
     scripts = ["pythoni"],
     long_description = long_desc,
     )
