@@ -299,7 +299,8 @@ class HistoricalReader(R):
             self.history.append(ret)
 
 def test():
-    reader = HistoricalReader()
+    from pyrepl.unix_console import UnixConsole
+    reader = HistoricalReader(UnixConsole(1, None))
     reader.ps1 = "h**> "
     reader.ps2 = "h/*> "
     reader.ps3 = "h|*> "
