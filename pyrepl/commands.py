@@ -29,7 +29,7 @@ import sys, os
 #  finishing
 # [completion]
 
-class Command:
+class Command(object):
     finish = 0
     kills_digit_arg = 1
     def __init__(self, reader, event):
@@ -81,7 +81,7 @@ class digit_arg(Command):
     kills_digit_arg = 0
     def do(self):
         r = self.reader
-        c = self.event.chars[-1]
+        c = self.event[-1]
         if c == "-":
             if r.arg is not None:
                 r.arg = -r.arg
@@ -283,7 +283,7 @@ class backward_word(MotionCommand):
 class self_insert(EditCommand):
     def do(self):
         r = self.reader
-        r.insert(self.event.chars * r.get_arg())
+        r.insert(self.event * r.get_arg())
 
 class insert_nl(EditCommand):
     def do(self):
@@ -324,7 +324,7 @@ class delete(EditCommand):
         r = self.reader
         b = r.buffer
         if  ( r.pos == 0 and len(b) == 0 # this is something of a hack
-              and self.event.chars[-1] == "\004"):
+              and self.event[-1] == "\004"):
             r.console.finish()
             raise EOFError
         for i in range(r.get_arg()):
@@ -338,31 +338,32 @@ class accept(FinishCommand):
     def do(self):
         pass
 
-class qIHelp(Command):
-    def do(self):
-        r = self.reader
-        r.insert((self.event.chars + r.console.getpending()) * r.get_arg())
-        self.reader.install_keymap()
-
-class DefaultDict:
-    def __contains__(self, whatever):
-        return True
-    def __getitem__(self, whatever):
-        return 'qIHelp'
-
-class quoted_insert(Command):
-    kills_digit_arg = 0
-    def do(self):
-        self.reader.console.k = self.reader.console.keymap = DefaultDict()
-
-class invalid_key(Command):
-    def do(self):
-        s = self.reader.console.describe_event(self.event)
-        self.reader.error("`%s' not bound"%s)
-
 class help(Command):
     def do(self):
         self.reader.msg = self.reader.help_text
         self.reader.dirty = 1
 
+class invalid_key(Command):
+    def do(self):
+        s = self.event
+        self.reader.error("`%s' not bound"%s)
 
+class qIHelp(Command):
+    def do(self):
+        r = self.reader
+        #r.insert((self.event + r.console.getpending()) * r.get_arg())
+        r.insert((self.event  ) * r.get_arg())
+        r.pop_input_trans()
+
+from pyrepl import input
+
+class QITrans(object):
+    def push(self, evt):
+        self.chars = evt.data
+    def get(self):
+        return ('qIHelp', self.chars)
+
+class quoted_insert(Command):
+    kills_digit_arg = 0
+    def do(self):
+        self.reader.push_input_trans(QITrans())

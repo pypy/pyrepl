@@ -117,9 +117,6 @@ class PythonicReader(CR):
             self.commands[c.__name__] = c
             self.commands[c.__name__.replace('_', '-')] = c        
     
-    def install_keymap(self):
-        self.console.install_keymap(self.keymap)
-
     def get_completions(self, stem):
         b = self.get_buffer()
         m = import_line_prog.match(b)
@@ -170,7 +167,8 @@ class ReaderConsole(code.InteractiveInterpreter):
         try:
             execfile(initfile, self.locals, self.locals)
         except:
-            traceback.print_exc()
+            traceback.print_exception(sys.exc_type, sys.exc_value,
+                                      sys.exc_traceback.tb_next)
 
     def execute(self, text):
         try:
@@ -334,13 +332,17 @@ def main(use_pygame_console=0):
                     encoding = None # so you get ASCII...
             con = UnixConsole(0, 1, None, encoding)
         print "Python", sys.version, "on", sys.platform
-        print 'Type "copyright", "credits" or "license" for more information.'
+        print 'Type "help", "copyright", "credits" or "license" '\
+              'for more information.'
         sys.path.insert(0, os.getcwd())
 
         module_lister._make_module_list()
 
-        mainmod = new.module('__main__')
-        sys.modules['__main__'] = mainmod
+        if __name__ != '__main__':
+            mainmod = new.module('__main__')
+            sys.modules['__main__'] = mainmod
+        else:
+            mainmod = sys.modules['__main__']
 
         rc = ReaderConsole(con, mainmod.__dict__)
         rc.run_user_init_file()

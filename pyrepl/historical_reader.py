@@ -119,7 +119,7 @@ class forward_history_isearch(commands.Command):
         r.isearch_start = r.historyi, r.pos
         r.isearch_term = ''
         r.dirty = 1
-        r.console.install_keymap(isearch_keymap)
+        r.push_input_trans(r.isearch_trans)
         
 
 class reverse_history_isearch(commands.Command):
@@ -128,14 +128,14 @@ class reverse_history_isearch(commands.Command):
         r.isearch_direction = ISEARCH_DIRECTION_BACKWARDS
         r.dirty = 1
         r.isearch_term = ''
-        r.console.install_keymap(isearch_keymap)
+        r.push_input_trans(r.isearch_trans)
         r.isearch_start = r.historyi, r.pos
 
 class isearch_cancel(commands.Command):
     def do(self):
         r = self.reader
         r.isearch_direction = ISEARCH_DIRECTION_NONE
-        r.install_keymap()
+        r.pop_input_trans()
         r.select_item(r.isearch_start[0])
         r.pos = r.isearch_start[1]
         r.dirty = 1
@@ -144,7 +144,7 @@ class isearch_add_character(commands.Command):
     def do(self):
         r = self.reader
         b = r.buffer
-        r.isearch_term += self.event.chars[-1]
+        r.isearch_term += self.event[-1]
         r.dirty = 1
         p = r.pos + len(r.isearch_term) - 1
         if b[p:p+1] != [r.isearch_term[-1]]:
@@ -176,7 +176,7 @@ class isearch_end(commands.Command):
         r = self.reader
         r.isearch_direction = ISEARCH_DIRECTION_NONE
         r.console.forgetinput()
-        r.install_keymap()
+        r.pop_input_trans()
         r.dirty = 1
 
 class HistoricalReader(R):
@@ -213,10 +213,10 @@ class HistoricalReader(R):
                   isearch_forwards, isearch_backwards, operate_and_get_next]:
             self.commands[c.__name__] = c
             self.commands[c.__name__.replace('_', '-')] = c
+        from pyrepl import input
+        self.isearch_trans = input.KeymapTranslator(
+            isearch_keymap, invalid_cls=isearch_end)
         
-    def install_keymap(self):
-        self.console.install_keymap(history_keymap)
-
     def select_item(self, i):
         self.transient_history[self.historyi] = self.get_buffer()
         buf = self.transient_history.get(i)
@@ -300,7 +300,7 @@ class HistoricalReader(R):
 
 def test():
     from pyrepl.unix_console import UnixConsole
-    reader = HistoricalReader(UnixConsole(1, None))
+    reader = HistoricalReader(UnixConsole())
     reader.ps1 = "h**> "
     reader.ps2 = "h/*> "
     reader.ps3 = "h|*> "

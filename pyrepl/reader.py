@@ -20,6 +20,7 @@
 import types, unicodedata
 from pyrepl import commands
 from curses import ascii
+from pyrepl import input
 
 def _make_unctrl_map():
     uc_map = {}
@@ -102,11 +103,11 @@ default_keymap = tuple(
      (r'\C-f', 'right'),
      (r'\C-g', 'cancel'),
      (r'\C-h', 'backspace'),
-     (r'\C-j', 'self-insert'),
+     (r'\C-j', 'accept'),
      (r'\<return>', 'accept'),
      (r'\C-k', 'kill-line'),
      (r'\C-l', 'clear-screen'),
-#     (r'\C-m', 'accept'),
+     (r'\C-m', 'accept'),
      (r'\C-q', 'quoted-insert'),
      (r'\C-t', 'transpose-characters'),
      (r'\C-u', 'unix-line-discard'),
@@ -232,16 +233,18 @@ feeling more loquacious than I am now."""
         self.arg = None
         self.finished = 0
         self.console = console
-        self.install_keymap()
         self.commands = {}
         self.msg = ''
         for v in vars(commands).values():
-            if  ( isinstance(v, types.ClassType)
+            if  ( isinstance(v, type)
                   and issubclass(v, commands.Command)
                   and v.__name__[0].islower() ):
                 self.commands[v.__name__] = v
                 self.commands[v.__name__.replace('_', '-')] = v
         self.syntax_table = make_default_syntax_table()
+        self.input_trans_stack = []
+        self.input_trans = input.KeymapTranslator(
+            self.keymap, invalid_cls='invalid-key')
 
     def calc_screen(self):
         """The purpose of this method is to translate changes in
@@ -281,7 +284,7 @@ feeling more loquacious than I am now."""
         self.screeninfo = screeninfo
         self.cxy = self.pos2xy(self.pos)
         return screen
-        
+
     def bow(self, p=None):
         """Return the 0-based index of the word break preceding p most
         immediately.
@@ -365,12 +368,16 @@ feeling more loquacious than I am now."""
         else:
             return self._ps1
 
-    def install_keymap(self):
-        self.console.install_keymap(default_keymap)
+    def push_input_trans(self, itrans):
+        self.input_trans_stack.append(self.input_trans)
+        self.input_trans = itrans
+
+    def pop_input_trans(self):
+        self.input_trans = self.input_trans_stack.pop()
 
     def pos2xy(self, pos):
         """Return the x, y coordinates of position 'pos'."""
-        # this is incomprehensible, yes.
+        # this *is* incomprehensible, yes.
         y = 0
         assert 0 <= pos <= len(self.buffer)
         if pos == len(self.buffer):
@@ -456,53 +463,63 @@ feeling more loquacious than I am now."""
         self.console.refresh(screen, self.cxy)
         self.dirty = 0 # forgot this for a while (blush)
 
-    def handle1(self, block=1):
-        """Handle a single event.  Wait as long as it takes if block
-        is true (the default), otherwise return None if no event is
-        pending."""
-        
-        if self.msg:
-            self.msg = ''
-            self.dirty = 1
-            
-        event = self.console.get_event(block)
-        if not event: # can only happen if we're not blocking
-            return
-        try:
-            cmd_class = self.commands[event.name]
-        except KeyError:
-            self.msg = " %s not written yet"%(event.name,)
-            self.refresh()
-            self.console.beep()
-            return
-        cmd = cmd_class(self, event)
-        
+    def do_cmd(self, cmd):
+        #print cmd
+        if isinstance(cmd[0], str):
+            cmd = self.commands[cmd[0]](self, cmd[1])
+        elif isinstance(cmd[0], type):
+            cmd = cmd[0](self, cmd[1])
+
         cmd.do()
 
         self.after_command(cmd)
 
         if self.dirty:
-            if 0:
-                from profile import Profile
-                import sys
-                p = Profile()
-                p.runcall(self.refresh)
-                so = sys.stdout
-                sys.stdout = open("/dev/pts/2", "w")
-                p.print_stats()
-                sys.stdout = so
-            else:
-                self.refresh()
+            self.refresh()
         else:
             self.update_cursor()
 
         if not isinstance(cmd, commands.digit_arg):
-            self.last_command = cmd_class
+            self.last_command = cmd.__class__
 
         self.finished = cmd.finish
         if self.finished:
             self.console.finish()
             self.finish()
+
+    def handle1(self, block=1):
+        """Handle a single event.  Wait as long as it takes if block
+        is true (the default), otherwise return None if no event is
+        pending."""
+
+        if self.msg:
+            self.msg = ''
+            self.dirty = 1
+
+        while 1:
+            event = self.console.get_event(block)
+            if not event: # can only happen if we're not blocking
+                return
+
+            if event.evt == 'key':
+                self.input_trans.push(event)
+            elif event.evt == 'scroll':
+                self.refresh()
+            elif event.evt == 'resize':
+                self.refresh()
+            else:
+                pass
+
+            cmd = self.input_trans.get()
+
+            if cmd is None:
+                if block:
+                    continue
+                else:
+                    return 
+
+            self.do_cmd(cmd)
+            return 
 
     def readline(self):
         """Read a line.  The implementation of this method also shows
@@ -518,8 +535,17 @@ feeling more loquacious than I am now."""
             self.restore()
 
     def bind(self, spec, command):
-        self.keymap += ((spec, command),)
-        self.install_keymap()
+        self.keymap = self.keymap + ((spec, command),)
+        self.input_trans = input.KeymapTranslator(self.keymap)
+
+    def get_buffer(self, encoding=None):
+        if encoding is None:
+            encoding = self.console.encoding
+        return u''.join(self.buffer).encode(self.console.encoding)
+
+    def get_unicode(self):
+        """Return the current buffer as a unicode string."""
+        return u''.join(self.buffer)
 
     def get_buffer(self):
         """Return the current buffer as a unicode string."""

@@ -178,9 +178,6 @@ class CompletingReader(HR):
             self.commands[c.__name__] = c
             self.commands[c.__name__.replace('_', '-')] = c        
 
-    def install_keymap(self):
-        self.console.install_keymap(self.keymap)
-
     HR_after_command = HR.after_command
     def after_command(self, cmd):
         self.HR_after_command(cmd)

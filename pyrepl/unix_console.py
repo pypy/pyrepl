@@ -17,12 +17,12 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import termios, curses, select, os, struct, types, errno, signal
-import re, time, sys, codecs, unicodedata
+import termios, curses, select, os, struct, types, errno
+import signal, re, time, sys, codecs, unicodedata
 from fcntl import ioctl
 from pyrepl.fancy_termios import tcgetattr, tcsetattr
 from pyrepl.console import Console, Event
-from pyrepl import unix_keymap
+from pyrepl import unix_eventqueue
 
 # there are arguments for changing this to "refresh"
 SIGWINCH_EVENT = 'repaint'
@@ -30,37 +30,12 @@ SIGWINCH_EVENT = 'repaint'
 FIONREAD = getattr(termios, "FIONREAD", None)
 TIOCGWINSZ = getattr(termios, "TIOCGWINSZ", None)
 
-if sys.version[:3] == '2.1' and sys.platform == 'linux2':
-    # 2.1's termios module was bust wrt. *lots* of constants...
-    TIOCGWINSZ = getattr(termios, "TIOCGWINSZ", 0x5413)
-    FIONREAD = getattr(termios, "FIONREAD", 0x541B)
-
 def _my_getstr(cap, optional=0):
     r = curses.tigetstr(cap)
     if not optional and r is None:
         raise RuntimeError, \
               "terminal doesn't have the required '%s' capability"%cap
     return r
-
-_keynames = {
-#    "backspace" : "kbs", # dig this out of tcgetattr instead
-    "delete" : "kdch1",
-    "down" : "kcud1",
-    "end" : "kend",
-    "enter" : "kent",
-    "f1"  : "kf1",    "f2"  : "kf2",    "f3"  : "kf3",    "f4"  : "kf4",
-    "f5"  : "kf5",    "f6"  : "kf6",    "f7"  : "kf7",    "f8"  : "kf8",
-    "f9"  : "kf9",    "f10" : "kf10",   "f11" : "kf11",   "f12" : "kf12",
-    "f13" : "kf13",   "f14" : "kf14",   "f15" : "kf15",   "f16" : "kf16",
-    "f17" : "kf17",   "f18" : "kf18",   "f19" : "kf19",   "f20" : "kf20",
-    "home" : "khome",
-    "insert" : "kich1",
-    "left" : "kcub1",
-    "pgdown" : "knp",       "page down" : "knp",
-    "pgup"   : "kpp",       "page up"   : "kpp",
-    "right" : "kcuf1",
-    "up" : "kcuu1",
-    }
 
 _keysets = {}
 
@@ -194,19 +169,12 @@ class UnixConsole(Console):
 
         self.__move = self.__move_short
 
-        self.keymap = {}
+        self.event_queue = unix_eventqueue.EventQueue(self.input_fd)
 
     def change_encoding(self, encoding):
         self.input = codecs.getreader(encoding)(self.input.stream)
         self.encoding = encoding
     
-    def install_keymap(self, new_keymap):
-        self.k = self.keymap = \
-                     unix_keymap.compile_keymap(new_keymap, keyset(self))
-
-    def describe_event(self, event):
-        return unix_keymap.unparse_keyf(event.chars, keyset(self))
-
     def refresh(self, screen, (cx, cy)):
         # this function is still too long (over 90 lines)
         self.__maybe_write_code(self._civis)
@@ -381,7 +349,7 @@ class UnixConsole(Console):
 
     def move_cursor(self, x, y):
         if y < self.__offset or y >= self.__offset + self.height:
-            self.__event_queue.append(Event('refresh', '', ''))
+            self.event_queue.insert(Event('scroll', None))
         else:
             self.__move(x, y)
             self.__posxy = x, y
@@ -416,11 +384,6 @@ class UnixConsole(Console):
 
         self.old_sigwinch = signal.signal(
             signal.SIGWINCH, self.__sigwinch)
-        self.__event_queue = []
-
-        # per-event preparations:
-        self.__cmd_buf = ''
-        self.k = self.keymap
 
     def restore(self):
         self.__maybe_write_code(self._rmkx)
@@ -431,44 +394,27 @@ class UnixConsole(Console):
 
     def __sigwinch(self, signum, frame):
         self.height, self.width = self.getheightwidth()
-        self.__event_queue.append(Event(SIGWINCH_EVENT, '', ''))
+        self.event_queue.insert(Event('resize', None))
 
     def get_event(self, block=1):
-        if self.__event_queue:
-            return self.__event_queue.pop(0)
-        while 1:
-            if block or self.pollob.poll(0):
-                while 1: # All hail Unix!
-                    try:
-                        c = self.input.read(1)
-                    except IOError, err:
-                        if err.errno == errno.EINTR:
-                            if self.__event_queue:
-                                return self.__event_queue.pop(0)
-                            else:
-                                continue # be explicit
+        while self.event_queue.empty():
+            while 1: # All hail Unix!
+                try:
+                    c = self.input.read(1)
+                except IOError, err:
+                    if err.errno == errno.EINTR:
+                        if not self.event_queue.empty():
+                            return self.event_queue.get()
                         else:
-                            raise
+                            continue # be explicit
                     else:
-                        break
-                self.__cmd_buf += c
-                if c not in self.k:
-                    for c2 in self.__cmd_buf:
-                        if unicodedata.category(c2).startswith('C'):
-                            self.__cmd_buf += self.getpending()
-                            k = "invalid-key"
-                            break
-                    else:
-                        k = "self-insert"
+                        raise
                 else:
-                    k = self.k = self.k[c]
-                if not isinstance(k, dict):
-                    e = Event(k, self.__cmd_buf, self.__cmd_buf)
-                    self.k = self.keymap
-                    self.__cmd_buf = ''
-                    return e
+                    break
+            self.event_queue.push(c)
             if not block:
-                return None
+                break
+        return self.event_queue.get()
 
     def wait(self):
         self.pollob.poll()
@@ -559,6 +505,7 @@ class UnixConsole(Console):
 
     if FIONREAD:
         def getpending(self):
+            return self.input.read()
             amount = struct.unpack(
                 "i", ioctl(self.input_fd, FIONREAD, "\0\0\0\0"))[0]
             return os.read(self.input_fd, amount)
@@ -572,3 +519,4 @@ class UnixConsole(Console):
         self.__move = self.__move_tall
         self.__posxy = 0, 0
         self.screen = []
+

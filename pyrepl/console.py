@@ -18,47 +18,23 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 class Event:
-    """An Event.  Attributes include:
+    """An Event.  `evt' is 'key' or somesuch."""
 
-      * name:
-        the assigned name for this event (e.g. 'self-insert' or
-        'prefix-arg')
-      * chars:
-        a string containing the characters read leading up to this
-        event (e.g. 'a' or '\\x1b0').
-      * _con_desc:
-        a console specific description of what caused this event
-        (used for producing 'M-foo not bound' messages)."""
+    def __init__(self, evt, data):
+        self.evt = evt
+        self.data = data
 
-    def __init__(self, name, chars='', con_desc=None):
-        self.name = name
-        self.chars = chars
-        self._con_desc = con_desc
+    def __repr__(self):
+        return 'Event(%r, %r)'%(self.evt, self.data)
 
 class Console:
     """Attributes:
 
-    (keymap),
-    (fd),
     screen,
     height,
     width,
     """
     
-    def install_keymap(self, keymap):
-        """Install a given keymap.
-
-        keymap is a tuple of 2-element tuples; each small tuple is a
-        pair (keyspec, event-name).  The format for keyspec is
-        modelled on that used by readline (so read that manual for
-        now!)."""
-        pass
-
-    def describe_event(self, event):
-        """Return a description of an event, suitable for error messages.
-
-        This method should..."""
-
     def refresh(self, screen, xy):
         pass
 
@@ -99,7 +75,7 @@ class Console:
 
     def flushoutput(self):
         """Flush all output to the screen (assuming there's some
-        buffering going on somewhere)"""
+        buffering going on somewhere)."""
         pass
 
     def forgetinput(self):
