@@ -82,7 +82,7 @@ def mk_saver(reader):
 
 python_keymap = cr.completing_keymap + (
     (r'\n', 'maybe-accept'),
-    (r'\M-\n', 'self-insert'))
+    (r'\M-\n', 'insert-nl'))
 
 class PythonicReader(CR):
     keymap = python_keymap

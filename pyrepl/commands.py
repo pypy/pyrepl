@@ -283,7 +283,12 @@ class backward_word(MotionCommand):
 class self_insert(EditCommand):
     def do(self):
         r = self.reader
-        r.insert(self.event.chars[-1] * r.get_arg())
+        r.insert(self.event.chars * r.get_arg())
+
+class insert_nl(EditCommand):
+    def do(self):
+        r = self.reader
+        r.insert("\n" * r.get_arg())
 
 class transpose_characters(EditCommand):
     def do(self):

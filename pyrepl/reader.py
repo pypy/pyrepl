@@ -126,7 +126,7 @@ default_keymap = tuple(
      (r'\M-7', 'digit-arg'),
      (r'\M-8', 'digit-arg'),
      (r'\M-9', 'digit-arg'),
-     (r'\M-\n', 'self-insert'),
+     (r'\M-\n', 'insert-nl'),
      ('\\\\', 'self-insert')] + \
     [(c, 'self-insert')
      for c in map(chr, range(32, 127)) if c <> '\\'] + \
