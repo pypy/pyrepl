@@ -86,7 +86,7 @@ Summary of new stuff in 0.7.0:
  + Changes to the init file handling.
  + Sundry code reorganization.  Libraries built on top of pyrepl will
    probably require small modifications (but I'm not sure anyone has
-   written  any of these yet!).
+   written any of these yet!).
  + A prototypical pygame console.
            -- see CHANGES for more details and older news
 

@@ -81,10 +81,8 @@ class UnixConsole(Console):
             self.input_fd = f_in.fileno()
 
         if isinstance(f_out, int):
-            self.output = os.fdopen(f_out)
             self.output_fd = f_out
         else:
-            self.output = f_out
             self.output_fd = f_out.fileno()
         
         self.pollob = poll()
