@@ -385,8 +385,12 @@ class UnixConsole(Console):
                         c += os.read(self.input_fd, 1)
                         try:
                             c = unicode(c, self.encoding)
-                        except:
-                            continue
+                        except UnicodeError, e:
+                            if len(e.args) > 4 and \
+                               e.args[4] == 'unexpected end of data':
+                                continue
+                            else:
+                                raise
                         else:
                             break
                         

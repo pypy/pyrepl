@@ -1,4 +1,4 @@
-This is pyrepl 0.8, a readline-a-like in Python.
+This is pyrepl 0.8.1, a readline-a-like in Python.
 
 http://pyrepl.codespeak.net/
 
@@ -43,6 +43,21 @@ Please direct comments to mwh@python.net.
 it is to see a couple of hundred downloads and only get a handful of
 emails, so don't think I'll be irritated by the banality of your
 comments!)
+
+Summary of 0.8.1:
+ + Fixes 
+   - in the area of unbound keys and unknown commands
+   - in quoted-insert
+   - in unicode support
+ + make Reader and subclasses new-style classes
+   - make the inheritance hierachy look like this
+                     Reader
+                    /      \
+      HistoricalReader   CompletingReader
+                    \      /
+                PythonicReader
+     Turns out I've been wanting new-style classes since before they existed!
+   - needed to slightly change the way keymaps are built
 
 Summary of 0.8.0:
  + A whole bundle of things.
