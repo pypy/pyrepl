@@ -1,0 +1,65 @@
+This file contains more verbose descriptions of the changes between
+versions than those in README.
+
+New in 0.7.2:
+ + Fix a couple of embarrassing typos in unix_console.py and 
+   python_reader.py
+ + Ran pychecker over the rest.  Found a few problems, and that pychecker
+   really doesn't like some of my idioms...
+ + "import no_such_package.[TAB]" should no longer crash.
+
+New in 0.7.1:
+ + I learnt how to use distutils properly...
+ + Another few days of pygame_console hacking; scrolling support is the 
+   biggy.
+
+New in 0.7.0:
+ + Moved to a package architecture.
+ + Wrote a (very simple!) distutils setup.py script.
+ + Changed the keyspec format to be more sensible.  See the docstring in
+   pyrepl/keymap.py for more information.
+ + Portability fixes (coping without FIONREAD, select.poll, sundry 
+   terminal capibilities, probably some other stuff).
+ + Various tortuous changes to use 2.2 features where possible but 
+   retaining 2.1 support (I hope; haven't got a 2.1 here to test with).
+ + Jumping up and down on control-C now shouldn't dump you out of 
+   pyrepl (via a large hammer kind of approach).
+ + Cancelling a command with ^C left an empty string in the history.
+   No longer.  Fixing this proved to require making the history code
+   more sensible, which was a good thing in itself.
+ + reader.Reader has a new method, bind(), intended to be used by the
+   user.
+ + The $PYTHONSTARTUP file is executed in a namespace containing Reader.
+   This means you can use the presence of the variable 'Reader' to tell
+   whether you're executing in a pyrepl shell.
+ + The $PYREPLSTARTUP env. var now overrides $PYTHONSTARTUP for pyrepl
+   shells if set.
+ + A prototype pygame console.  To use this, call python_reader.main(1)
+   instead of just main() or main(0), or run 'pythoni pg'
+   - input is a bit messy right now
+   - printing large gobs of text is really slow
+   - you can't ^C running commands (you have to find the controlling 
+     terminal and type ^C there).
+   - during long running commands we don't pump pygame's event loop, which
+     is naughty.  These last two are related and probably require threads 
+     (and much thought) to fix.
+   - probably lots of other warts!
+
+New in 0.6.0:
+ + Rewrote the low level code to be (hopefully) more portable and
+   (certainly) clearer.  Most of the code from 0.5.1 is still present,
+   but it's been moved around and refactored (and the names have
+   gotten more sensible).
+ + The above process fixed a fair few bugs.
+ + Implemented a few more emacs-mode bindings.
+ + Nailed another couple of differences between my top-level and the
+   the default one, including playing nice with Tk.
+ + Implemented a saner way of handling window resizes (a sane way of 
+   handling signals!  Call the Unix police!)
+
+New in 0.5.1:
+ + Realizing that it wasn't going to run under 2.0 after all, I ripped
+   out some of the 2.0 compatibility code.
+
+Version 0.5.0 is sufficiently historic that I can't remember what it
+was like :)
