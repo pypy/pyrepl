@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/local/bin/python
 
 #   Copyright 2000-2003 Michael Hudson mwh@python.net
 #
