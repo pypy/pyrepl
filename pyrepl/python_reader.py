@@ -29,22 +29,7 @@ try:
 except ImportError:
     import pickle
 
-if not hasattr(codeop, "CommandCompiler"):
-    def default_compile(string, fname, mode):
-        return compile(string, fname, mode)
-
-    _code = copy_code.copy_code_with_changes(
-        default_compile.func_code,
-        flags = default_compile.func_code.co_flags|16)
-
-    nested_compile = new.function(_code, globals(), "nested_compile")
-
-    del _code, default_compile
-
-    def CommandCompiler():
-        return codeop.compile_command
-else:
-    CommandCompiler = code.CommandCompiler
+CommandCompiler = code.CommandCompiler
 
 def eat_it(*args):
     """this function eats warnings, if you were wondering"""
@@ -153,7 +138,7 @@ class ReaderConsole(code.InteractiveInterpreter):
             locals = {}
         self.II_init(locals)
         self.compiler = CommandCompiler()
-        self.compile = getattr(self.compiler, "compiler", compile)
+        self.compile = self.compiler.compiler
         self.reader = PythonicReader(console, locals, self.compiler)
         locals['Reader'] = self.reader
 
@@ -175,8 +160,6 @@ class ReaderConsole(code.InteractiveInterpreter):
             # ooh, look at the hack:            
             code = self.compile("# coding:utf8\n"+text.encode('utf-8'),
                                 '<input>', 'single')
-            if code.co_flags & 16:
-                self.compile = nested_compile
         except (OverflowError, SyntaxError, ValueError):
             self.showsyntaxerror("<input>")
         else:
