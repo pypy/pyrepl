@@ -54,7 +54,7 @@ except ImportError:
 
         Return the string that should be the printed represenation of
         |buffer| and a list detailing where the characters of |buffer|
-        get used up.  E.g:
+        get used up.  E.g.:
 
         >>> disp_str(chr(3))
         ('^C', [1, 0])
@@ -238,7 +238,7 @@ feeling more loquacious than I am now."""
         """The purpose of this method is to translate changes in
         self.buffer into changes in self.screen.  Currently it rips
         everything down and starts from scratch, which whilst not
-        especially efficient is certainly simple.
+        especially efficient is certainly simple(r).
         """
         lines = ''.join(self.buffer).split("\n")
         screen = []
@@ -448,8 +448,8 @@ feeling more loquacious than I am now."""
         self.dirty = 0 # forgot this for a while (blush)
 
     def handle1(self, block=1):
-        """Handle a single event.  Wait as long as it takes if block is
-        true (the default), otherwise return None if no event is
+        """Handle a single event.  Wait as long as it takes if block
+        is true (the default), otherwise return None if no event is
         pending."""
         
         if self.msg:
@@ -497,8 +497,9 @@ feeling more loquacious than I am now."""
             self.finish()
 
     def readline(self):
-        """Read a line.  The implementation of this method also shows how
-        to drive Reader if you want more control over the event loop."""
+        """Read a line.  The implementation of this method also shows
+        how to drive Reader if you want more control over the event
+        loop."""
         self.prepare()
         try:
             self.refresh()
