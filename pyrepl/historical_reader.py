@@ -215,7 +215,8 @@ class HistoricalReader(R):
             self.commands[c.__name__.replace('_', '-')] = c
         from pyrepl import input
         self.isearch_trans = input.KeymapTranslator(
-            isearch_keymap, invalid_cls=isearch_end)
+            isearch_keymap, invalid_cls=isearch_end,
+            character_cls=isearch_add_character)
         
     def select_item(self, i):
         self.transient_history[self.historyi] = self.get_unicode()

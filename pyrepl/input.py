@@ -14,6 +14,8 @@
 # [meta-key] is identified with [esc key].  We demand that any console
 # class does quite a lot towards emulating a unix terminal.
 
+import unicodedata
+
 class InputTranslator(object):
     def push(self, evt):
         pass
@@ -23,11 +25,13 @@ class InputTranslator(object):
         pass
 
 class KeymapTranslator(InputTranslator):
-    def __init__(self, keymap, verbose=0, invalid_cls=None):
+    def __init__(self, keymap, verbose=0,
+                 invalid_cls=None, character_cls=None):
         self.verbose = verbose
         from pyrepl.keymap import compile_keymap, parse_keys
         self.keymap = keymap
         self.invalid_cls = invalid_cls
+        self.character_cls = character_cls
         d = {}
         for keyspec, command in keymap:
             keyseq = tuple(parse_keys(keyspec))
@@ -51,14 +55,18 @@ class KeymapTranslator(InputTranslator):
             if d is None:
                 if self.verbose:
                     print "invalid"
-                self.results.append(
-                    (self.invalid_cls,
-                     self.stack + [key]))
+                if self.stack or unicodedata.category(key) == 'C':
+                    self.results.append(
+                        (self.invalid_cls, self.stack + [key]))
+                else:
+                    # small optimization:
+                    self.k[key] = self.character_cls
+                    self.results.append(
+                        (self.character_cls, [key]))
             else:
                 if self.verbose:
                     print "matched", d
-                self.results.append((d,
-                                     self.stack + [key]))
+                self.results.append((d, self.stack + [key]))
             self.stack = []
             self.k = self.ck
     def get(self):
@@ -68,4 +76,3 @@ class KeymapTranslator(InputTranslator):
             return None
     def empty(self):
         return not self.results
-            

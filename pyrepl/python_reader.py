@@ -287,7 +287,7 @@ class ReaderConsole(code.InteractiveInterpreter):
 def main(use_pygame_console=0):
     si, se, so = sys.stdin, sys.stderr, sys.stdout
     try:
-        if use_pygame_console:
+        if 0 and use_pygame_console: # pygame currently borked
             from pyrepl.pygame_console import PyGameConsole, FakeStdin, FakeStdout
             con = PyGameConsole()
             sys.stderr = sys.stdout = FakeStdout(con)
@@ -309,6 +309,9 @@ def main(use_pygame_console=0):
                         ).read())
                     if code == 4:
                         encoding = 'utf-8'
+                        # More could go here -- and what's here isn't
+                        # bulletproof.  What would be?  AppleScript?
+                        # Doesn't seem to be possible.
                     else:
                         encoding = None
                 else:

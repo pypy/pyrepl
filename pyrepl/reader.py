@@ -244,7 +244,9 @@ feeling more loquacious than I am now."""
         self.syntax_table = make_default_syntax_table()
         self.input_trans_stack = []
         self.input_trans = input.KeymapTranslator(
-            self.keymap, invalid_cls='invalid-key')
+            self.keymap,
+            invalid_cls='invalid-key',
+            character_cls='self-insert')
 
     def calc_screen(self):
         """The purpose of this method is to translate changes in
@@ -536,7 +538,10 @@ feeling more loquacious than I am now."""
 
     def bind(self, spec, command):
         self.keymap = self.keymap + ((spec, command),)
-        self.input_trans = input.KeymapTranslator(self.keymap)
+        self.input_trans = input.KeymapTranslator(
+            self.keymap,
+            invalid_cls='invalid-key',
+            character_cls='self-insert')
 
     def get_buffer(self, encoding=None):
         if encoding is None:
