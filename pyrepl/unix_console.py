@@ -43,7 +43,7 @@ def _my_getstr(cap, optional=0):
     return r
 
 _keynames = {
-    "backspace" : "kbs",
+#    "backspace" : "kbs", # dig this out of tcgetattr instead
     "delete" : "kdch1",
     "down" : "kcud1",
     "end" : "kend",
@@ -74,6 +74,7 @@ def keyset(term=None):
                "escape":"\033", "return":"\n", 'backslash':'\\'}
         for key, code in _keynames.items():
             set[key] = curses.tigetstr(code)
+        set["backspace"] = termios.tcgetattr(fd)[6][termios.VERASE]
         return _keysets.setdefault(term, set)
 
 # at this point, can we say: AAAAAAAAAAAAAAAAAAAAAARGH!
@@ -114,6 +115,7 @@ class UnixConsole(Console):
         self.pollob.register(fd, POLLIN)
         curses.setupterm(term, fd)
         self.term = term
+        
         self._bel   = _my_getstr("bel")
         self._civis = _my_getstr("civis", optional=1)
         self._clear = _my_getstr("clear")
