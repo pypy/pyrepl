@@ -64,18 +64,20 @@ _keynames = {
 
 _keysets = {}
 
-def keyset(term=None):
-    if term is None:
-        term = os.environ["TERM"]
+def keyset(con=None):
+    if con is None:
+        term, fd = os.environ["TERM"], 0
+    else:
+        term, fd = con.term, con.fd
     try:
-        return _keysets[term]
+        return _keysets[(term, fd)]
     except KeyError:
         set = {'space' : ' ', 'tab' : '\t', 'hash' : '#',
                "escape":"\033", "return":"\n", 'backslash':'\\'}
         for key, code in _keynames.items():
             set[key] = curses.tigetstr(code)
         set["backspace"] = termios.tcgetattr(fd)[6][termios.VERASE]
-        return _keysets.setdefault(term, set)
+        return _keysets.setdefault((term, fd), set)
 
 # at this point, can we say: AAAAAAAAAAAAAAAAAAAAAARGH!
 def maybe_add_baudrate(dict, rate):
@@ -178,10 +180,10 @@ class UnixConsole(Console):
 
     def install_keymap(self, new_keymap):
         self.k = self.keymap = \
-                     unix_keymap.compile_keymap(new_keymap, keyset(self.term))
+                     unix_keymap.compile_keymap(new_keymap, keyset(self))
 
     def describe_event(self, event):
-        return unix_keymap.unparse_keyf(event.chars, keyset(self.term))
+        return unix_keymap.unparse_keyf(event.chars, keyset(self))
 
     def refresh(self, screen, (cx, cy)):
         # this function is still too long (over 90 lines)
