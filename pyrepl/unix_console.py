@@ -68,7 +68,7 @@ def keyset(con=None):
     if con is None:
         term, fd = os.environ["TERM"], 0
     else:
-        term, fd = con.term, con.fd
+        term, fd = con.term, con.input_fd
     try:
         return _keysets[(term, fd)]
     except KeyError:
@@ -111,11 +111,24 @@ except AttributeError:
 POLLIN = getattr(select, "POLLIN", None)
 
 class UnixConsole(Console):
-    def __init__(self, fd, term):
-        self.fd = fd
+    def __init__(self, f_in=0, f_out=1, term=None):
+        if isinstance(f_in, int):
+            self.input = os.fdopen(f_in)
+            self.input_fd = f_in
+        else:
+            self.input = f_in
+            self.input_fd = f_in.fileno()
+
+        if isinstance(f_out, int):
+            self.output = os.fdopen(f_out)
+            self.output_fd = f_out
+        else:
+            self.output = f_out
+            self.output_fd = f_out.fileno()
+        
         self.pollob = poll()
-        self.pollob.register(fd, POLLIN)
-        curses.setupterm(term, fd)
+        self.pollob.register(self.input_fd, POLLIN)
+        curses.setupterm(term, self.output_fd)
         self.term = term
         
         self._bel   = _my_getstr("bel")
@@ -249,9 +262,6 @@ class UnixConsole(Console):
 
         self.__offset = offset
 
-        # in the refresh loop we check for a common case: the
-        # insertion of a single character.
-
         for y, oldline, newline, in zip(range(offset, offset + height),
                                         oldscr,
                                         newscr):
@@ -370,7 +380,7 @@ class UnixConsole(Console):
 
     def prepare(self):
         # per-readline preparations:
-        self.__svtermstate = tcgetattr(self.fd)
+        self.__svtermstate = tcgetattr(self.input_fd)
         raw = self.__svtermstate.copy()
         raw.iflag &=~ (termios.BRKINT | termios.INPCK |
                        termios.ISTRIP | termios.IXON)
@@ -381,7 +391,7 @@ class UnixConsole(Console):
                        termios.IEXTEN|(termios.ISIG*1))
         raw.cc[termios.VMIN] = 1
         raw.cc[termios.VTIME] = 0
-        tcsetattr(self.fd, termios.TCSADRAIN, raw)
+        tcsetattr(self.input_fd, termios.TCSADRAIN, raw)
 
         self.screen = []
         self.height, self.width = self.getheightwidth()
@@ -406,7 +416,7 @@ class UnixConsole(Console):
     def restore(self):
         self.__maybe_write_code(self._rmkx)
         self.flushoutput()
-        tcsetattr(self.fd, termios.TCSADRAIN, self.__svtermstate)
+        tcsetattr(self.input_fd, termios.TCSADRAIN, self.__svtermstate)
 
         signal.signal(signal.SIGWINCH, self.old_sigwinch)
 
@@ -421,8 +431,8 @@ class UnixConsole(Console):
             if block or self.pollob.poll(0):
                 while 1: # All hail Unix!
                     try:
-                        c = os.read(self.fd, 1)
-                    except OSError, err:
+                        c = self.input.read(1)
+                    except IOError, err:
                         if err.errno == errno.EINTR:
                             if self.__event_queue:
                                 return self.__event_queue.pop(0)
@@ -473,7 +483,7 @@ class UnixConsole(Console):
                 return int(os.environ["LINES"]), int(os.environ["COLUMNS"])
             except KeyError:
                 height, width = struct.unpack(
-                    "hhhh", ioctl(self.fd, TIOCGWINSZ, "\000"*8))[0:2]
+                    "hhhh", ioctl(self.input_fd, TIOCGWINSZ, "\000"*8))[0:2]
                 if not height: return 25, 80
                 return height, width
     else:
@@ -484,14 +494,14 @@ class UnixConsole(Console):
                 return 25, 80
 
     def forgetinput(self):
-        termios.tcflush(self.fd, termios.TCIFLUSH)
+        termios.tcflush(self.input_fd, termios.TCIFLUSH)
 
     def flushoutput(self):
         for text, iscode in self.__buffer:
             if iscode:
                 self.__tputs(text)
             else:
-                os.write(self.fd, text)
+                os.write(self.output_fd, text))
         del self.__buffer[:]
 
     def __tputs(self, fmt, prog=delayprog):
@@ -507,17 +517,17 @@ class UnixConsole(Console):
         while 1:
             m = prog.search(fmt)
             if not m:
-                os.write(self.fd, fmt)
+                os.write(self.output_fd, fmt)
                 break
             x, y = m.span()
-            os.write(self.fd, fmt[:x])
+            os.write(self.output_fd, fmt[:x])
             fmt = fmt[y:]
             delay = int(m.group(1))
             if '*' in m.group(2):
                 delay *= self.height
             if self._pad:
                 nchars = (bps*delay)/1000
-                os.write(self.fd, self._pad*nchars)
+                os.write(self.output_fd, self._pad*nchars)
             else:
                 time.sleep(float(delay)/1000.0)
 
@@ -536,11 +546,11 @@ class UnixConsole(Console):
     if FIONREAD:
         def getpending(self):
             amount = struct.unpack(
-                "i", ioctl(self.fd, FIONREAD, "\0\0\0\0"))[0]
-            return os.read(self.fd, amount)
+                "i", ioctl(self.input_fd, FIONREAD, "\0\0\0\0"))[0]
+            return os.read(self.input_fd, amount)
     else:
         def getpending(self):
-            return os.read(self.fd, 100000) # that should be enough :)
+            return os.read(self.input_fd, 100000) # that should be enough :)
 
     def clear(self):
         self.__write_code(self._clear)

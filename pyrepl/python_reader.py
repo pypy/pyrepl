@@ -309,7 +309,7 @@ def main(use_pygame_console=0):
             sys.stdin = FakeStdin(con)
         else:
             from pyrepl.unix_console import UnixConsole
-            con = UnixConsole(1, None)
+            con = UnixConsole(0, 1, None)
         print "Python", sys.version, "on", sys.platform
         print 'Type "copyright", "credits" or "license" for more information.'
         sys.path.insert(0, os.getcwd())
