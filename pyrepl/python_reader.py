@@ -223,7 +223,7 @@ class ReaderConsole(code.InteractiveInterpreter):
     def really_tkinteract(self):
         import _tkinter
         _tkinter.createfilehandler(
-            self.reader.console.fd, _tkinter.READABLE,
+            self.reader.console.input_fd, _tkinter.READABLE,
             self.tkfilehandler)
         self.exc_info = None
         while 1:
