@@ -31,6 +31,7 @@ import sys, os
 
 class Command:
     finish = 0
+    kills_digit_arg = 1
     def __init__(self, reader, event):
         self.reader = reader
         self.event = event
@@ -77,6 +78,7 @@ def is_yank(command):
 # etc
 
 class digit_arg(Command):
+    kills_digit_arg = 0
     def do(self):
         r = self.reader
         c = self.event.chars[-1]
@@ -334,13 +336,14 @@ class accept(FinishCommand):
 class qIHelp(Command):
     def do(self):
         r = self.reader
-        r.insert(self.event.chars + r.console.getpending())
+        r.insert((self.event.chars + r.console.getpending()) * r.get_arg())
         self.reader.install_keymap()
 
 _qikeymap = tuple(
     [("\\%03o"%o, 'qIHelp') for o in range(256)])
 
 class quoted_insert(Command):
+    kills_digit_arg = 0
     def do(self):
         self.reader.console.install_keymap(_qikeymap)
 

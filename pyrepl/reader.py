@@ -398,7 +398,7 @@ feeling more loquacious than I am now."""
 
     def after_command(self, cmd):
         """This function is called to allow post command cleanup."""
-        if not isinstance(cmd, commands.digit_arg):
+        if getattr(cmd, "kills_digit_arg", 1):
             if self.arg is not None:
                 self.dirty = 1                
             self.arg = None
