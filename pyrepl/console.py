@@ -30,7 +30,7 @@ class Event:
         a console specific description of what caused this event
         (used for producing 'M-foo not bound' messages)."""
 
-    def __init__(self, name, chars, con_desc):
+    def __init__(self, name, chars='', con_desc=None):
         self.name = name
         self.chars = chars
         self._con_desc = con_desc
