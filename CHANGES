@@ -1,6 +1,9 @@
 This file contains more verbose descriptions of the changes between
 versions than those in README.
 
+New in 0.7.3:
+ + ^T at the start of a line should not crash.
+
 New in 0.7.2:
  + Fix a couple of embarrassing typos in unix_console.py and 
    python_reader.py
