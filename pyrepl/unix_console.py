@@ -18,7 +18,7 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import termios, curses, select, os, struct, types, errno, signal
-import re, time, sys
+import re, time, sys, codecs, unicodedata
 from fcntl import ioctl
 from pyrepl.fancy_termios import tcgetattr, tcsetattr
 from pyrepl.console import Console, Event
@@ -111,12 +111,17 @@ except AttributeError:
 POLLIN = getattr(select, "POLLIN", None)
 
 class UnixConsole(Console):
-    def __init__(self, f_in=0, f_out=1, term=None):
+    def __init__(self, f_in=0, f_out=1, term=None, encoding=None):
+        if encoding is None:
+            encoding = 'utf-8'#sys.getdefaultencoding()
+            
+        self.encoding = encoding
+
         if isinstance(f_in, int):
-            self.input = os.fdopen(f_in)
+            self.input = codecs.getreader(encoding)(os.fdopen(f_in))
             self.input_fd = f_in
         else:
-            self.input = f_in
+            self.input = codecs.getreader(encoding)(f_in)
             self.input_fd = f_in.fileno()
 
         if isinstance(f_out, int):
@@ -191,6 +196,10 @@ class UnixConsole(Console):
 
         self.keymap = {}
 
+    def change_encoding(self, encoding):
+        self.input = codecs.getreader(encoding)(self.input.stream)
+        self.encoding = encoding
+    
     def install_keymap(self, new_keymap):
         self.k = self.keymap = \
                      unix_keymap.compile_keymap(new_keymap, keyset(self))
@@ -443,12 +452,17 @@ class UnixConsole(Console):
                     else:
                         break
                 self.__cmd_buf += c
-                try:
+                if c not in self.k:
+                    for c2 in self.__cmd_buf:
+                        if unicodedata.category(c2).startswith('C'):
+                            self.__cmd_buf += self.getpending()
+                            k = "invalid-key"
+                            break
+                    else:
+                        k = "self-insert"
+                else:
                     k = self.k = self.k[c]
-                except:
-                    self.__cmd_buf += self.getpending()
-                    k = "invalid-key"
-                if type(k) is not types.DictType:
+                if not isinstance(k, dict):
                     e = Event(k, self.__cmd_buf, self.__cmd_buf)
                     self.k = self.keymap
                     self.__cmd_buf = ''
@@ -501,7 +515,7 @@ class UnixConsole(Console):
             if iscode:
                 self.__tputs(text)
             else:
-                os.write(self.output_fd, text))
+                os.write(self.output_fd, text.encode(self.encoding))
         del self.__buffer[:]
 
     def __tputs(self, fmt, prog=delayprog):

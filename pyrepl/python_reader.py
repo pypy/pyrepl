@@ -53,9 +53,10 @@ def eat_it(*args):
 class maybe_accept(commands.Command):
     def do(self):
         r = self.reader
-        text = ''.join(r.buffer)
+        text = r.get_buffer()
         try:
-            code = r.compiler(text)
+            # ooh, look at the hack:
+            code = r.compiler("#coding:utf-8\n"+text.encode('utf-8'))
         except (OverflowError, SyntaxError, ValueError):
             self.finish = 1
         else:
@@ -120,7 +121,7 @@ class PythonicReader(CR):
         self.console.install_keymap(self.keymap)
 
     def get_completions(self, stem):
-        b = ''.join(self.buffer)
+        b = self.get_buffer()
         m = import_line_prog.match(b)
         if m:
             mod = m.group("mod")
@@ -173,13 +174,16 @@ class ReaderConsole(code.InteractiveInterpreter):
 
     def execute(self, text):
         try:
-            code = self.compile(text, '<input>', 'single')
+            # ooh, look at the hack:            
+            code = self.compile("# coding:utf8\n"+text.encode('utf-8'),
+                                '<input>', 'single')
             if code.co_flags & 16:
                 self.compile = nested_compile
         except (OverflowError, SyntaxError, ValueError):
             self.showsyntaxerror("<input>")
         else:
             self.runcode(code)
+            sys.stdout.flush()
 
     def interact(self):
         while 1:
@@ -221,7 +225,7 @@ class ReaderConsole(code.InteractiveInterpreter):
             self.prepare()
         else:
             if self.reader.finished:
-                text = ''.join(self.reader.buffer)
+                text = self.reader.get_buffer()
                 self.restore()
                 if text:
                     self.execute(text)

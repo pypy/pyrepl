@@ -17,29 +17,30 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import types
+import types, unicodedata
 from pyrepl import commands
 from curses import ascii
 
 def _make_unctrl_map():
-    map = {}
-    for i in range(256):
-        c = chr(i)
-        if c.isalpha() or ascii.isprint(c):
-            map[c] = c
+    uc_map = {}
+    for c in map(unichr, range(256)):
+        if unicodedata.category(c)[0] <> 'C':
+            uc_map[c] = c
     for i in range(32):
-        c = chr(i)
-        map[c] = '^' + chr(ord('A') + i - 1)
-    map['\177'] = '^?'
+        c = unichr(i)
+        uc_map[c] = u'^' + unichr(ord('A') + i - 1)
+    uc_map['\177'] = u'^?'
     for i in range(256):
-        c = chr(i)
-        if not map.has_key(c):
-            map[c] = '\\%03o'%i 
-    return map
+        c = unichr(i)
+        if not uc_map.has_key(c):
+            uc_map[c] = u'\\%03o'%i 
+    return uc_map
 
 # disp_str proved to be a bottleneck for large inputs, so it's been
 # rewritten in C; it's not required though.
 try:
+    raise ImportError # currently it's borked by the unicode support
+    
     from _pyrepl_utils import disp_str, init_unctrl_map
     
     init_unctrl_map(_make_unctrl_map())
@@ -47,7 +48,14 @@ try:
     del init_unctrl_map
 except ImportError:
     def _my_unctrl(c, u=_make_unctrl_map()):
-        return u[c]
+        import unicodedata
+        if c in u:
+            return u[c]
+        else:
+            if unicodedata.category(c).startswith('C'):
+                return '\u%04x'%(ord(c),)
+            else:
+                return c
 
     def disp_str(buffer, join=''.join, uc=_my_unctrl):
         """ disp_str(buffer:string) -> (string, [int])
@@ -76,12 +84,13 @@ del _make_unctrl_map
  SYNTAX_SYMBOL] = range(3)
 
 def make_default_syntax_table():
+    # XXX perhaps should use some unicodedata here?
     st = {}
-    for c in map(chr, range(256)):
+    for c in map(unichr, range(256)):
         st[c] = SYNTAX_SYMBOL
-    for c in [a for a in map(chr, range(256)) if a.isalpha()]:
+    for c in [a for a in map(unichr, range(256)) if a.isalpha()]:
         st[c] = SYNTAX_WORD
-    st['\n'] = st[' '] = SYNTAX_WHITESPACE
+    st[u'\n'] = st[u' '] = SYNTAX_WHITESPACE
     return st
 
 default_keymap = tuple(
@@ -240,7 +249,7 @@ feeling more loquacious than I am now."""
         everything down and starts from scratch, which whilst not
         especially efficient is certainly simple(r).
         """
-        lines = ''.join(self.buffer).split("\n")
+        lines = self.get_buffer().split("\n")
         screen = []
         screeninfo = []
         w = self.console.width - 1
@@ -284,9 +293,9 @@ feeling more loquacious than I am now."""
         st = self.syntax_table
         b = self.buffer
         p -= 1
-        while p >= 0 and st[b[p]] <> SYNTAX_WORD:
+        while p >= 0 and st.get(b[p], SYNTAX_WORD) <> SYNTAX_WORD:
             p -= 1
-        while p >= 0 and st[b[p]] == SYNTAX_WORD:
+        while p >= 0 and st.get(b[p], SYNTAX_WORD) == SYNTAX_WORD:
             p -= 1
         return p + 1
 
@@ -300,9 +309,9 @@ feeling more loquacious than I am now."""
             p = self.pos
         st = self.syntax_table
         b = self.buffer
-        while p < len(b) and st[b[p]] <> SYNTAX_WORD:
+        while p < len(b) and st.get(b[p], SYNTAX_WORD) <> SYNTAX_WORD:
             p += 1
-        while p < len(b) and st[b[p]] == SYNTAX_WORD:
+        while p < len(b) and st.get(b[p], SYNTAX_WORD) == SYNTAX_WORD:
             p += 1
         return p
 
@@ -466,7 +475,6 @@ feeling more loquacious than I am now."""
             self.refresh()
             self.console.beep()
             return
-
         cmd = cmd_class(self, event)
         
         cmd.do()
@@ -505,13 +513,17 @@ feeling more loquacious than I am now."""
             self.refresh()
             while not self.finished:
                 self.handle1()
-            return ''.join(self.buffer)
+            return self.get_buffer()
         finally:
             self.restore()
 
     def bind(self, spec, command):
         self.keymap += ((spec, command),)
         self.install_keymap()
+
+    def get_buffer(self):
+        """Return the current buffer as a unicode string."""
+        return u''.join(self.buffer)
 
 def test():
     from pyrepl.unix_console import UnixConsole

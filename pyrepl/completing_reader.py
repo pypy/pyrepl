@@ -210,11 +210,12 @@ class CompletingReader(HR):
 
     def get_stem(self):
         st = self.syntax_table
+        SW = reader.SYNTAX_WORD
         b = self.buffer
         p = self.pos - 1
-        while p >= 0 and st[b[p]] == reader.SYNTAX_WORD:
+        while p >= 0 and st.get(b[p], SW) == SW:
             p -= 1
-        return ''.join(b[p+1:self.pos])
+        return u''.join(b[p+1:self.pos])
 
     def get_completions(self, stem):
         return []

@@ -344,13 +344,16 @@ class qIHelp(Command):
         r.insert((self.event.chars + r.console.getpending()) * r.get_arg())
         self.reader.install_keymap()
 
-_qikeymap = tuple(
-    [("\\%03o"%o, 'qIHelp') for o in range(256)])
+class DefaultDict:
+    def __contains__(self, whatever):
+        return True
+    def __getitem__(self, whatever):
+        return 'qIHelp'
 
 class quoted_insert(Command):
     kills_digit_arg = 0
     def do(self):
-        self.reader.console.install_keymap(_qikeymap)
+        self.reader.console.k = self.reader.console.keymap = DefaultDict()
 
 class invalid_key(Command):
     def do(self):
