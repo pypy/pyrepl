@@ -288,19 +288,25 @@ class ReaderConsole(code.InteractiveInterpreter):
 
     def twistedinteract(self):
         from twisted.internet import reactor
+        from twisted.internet.abstract import FileDescriptor
+        import signal
         outerself = self
-        class Me(object):
+        class Me(FileDescriptor):
             def fileno(self):
                 """ We want to select on FD 0 """
                 return 0
 
             def doRead(self):
                 """called when input is ready"""
-                outerself.handle1()
+                try:
+                    outerself.handle1()
+                except EOFError:
+                    reactor.stop()
 
-            def logPrefix(self): return 'PyRepl'
-            
         reactor.addReader(Me())
+        reactor.callWhenRunning(signal.signal,
+                                signal.SIGINT,
+                                signal.default_int_handler)
         self.prepare()
         try:
             reactor.run()
