@@ -1,3 +1,4 @@
+
 /*   Copyright 2000-2001 Michael Hudson mwh@python.net
  *
  *                        All Rights Reserved
@@ -166,8 +167,9 @@ PyMethodDef pyrepl_utils_methods[] = {
 static char pyrepl_utils_doc[] = 
 "Utilities to help speed up pyrepl.";
 
-void initpyrepl_utils(void)
+void init_pyrepl_utils(void)
 {
-	Py_InitModule3(
-		"pyrepl_utils",pyrepl_utils_methods,pyrepl_utils_doc);
+	Py_InitModule3("_pyrepl_utils", 
+		       pyrepl_utils_methods,
+		       pyrepl_utils_doc);
 }
