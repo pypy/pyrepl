@@ -1,4 +1,4 @@
-#   Copyright 2000-2003 Michael Hudson mwh@python.net
+#   Copyright 2000-2004 Michael Hudson mwh@python.net
 #
 #                        All Rights Reserved
 #
@@ -38,11 +38,12 @@ from pyrepl import completing_reader as cr, reader, completer
 from pyrepl.completing_reader import CompletingReader as CR
 import cmd
 
-keymap = cr.completing_keymap + (
-    ("\\M-\\n", "invalid-key"),
-    ("\\n", "accept"))
-
 class CmdReader(CR):
+    def collect_keymap(self):
+        return super(CmdReader, self).collect_keymap() + (
+            ("\\M-\\n", "invalid-key"),
+            ("\\n", "accept"))
+    
     CR_init = CR.__init__
     def __init__(self, completions):
         self.CR_init()

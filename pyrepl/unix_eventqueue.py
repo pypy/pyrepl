@@ -1,9 +1,29 @@
+#   Copyright 2000-2004 Michael Hudson mwh@python.net
+#
+#                        All Rights Reserved
+#
+#
+# Permission to use, copy, modify, and distribute this software and
+# its documentation for any purpose is hereby granted without fee,
+# provided that the above copyright notice appear in all copies and
+# that both that copyright notice and this permission notice appear in
+# supporting documentation.
+#
+# THE AUTHOR MICHAEL HUDSON DISCLAIMS ALL WARRANTIES WITH REGARD TO
+# THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+# AND FITNESS, IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL,
+# INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER
+# RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF
+# CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+# CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
 # Bah, this would be easier to test if curses/terminfo didn't have so
 # much non-introspectable global state.
 
 from pyrepl import keymap
 from pyrepl.console import Event
 import curses, termios
+from termios import tcgetattr, VERASE
 
 _keynames = {
     "delete" : "kdch1",
@@ -31,8 +51,7 @@ class EventQueue(object):
             keycode = curses.tigetstr(tiname)
             if keycode:
                 our_keycodes[keycode] = unicode(key)
-        our_keycodes[termios.tcgetattr(fd)[6][termios.VERASE]] = \
-                                                               u'backspace'
+        our_keycodes[tcgetattr(fd)[6][VERASE]] = u'backspace'
         self.k = self.ck = keymap.compile_keymap(our_keycodes)
         self.events = []
         self.buf = []
@@ -52,13 +71,13 @@ class EventQueue(object):
                 self.buf.append(char)
                 self.k = k
             else:
-                self.events.append(Event('key', k))
+                self.events.append(Event('key', k, ''.join(self.buf) + char))
                 self.buf = []
                 self.k = self.ck
         elif self.buf:
-            self.events.extend([Event('key', c) for c in self.buf])
+            self.events.extend([Event('key', c, c) for c in self.buf])
             self.buf = []
             self.k = self.ck
             self.push(char)
         else:
-            self.events.append(Event('key', char))
+            self.events.append(Event('key', char, char))

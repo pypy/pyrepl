@@ -1,4 +1,4 @@
-#   Copyright 2000-2003 Michael Hudson mwh@python.net
+#   Copyright 2000-2004 Michael Hudson mwh@python.net
 #
 #                        All Rights Reserved
 #
@@ -160,7 +160,7 @@ default_keymap = tuple(
 
 del c # from the listcomps
 
-class Reader:    
+class Reader(object):
     """The Reader class implements the bare bones of a command reader,
     handling such details as editing and cursor motion.  What it does
     not support are such things as completion or history support -
@@ -215,8 +215,6 @@ class Reader:
         that we're done.
     """
 
-    keymap = default_keymap
-
     help_text = """\
 This is pyrepl.  Hear my roar.
 
@@ -243,10 +241,14 @@ feeling more loquacious than I am now."""
                 self.commands[v.__name__.replace('_', '-')] = v
         self.syntax_table = make_default_syntax_table()
         self.input_trans_stack = []
+        self.keymap = self.collect_keymap()
         self.input_trans = input.KeymapTranslator(
             self.keymap,
             invalid_cls='invalid-key',
             character_cls='self-insert')
+
+    def collect_keymap(self):
+        return default_keymap
 
     def calc_screen(self):
         """The purpose of this method is to translate changes in
@@ -502,7 +504,7 @@ feeling more loquacious than I am now."""
         while 1:
             event = self.console.get_event(block)
             if not event: # can only happen if we're not blocking
-                return
+                return None
 
             if event.evt == 'key':
                 self.input_trans.push(event)
@@ -519,10 +521,10 @@ feeling more loquacious than I am now."""
                 if block:
                     continue
                 else:
-                    return 
+                    return None
 
             self.do_cmd(cmd)
-            return 
+            return 1
 
     def readline(self):
         """Read a line.  The implementation of this method also shows

@@ -1,4 +1,4 @@
-#   Copyright 2000-2003 Michael Hudson mwh@python.net
+#   Copyright 2000-2004 Michael Hudson mwh@python.net
 #
 #                        All Rights Reserved
 #
@@ -20,9 +20,10 @@
 class Event:
     """An Event.  `evt' is 'key' or somesuch."""
 
-    def __init__(self, evt, data):
+    def __init__(self, evt, data, raw=''):
         self.evt = evt
         self.data = data
+        self.raw = raw
 
     def __repr__(self):
         return 'Event(%r, %r)'%(self.evt, self.data)

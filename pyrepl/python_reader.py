@@ -1,4 +1,4 @@
-#   Copyright 2000-2003 Michael Hudson mwh@python.net
+#   Copyright 2000-2004 Michael Hudson mwh@python.net
 #
 #                        All Rights Reserved
 #
@@ -18,8 +18,9 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 # one impressive collections of imports:
-from pyrepl.completing_reader import CompletingReader as CR
-from pyrepl import completing_reader as cr, reader
+from pyrepl.completing_reader import CompletingReader
+from pyrepl.historical_reader import HistoricalReader
+from pyrepl import completing_reader, reader
 from pyrepl import copy_code, commands, completer
 from pyrepl import module_lister
 import new, codeop, sys, os, re, code, traceback
@@ -66,17 +67,15 @@ def mk_saver(reader):
             file.close()
     return saver
 
-python_keymap = cr.completing_keymap + (
-    (r'\n', 'maybe-accept'),
-    (r'\M-\n', 'insert-nl'))
-
-class PythonicReader(CR):
-    keymap = python_keymap
+class PythonicReader(CompletingReader, HistoricalReader):
+    def collect_keymap(self):
+        return super(PythonicReader, self).collect_keymap() + (
+            (r'\n', 'maybe-accept'),
+            (r'\M-\n', 'insert-nl'))
     
-    CR_init = CR.__init__
     def __init__(self, console, locals,
                  compiler=None):
-        self.CR_init(console)
+        super(PythonicReader, self).__init__(console)
         self.completer = completer.Completer(locals)
         st = self.syntax_table
         for c in "._0123456789":
@@ -126,7 +125,7 @@ class PythonicReader(CR):
                 return [x[len(mod) + 1:]
                         for x in l if x.startswith(mod + '.' + name)]
         try:
-            l = cr.uniqify(self.completer.complete(stem))
+            l = completing_reader.uniqify(self.completer.complete(stem))
             return l
         except (NameError, AttributeError):
             return []

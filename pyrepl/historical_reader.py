@@ -1,4 +1,4 @@
-#   Copyright 2000-2003 Michael Hudson mwh@python.net
+#   Copyright 2000-2004 Michael Hudson mwh@python.net
 #
 #                        All Rights Reserved
 #
@@ -19,17 +19,6 @@
 
 from pyrepl import reader, commands
 from pyrepl.reader import Reader as R
-
-history_keymap = reader.default_keymap + (
-    (r'\C-n', 'next-history'),
-    (r'\C-p', 'previous-history'),
-    (r'\C-o', 'operate-and-get-next'),
-    (r'\C-r', 'reverse-history-isearch'),
-    (r'\C-s', 'forward-history-isearch'),
-    (r'\M-r', 'restore-history'),
-    (r'\M-.', 'yank-arg'),
-    (r'\<page down>', 'last-history'),
-    (r'\<page up>', 'first-history'))
 
 isearch_keymap = tuple(
     [('\\%03o'%c, 'isearch-end') for c in range(256) if chr(c) != '\\'] + \
@@ -195,11 +184,21 @@ class HistoricalReader(R):
         HistoricalReader instance methods.
     """
 
-    keymap = history_keymap
+    def collect_keymap(self):
+        return super(HistoricalReader, self).collect_keymap() + (
+            (r'\C-n', 'next-history'),
+            (r'\C-p', 'previous-history'),
+            (r'\C-o', 'operate-and-get-next'),
+            (r'\C-r', 'reverse-history-isearch'),
+            (r'\C-s', 'forward-history-isearch'),
+            (r'\M-r', 'restore-history'),
+            (r'\M-.', 'yank-arg'),
+            (r'\<page down>', 'last-history'),
+            (r'\<page up>', 'first-history'))
 
-    R_init = R.__init__
+
     def __init__(self, console):
-        self.R_init(console)
+        super(HistoricalReader, self).__init__(console)
         self.history = []
         self.historyi = 0
         self.transient_history = {}
@@ -234,9 +233,8 @@ class HistoricalReader(R):
         else:
             return self.transient_history.get(i, self.get_unicode())
 
-    R_prepare = R.prepare
     def prepare(self):
-        self.R_prepare()
+        super(HistoricalReader, self).prepare()
         try:
             self.transient_history = {}
             if self.next_history is not None \
@@ -252,13 +250,12 @@ class HistoricalReader(R):
             self.restore()
             raise
 
-    R_get_prompt = R.get_prompt
     def get_prompt(self, lineno, cursor_on_line):
         if cursor_on_line and self.isearch_direction <> ISEARCH_DIRECTION_NONE:
             d = 'rf'[self.isearch_direction == ISEARCH_DIRECTION_FORWARDS]
             return "(%s-search `%s') "%(d, self.isearch_term)
         else:
-            return self.R_get_prompt(lineno, cursor_on_line)
+            return super(HistoricalReader, self).get_prompt(lineno, cursor_on_line)
 
     def isearch_next(self):
         st = self.isearch_term
@@ -289,9 +286,8 @@ class HistoricalReader(R):
                     s = self.get_item(i)
                     p = len(s)
 
-    R_finish = R.finish
     def finish(self):
-        self.R_finish()
+        super(HistoricalReader, self).finish()
         ret = self.get_unicode()
         for i, t in self.transient_history.items():
             if i < len(self.history) and i != self.historyi:

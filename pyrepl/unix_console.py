@@ -1,4 +1,4 @@
-#   Copyright 2000-2003 Michael Hudson mwh@python.net
+#   Copyright 2000-2004 Michael Hudson mwh@python.net
 #
 #                        All Rights Reserved
 #
@@ -18,7 +18,7 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import termios, curses, select, os, struct, types, errno
-import signal, re, time, sys, codecs, unicodedata
+import signal, re, time, sys
 from fcntl import ioctl
 from pyrepl.fancy_termios import tcgetattr, tcsetattr
 from pyrepl.console import Console, Event
@@ -93,10 +93,8 @@ class UnixConsole(Console):
         self.encoding = encoding
 
         if isinstance(f_in, int):
-            self.input = codecs.getreader(encoding)(os.fdopen(f_in))
             self.input_fd = f_in
         else:
-            self.input = codecs.getreader(encoding)(f_in)
             self.input_fd = f_in.fileno()
 
         if isinstance(f_out, int):
@@ -172,7 +170,6 @@ class UnixConsole(Console):
         self.event_queue = unix_eventqueue.EventQueue(self.input_fd)
 
     def change_encoding(self, encoding):
-        self.input = codecs.getreader(encoding)(self.input.stream)
         self.encoding = encoding
     
     def refresh(self, screen, (cx, cy)):
@@ -400,7 +397,16 @@ class UnixConsole(Console):
         while self.event_queue.empty():
             while 1: # All hail Unix!
                 try:
-                    c = self.input.read(1)
+                    c = ''
+                    while 1:
+                        c += os.read(self.input_fd, 1)
+                        try:
+                            c = unicode(c, self.encoding)
+                        except:
+                            continue
+                        else:
+                            break
+                        
                 except IOError, err:
                     if err.errno == errno.EINTR:
                         if not self.event_queue.empty():
@@ -505,13 +511,33 @@ class UnixConsole(Console):
 
     if FIONREAD:
         def getpending(self):
-            return self.input.read()
+            e = Event('key', '', '')
+
+            while not self.event_queue.empty():
+                e2 = self.event_queue.get()
+                e.data += e2.data
+                e.raw += e.raw
+                
             amount = struct.unpack(
                 "i", ioctl(self.input_fd, FIONREAD, "\0\0\0\0"))[0]
-            return os.read(self.input_fd, amount)
+            raw = unicode(os.read(self.input_fd, amount), self.encoding, 'replace')
+            e.data += raw
+            e.raw += raw
+            return e
     else:
         def getpending(self):
-            return os.read(self.input_fd, 100000) # that should be enough :)
+            e = Event('key', '', '')
+
+            while not self.event_queue.empty():
+                e2 = self.event_queue.get()
+                e.data += e2.data
+                e.raw += e.raw
+                
+            amount = 10000
+            raw = unicode(os.read(self.input_fd, amount), self.encoding, 'replace')
+            e.data += raw
+            e.raw += raw
+            return e
 
     def clear(self):
         self.__write_code(self._clear)

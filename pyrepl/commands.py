@@ -1,4 +1,4 @@
-#   Copyright 2000-2003 Michael Hudson mwh@python.net
+#   Copyright 2000-2004 Michael Hudson mwh@python.net
 #
 #                        All Rights Reserved
 #
@@ -346,8 +346,9 @@ class help(Command):
 
 class invalid_key(Command):
     def do(self):
-        s = self.event
-        self.reader.error("`%s' not bound"%s)
+        pending = self.reader.console.getpending()
+        s = ''.join(self.event) + pending.data
+        self.reader.error("`%r' not bound"%s)
 
 class invalid_command(Command):
     def do(self):
@@ -357,17 +358,16 @@ class invalid_command(Command):
 class qIHelp(Command):
     def do(self):
         r = self.reader
-        #r.insert((self.event + r.console.getpending()) * r.get_arg())
-        r.insert((self.event  ) * r.get_arg())
+        r.insert((self.event + r.console.getpending().data) * r.get_arg())
         r.pop_input_trans()
 
 from pyrepl import input
 
 class QITrans(object):
     def push(self, evt):
-        self.chars = evt.data
+        self.evt = evt
     def get(self):
-        return ('qIHelp', self.chars)
+        return ('qIHelp', self.evt.raw)
 
 class quoted_insert(Command):
     kills_digit_arg = 0

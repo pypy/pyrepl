@@ -1,4 +1,4 @@
-#   Copyright 2000-2003 Michael Hudson mwh@python.net
+#   Copyright 2000-2004 Michael Hudson mwh@python.net
 #
 #                        All Rights Reserved
 #
@@ -17,11 +17,8 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-from pyrepl import historical_reader, commands, reader
-from pyrepl.historical_reader import HistoricalReader as HR
-
-completing_keymap = historical_reader.history_keymap + (
-    (r'\t', 'complete'),)
+from pyrepl import commands, reader
+from pyrepl.reader import Reader
 
 def uniqify(l):
     d = {}
@@ -158,19 +155,20 @@ class self_insert(commands.self_insert):
                 else:
                     r.cmpltn_reset()
 
-class CompletingReader(HR):
-    """Adds completion support to the HistoricalReader class.
+class CompletingReader(Reader):
+    """Adds completion support
 
     Adds instance variables:
       * cmpltn_menu, cmpltn_menu_vis, cmpltn_menu_end, cmpltn_choices:
       *
     """
 
-    keymap = completing_keymap
+    def collect_keymap(self):
+        return super(CompletingReader, self).collect_keymap() + (
+            (r'\t', 'complete'),)
     
-    HR_init = HR.__init__
     def __init__(self, console):
-        self.HR_init(console)
+        super(CompletingReader, self).__init__(console)
         self.cmpltn_menu = ["[ menu 1 ]", "[ menu 2 ]"]
         self.cmpltn_menu_vis = 0
         self.cmpltn_menu_end = 0
@@ -178,15 +176,13 @@ class CompletingReader(HR):
             self.commands[c.__name__] = c
             self.commands[c.__name__.replace('_', '-')] = c        
 
-    HR_after_command = HR.after_command
     def after_command(self, cmd):
-        self.HR_after_command(cmd)
+        super(CompletingReader, self).after_command(cmd)
         if not isinstance(cmd, complete) and not isinstance(cmd, self_insert):
             self.cmpltn_reset()
 
-    HR_calc_screen = HR.calc_screen
     def calc_screen(self):
-        screen = self.HR_calc_screen()
+        screen = super(CompletingReader, self).calc_screen()
         if self.cmpltn_menu_vis:
             ly = self.lxy[1]
             screen[ly:ly] = self.cmpltn_menu
@@ -194,9 +190,8 @@ class CompletingReader(HR):
             self.cxy = self.cxy[0], self.cxy[1] + len(self.cmpltn_menu)
         return screen
 
-    HR_finish = HR.finish
     def finish(self):
-        self.HR_finish()
+        super(CompletingReader, self).finish()
         self.cmpltn_reset()
 
     def cmpltn_reset(self):
