@@ -46,7 +46,7 @@ def prefix(wordlist, j = 0):
         return wordlist[0][j:i]
 
 def build_menu(cons, wordlist, start):
-    maxlen = max(map(len, wordlist))
+    maxlen = min(max(map(len, wordlist)), cons.width - 4)
     cols = cons.width / (maxlen + 4)
     rows = (len(wordlist) - 1)/cols + 1
     menu = []
@@ -54,7 +54,7 @@ def build_menu(cons, wordlist, start):
     for r in range(rows):
         row = []
         for col in range(cols):
-            row.append("[ %-*s ]"%(maxlen, wordlist[i]))
+            row.append("[ %-*s ]"%(maxlen, wordlist[i][:maxlen]))
             i += 1
             if i >= len(wordlist):
                 break
