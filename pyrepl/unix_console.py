@@ -113,7 +113,7 @@ POLLIN = getattr(select, "POLLIN", None)
 class UnixConsole(Console):
     def __init__(self, f_in=0, f_out=1, term=None, encoding=None):
         if encoding is None:
-            encoding = 'utf-8'#sys.getdefaultencoding()
+            encoding = sys.getdefaultencoding()
             
         self.encoding = encoding
 

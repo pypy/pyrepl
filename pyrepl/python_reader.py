@@ -313,7 +313,26 @@ def main(use_pygame_console=0):
             sys.stdin = FakeStdin(con)
         else:
             from pyrepl.unix_console import UnixConsole
-            con = UnixConsole(0, 1, None)
+            try:
+                import locale
+            except ImportError:
+                encoding = None
+            else:
+                if hasattr(locale, 'nl_langinfo') \
+                       and hasattr(locale, 'CODESET'):
+                    encoding = locale.nl_langinfo(locale.CODESET)
+                elif os.environ.get('TERM_PROGRAM') == 'Apple_Terminal':
+                    # /me whistles innocently...
+                    code = int(os.popen(
+                        "defaults read com.apple.Terminal StringEncoding"
+                        ).read())
+                    if code == 4:
+                        encoding = 'utf-8'
+                    else:
+                        encoding = None
+                else:
+                    encoding = None # so you get ASCII...
+            con = UnixConsole(0, 1, None, encoding)
         print "Python", sys.version, "on", sys.platform
         print 'Type "copyright", "credits" or "license" for more information.'
         sys.path.insert(0, os.getcwd())
