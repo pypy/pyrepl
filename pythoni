@@ -33,12 +33,4 @@ from pyrepl import cmdrepl
 # whizzy feature:  graft pyrepl support onto pdb
 #pdb.Pdb = cmdrepl.replize(pdb.Pdb, 1)
 
-try:
-    import imp
-    imp.find_module("twisted")
-except ImportError:
-    interactmethod="interact"
-else:
-    interactmethod="twistedinteract"
-
-main(use_pygame_console=('pg' in sys.argv), interactmethod=interactmethod)
+main(use_pygame_console=('pg' in sys.argv))

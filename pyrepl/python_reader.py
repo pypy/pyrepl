@@ -29,6 +29,13 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
+try:
+    import imp
+    imp.find_module("twisted")
+except ImportError:
+    default_interactmethod = "interact"
+else:
+    default_interactmethod = "twistedinteract"
 
 CommandCompiler = code.CommandCompiler
 
@@ -321,7 +328,7 @@ class ReaderConsole(code.InteractiveInterpreter):
         self.cocoainteracter = CocoaInteracter.alloc().init(self, inputfilehandle, outputfilehandle)
         
         
-def main(use_pygame_console=0, interactmethod="twistedinteract"):
+def main(use_pygame_console=0, interactmethod=default_interactmethod):
     si, se, so = sys.stdin, sys.stderr, sys.stdout
     try:
         if 0 and use_pygame_console: # pygame currently borked
