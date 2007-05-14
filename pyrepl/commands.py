@@ -203,6 +203,9 @@ class up(MotionCommand):
         for i in range(r.get_arg()):
             bol1 = r.bol()
             if bol1 == 0:
+                if r.historyi > 0:
+                    r.select_item(r.historyi - 1)
+                    return
                 r.pos = 0
                 r.error("start of buffer")
                 return
@@ -222,6 +225,10 @@ class down(MotionCommand):
             bol1 = r.bol()
             eol1 = r.eol()
             if eol1 == len(b):
+                if r.historyi < len(r.history):
+                    r.select_item(r.historyi + 1)
+                    r.pos = r.eol(0)
+                    return
                 r.pos = len(b)
                 r.error("end of buffer")
                 return
