@@ -46,7 +46,7 @@ class CmdReader(CR):
     
     CR_init = CR.__init__
     def __init__(self, completions):
-        self.CR_init()
+        self.CR_init(self)
         self.completions = completions
 
     def get_completions(self, stem):
