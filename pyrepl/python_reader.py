@@ -32,6 +32,8 @@ except ImportError:
 try:
     import imp
     imp.find_module("twisted")
+    from twisted.internet import reactor
+    from twisted.internet.abstract import FileDescriptor
 except ImportError:
     default_interactmethod = "interact"
 else:
