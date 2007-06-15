@@ -114,6 +114,10 @@ class PythonicReader(CompletingReader, HistoricalReader):
         b = self.get_unicode()
         m = import_line_prog.match(b)
         if m:
+            if not self._module_list_ready:
+                module_lister._make_module_list()
+                self._module_list_ready = True
+
             mod = m.group("mod")
             try:
                 return module_lister.find_modules(mod)
@@ -361,14 +365,12 @@ def main(use_pygame_console=0, interactmethod=default_interactmethod):
                     else:
                         encoding = None
                 else:
-                    encoding = None # so you get ASCII...
+                    encoding = 'UTF-8' # so you get ASCII...
             con = UnixConsole(0, 1, None, encoding)
         print "Python", sys.version, "on", sys.platform
         print 'Type "help", "copyright", "credits" or "license" '\
               'for more information.'
         sys.path.insert(0, os.getcwd())
-
-        module_lister._make_module_list()
 
         if __name__ != '__main__':
             mainmod = new.module('__main__')
@@ -377,6 +379,7 @@ def main(use_pygame_console=0, interactmethod=default_interactmethod):
             mainmod = sys.modules['__main__']
 
         rc = ReaderConsole(con, mainmod.__dict__)
+        rc.reader._module_list_ready = False
         rc.run_user_init_file()
         getattr(rc, interactmethod)()
     finally:
