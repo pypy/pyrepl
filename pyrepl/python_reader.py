@@ -29,15 +29,15 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
-try:
-    import imp
-    imp.find_module("twisted")
-    from twisted.internet import reactor
-    from twisted.internet.abstract import FileDescriptor
-except ImportError:
-    default_interactmethod = "interact"
-else:
-    default_interactmethod = "twistedinteract"
+#try:
+#    import imp
+#    imp.find_module("twisted")
+#    from twisted.internet import reactor
+#    from twisted.internet.abstract import FileDescriptor
+#except ImportError:
+default_interactmethod = "interact"
+#else:
+#    default_interactmethod = "twistedinteract"
 
 CommandCompiler = code.CommandCompiler
 
@@ -365,7 +365,7 @@ def main(use_pygame_console=0, interactmethod=default_interactmethod):
                     else:
                         encoding = None
                 else:
-                    encoding = 'UTF-8' # so you get ASCII...
+                    encoding = None # so you get ASCII...
             con = UnixConsole(0, 1, None, encoding)
         print "Python", sys.version, "on", sys.platform
         print 'Type "help", "copyright", "credits" or "license" '\
@@ -378,6 +378,7 @@ def main(use_pygame_console=0, interactmethod=default_interactmethod):
         else:
             mainmod = sys.modules['__main__']
 
+        self._module_list_ready = False
         rc = ReaderConsole(con, mainmod.__dict__)
         rc.reader._module_list_ready = False
         rc.run_user_init_file()
