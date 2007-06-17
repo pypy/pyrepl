@@ -29,15 +29,15 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
-#try:
-#    import imp
-#    imp.find_module("twisted")
-#    from twisted.internet import reactor
-#    from twisted.internet.abstract import FileDescriptor
-#except ImportError:
-default_interactmethod = "interact"
-#else:
-#    default_interactmethod = "twistedinteract"
+try:
+    import imp
+    imp.find_module("twisted")
+    from twisted.internet import reactor
+    from twisted.internet.abstract import FileDescriptor
+except ImportError:
+    default_interactmethod = "interact"
+else:
+    default_interactmethod = "twistedinteract"
 
 CommandCompiler = code.CommandCompiler
 
@@ -378,7 +378,6 @@ def main(use_pygame_console=0, interactmethod=default_interactmethod):
         else:
             mainmod = sys.modules['__main__']
 
-        self._module_list_ready = False
         rc = ReaderConsole(con, mainmod.__dict__)
         rc.reader._module_list_ready = False
         rc.run_user_init_file()
