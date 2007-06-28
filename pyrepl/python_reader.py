@@ -334,7 +334,7 @@ class ReaderConsole(code.InteractiveInterpreter):
         self.cocoainteracter = CocoaInteracter.alloc().init(self, inputfilehandle, outputfilehandle)
         
         
-def main(use_pygame_console=0, interactmethod=default_interactmethod):
+def main(use_pygame_console=0, interactmethod=default_interactmethod, print_banner=True):
     si, se, so = sys.stdin, sys.stderr, sys.stdout
     try:
         if 0 and use_pygame_console: # pygame currently borked
@@ -367,9 +367,10 @@ def main(use_pygame_console=0, interactmethod=default_interactmethod):
                 else:
                     encoding = None # so you get ASCII...
             con = UnixConsole(0, 1, None, encoding)
-        print "Python", sys.version, "on", sys.platform
-        print 'Type "help", "copyright", "credits" or "license" '\
-              'for more information.'
+        if print_banner:
+            print "Python", sys.version, "on", sys.platform
+            print 'Type "help", "copyright", "credits" or "license" '\
+                  'for more information.'
         sys.path.insert(0, os.getcwd())
 
         if __name__ != '__main__':
