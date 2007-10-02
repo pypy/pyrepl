@@ -334,7 +334,7 @@ class ReaderConsole(code.InteractiveInterpreter):
         self.cocoainteracter = CocoaInteracter.alloc().init(self, inputfilehandle, outputfilehandle)
         
         
-def main(use_pygame_console=0, interactmethod=default_interactmethod, print_banner=True):
+def main(use_pygame_console=0, interactmethod=default_interactmethod, print_banner=True, clear_main=True):
     si, se, so = sys.stdin, sys.stderr, sys.stdout
     try:
         if 0 and use_pygame_console: # pygame currently borked
@@ -373,7 +373,7 @@ def main(use_pygame_console=0, interactmethod=default_interactmethod, print_bann
                   'for more information.'
         sys.path.insert(0, os.getcwd())
 
-        if __name__ != '__main__':
+        if clear_main and __name__ != '__main__':
             mainmod = new.module('__main__')
             sys.modules['__main__'] = mainmod
         else:
