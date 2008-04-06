@@ -466,6 +466,13 @@ feeling more loquacious than I am now."""
         self.dirty = 1
         self.console.beep()
 
+    def immediately_clear_message(self):
+        if self.msg:
+            self.msg = ''
+            self.dirty = 1
+        if self.dirty:
+            self.refresh()
+
     def refresh(self):
         """Recalculate and refresh the screen."""
         # this call sets up self.cxy, so call it first.
