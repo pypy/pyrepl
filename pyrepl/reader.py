@@ -221,6 +221,8 @@ This is pyrepl.  Hear my roar.
 Helpful text may appear here at some point in the future when I'm
 feeling more loquacious than I am now."""
 
+    msg_at_bottom = True
+
     def __init__(self, console):
         self.buffer = []
         self.ps1 = "->> "
@@ -264,7 +266,7 @@ feeling more loquacious than I am now."""
         for ln, line in zip(range(len(lines)), lines):
             ll = len(line)
             if 0 <= p <= ll:
-                if self.msg:
+                if self.msg and not self.msg_at_bottom:
                     for mline in self.msg.split("\n"):
                         screen.append(mline)
                         screeninfo.append((0, []))
@@ -287,6 +289,10 @@ feeling more loquacious than I am now."""
                 screeninfo.append((0, l2[wrapcount*w - lp:]+[1]))
         self.screeninfo = screeninfo
         self.cxy = self.pos2xy(self.pos)
+        if self.msg and self.msg_at_bottom:
+            for mline in self.msg.split("\n"):
+                screen.append(mline)
+                screeninfo.append((0, []))
         return screen
 
     def bow(self, p=None):
