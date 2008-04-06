@@ -466,10 +466,7 @@ feeling more loquacious than I am now."""
         self.dirty = 1
         self.console.beep()
 
-    def immediately_clear_message(self):
-        if self.msg:
-            self.msg = ''
-            self.dirty = 1
+    def update_screen(self):
         if self.dirty:
             self.refresh()
 

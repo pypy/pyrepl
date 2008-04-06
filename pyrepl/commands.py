@@ -333,7 +333,7 @@ class delete(EditCommand):
         b = r.buffer
         if  ( r.pos == 0 and len(b) == 0 # this is something of a hack
               and self.event[-1] == "\004"):
-            r.immediately_clear_message()
+            r.update_screen()
             r.console.finish()
             raise EOFError
         for i in range(r.get_arg()):
