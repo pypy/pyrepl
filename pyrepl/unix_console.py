@@ -196,7 +196,7 @@ class UnixConsole(Console):
             offset = cy - height + 1
         elif offset > 0 and len(screen) < offset + height:
             offset = max(len(screen) - height, 0)
-            screen.append([])
+            screen.append("")
 
         oldscr = self.screen[old_offset:old_offset + height]
         newscr = screen[offset:offset + height]
