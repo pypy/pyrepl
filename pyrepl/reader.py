@@ -19,7 +19,6 @@
 
 import types, unicodedata
 from pyrepl import commands
-from curses import ascii
 from pyrepl import input
 
 def _make_unctrl_map():

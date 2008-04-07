@@ -35,7 +35,6 @@
 # XXX it's actually possible to test this module, so it should have a
 # XXX test suite.
 
-from curses import ascii
 from pygame.locals import *
 
 _escapes = {
@@ -137,7 +136,8 @@ def _parse_key1(key, s):
                     `c`, s + 2, repr(key))
         else:
             if ctrl:
-                ret = unicode(ascii.ctrl(key[s]))
+                ret = chr(ord(key[s]) & 0x1f)   # curses.ascii.ctrl()
+                ret = unicode(ret)
             else:
                 ret = unicode(key[s])
             s += 1

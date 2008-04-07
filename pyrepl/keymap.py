@@ -52,8 +52,6 @@ Examples:
    - all of these are the tab character.  Can you think of any more?
 """
 
-from curses import ascii
-
 _escapes = {
     '\\':'\\',
     "'":"'",
@@ -156,7 +154,7 @@ def _parse_key1(key, s):
     if ctrl:
         if len(ret) > 1:
             raise KeySpecError, "\\C- must be followed by a character"
-        ret = ascii.ctrl(ret)
+        ret = chr(ord(ret) & 0x1f)   # curses.ascii.ctrl()
     if meta:
         ret = ['\033', ret]
     else:

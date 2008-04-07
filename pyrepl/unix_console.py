@@ -17,9 +17,10 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import termios, curses, select, os, struct, errno
+import termios, select, os, struct, errno
 import signal, re, time, sys
 from fcntl import ioctl
+from pyrepl import curses
 from pyrepl.fancy_termios import tcgetattr, tcsetattr
 from pyrepl.console import Console, Event
 from pyrepl import unix_eventqueue

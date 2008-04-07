@@ -17,7 +17,6 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-from curses import ascii
 import sys, os
 
 # Catgories of actions:
@@ -120,7 +119,7 @@ class kill_line(KillCommand):
         b = r.buffer
         eol = r.eol()
         for c in b[r.pos:eol]:
-            if not ascii.isspace(c):
+            if not c.isspace():
                 self.kill_range(r.pos, eol)
                 return
         else:
