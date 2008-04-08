@@ -13,4 +13,5 @@ sys.modules['readline'] = readline
 if os.getenv('PYTHONSTARTUP'):
     execfile(os.getenv('PYTHONSTARTUP'))
 
+print 'Python', sys.version
 run_multiline_interactive_console()
