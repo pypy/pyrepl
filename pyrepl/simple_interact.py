@@ -7,7 +7,7 @@ import sys
 from pyrepl.readline import multiline_input
 
 
-def run_multiline_interactive_console(mainmodule):
+def run_multiline_interactive_console(mainmodule=None):
     import code
     if mainmodule is None:
         import __main__ as mainmodule
