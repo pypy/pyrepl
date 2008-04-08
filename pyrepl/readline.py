@@ -41,6 +41,9 @@ class _ReaderMixin(object):
     readline_completer = None
     completer_delims = dict.fromkeys(' \t\n`~!@#$%^&*()-=+[{]}\\|;:\'",<>/?')
 
+    def error(self, msg="none"):
+        pass    # don't show error messages by default
+
     def get_stem(self):
         b = self.buffer
         p = self.pos - 1
