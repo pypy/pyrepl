@@ -4,7 +4,11 @@ extensions for multiline input.
 """
 
 import sys, os
-import pyrepl.curses    # check to give an early ImportError
+from pyrepl import commands
+from pyrepl.historical_reader import HistoricalReader
+from pyrepl.completing_reader import CompletingReader
+from pyrepl.unix_console import UnixConsole
+
 
 ENCODING = 'latin1'     # XXX hard-coded
 
@@ -37,7 +41,7 @@ __all__ = ['add_history',
 
 # ____________________________________________________________
 
-class _ReaderMixin(object):
+class ReadlineAlikeReader(HistoricalReader, CompletingReader):
     readline_completer = None
     completer_delims = dict.fromkeys(' \t\n`~!@#$%^&*()-=+[{]}\\|;:\'",<>/?')
 
@@ -92,26 +96,26 @@ class _ReaderMixin(object):
     more_lines = None
 
     def collect_keymap(self):
-        return super(_ReaderMixin, self).collect_keymap() + (
+        return super(ReadlineAlikeReader, self).collect_keymap() + (
             (r'\n', 'maybe-accept'),)
 
     def __init__(self, console):
-        super(_ReaderMixin, self).__init__(console)
-        from pyrepl import commands
-        class maybe_accept(commands.Command):
-            def do(self):
-                r = self.reader
-                # if there are already several lines and the cursor
-                # is not on the last one, always insert a new \n.
-                text = r.get_unicode()
-                if "\n" in r.buffer[r.pos:]:
-                    r.insert("\n")
-                elif r.more_lines is not None and r.more_lines(text):
-                    r.insert("\n")
-                else:
-                    self.finish = 1
+        super(ReadlineAlikeReader, self).__init__(console)
         self.commands['maybe_accept'] = maybe_accept
         self.commands['maybe-accept'] = maybe_accept
+
+class maybe_accept(commands.Command):
+    def do(self):
+        r = self.reader
+        # if there are already several lines and the cursor
+        # is not on the last one, always insert a new \n.
+        text = r.get_unicode()
+        if "\n" in r.buffer[r.pos:]:
+            r.insert("\n")
+        elif r.more_lines is not None and r.more_lines(text):
+            r.insert("\n")
+        else:
+            self.finish = 1
 
 # ____________________________________________________________
 
@@ -124,13 +128,8 @@ class _ReadlineWrapper(object):
 
     def get_reader(self):
         if self.reader is None:
-            from pyrepl.historical_reader import HistoricalReader
-            from pyrepl.completing_reader import CompletingReader
-            from pyrepl.unix_console import UnixConsole
-            class MyReader(_ReaderMixin, HistoricalReader, CompletingReader):
-                pass
             console = UnixConsole(self.f_in, self.f_out, encoding=ENCODING)
-            self.reader = MyReader(console)
+            self.reader = ReadlineAlikeReader(console)
         return self.reader
 
     def raw_input(self, prompt=''):
