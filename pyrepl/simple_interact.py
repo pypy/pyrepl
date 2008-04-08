@@ -6,6 +6,12 @@ allowing multiline input and multiline history entries.
 import sys
 from pyrepl.readline import multiline_input
 
+# please don't remove the following imports, useful
+# to give an early ImportError if something is missing
+import pyrepl.unix_console
+import pyrepl.historical_reader
+import pyrepl.completing_reader
+
 
 def run_multiline_interactive_console(mainmodule=None):
     import code
