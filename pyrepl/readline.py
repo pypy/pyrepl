@@ -104,6 +104,22 @@ class ReadlineAlikeReader(HistoricalReader, CompletingReader):
         self.commands['maybe_accept'] = maybe_accept
         self.commands['maybe-accept'] = maybe_accept
 
+    def after_command(self, cmd):
+        super(ReadlineAlikeReader, self).after_command(cmd)
+        if self.more_lines is None:
+            # Force single-line input if we are in raw_input() mode.
+            # Although there is no direct way to add a \n in this mode,
+            # multiline buffers can still show up using various
+            # commands, e.g. navigating the history.
+            try:
+                index = self.buffer.index("\n")
+            except ValueError:
+                pass
+            else:
+                self.buffer = self.buffer[:index]
+                if self.pos > len(self.buffer):
+                    self.pos = len(self.buffer)
+
 class maybe_accept(commands.Command):
     def do(self):
         r = self.reader
