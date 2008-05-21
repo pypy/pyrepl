@@ -70,6 +70,13 @@ class ReadlineAlikeReader(HistoricalReader, CompletingReader):
                     break
                 result.append(next)
                 state += 1
+            # emulate the behavior of the standard readline that sorts
+            # the completions before displaying them.  Note that the
+            # screen order is still a bit different because pyrepl
+            # displays them in this order:   and readline in this one:
+            #                     [A][B][C]                       A C E
+            #                     [D][E][F]                       B D F
+            result.sort()
         return result
 
     def get_trimmed_history(self, maxlength):
