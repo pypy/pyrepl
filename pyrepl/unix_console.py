@@ -151,16 +151,17 @@ class UnixConsole(Console):
 
         self.event_queue = unix_eventqueue.EventQueue(self.input_fd)
         self.partial_char = ''
+        self.cursor_visible = 1
 
     def change_encoding(self, encoding):
         self.encoding = encoding
     
     def refresh(self, screen, (cx, cy)):
         # this function is still too long (over 90 lines)
-        self.__maybe_write_code(self._civis)
 
         if not self.__gone_tall:
             while len(self.screen) < min(len(screen), self.height):
+                self.__hide_cursor()
                 self.__move(0, len(self.screen) - 1)
                 self.__write("\n")
                 self.__posxy = 0, len(self.screen)
@@ -203,6 +204,7 @@ class UnixConsole(Console):
 
         # use hardware scrolling if we have it.
         if old_offset > offset and self._ri:
+            self.__hide_cursor()
             self.__write_code(self._cup, 0, 0)
             self.__posxy = 0, old_offset
             for i in range(old_offset - offset):
@@ -210,6 +212,7 @@ class UnixConsole(Console):
                 oldscr.pop(-1)
                 oldscr.insert(0, "")
         elif old_offset < offset and self._ind:
+            self.__hide_cursor()
             self.__write_code(self._cup, self.height - 1, 0)
             self.__posxy = 0, old_offset + self.height - 1
             for i in range(offset - old_offset):
@@ -223,22 +226,23 @@ class UnixConsole(Console):
                                         oldscr,
                                         newscr):
             if oldline != newline:
-                self.write_changed_line(y, oldline, newline, px)
+                self.__write_changed_line(y, oldline, newline, px)
                 
         y = len(newscr)
         while y < len(oldscr):
+            self.__hide_cursor()
             self.__move(0, y)
             self.__posxy = 0, y
             self.__write_code(self._el)
             y += 1
 
-        self.__maybe_write_code(self._cnorm)
+        self.__show_cursor()
         
-        self.flushoutput()
         self.screen = screen
         self.move_cursor(cx, cy)
+        self.flushoutput()
 
-    def write_changed_line(self, y, oldline, newline, px):
+    def __write_changed_line(self, y, oldline, newline, px):
         # this is frustrating; there's no reason to test (say)
         # self.dch1 inside the loop -- but alternative ways of
         # structuring this function are equally painful (I'm trying to
@@ -262,6 +266,7 @@ class UnixConsole(Console):
         elif (self.dch1 and self.ich1 and len(newline) == self.width
               and x < len(newline) - 2
               and newline[x+1:-1] == oldline[x:-2]):
+            self.__hide_cursor()
             self.__move(self.width - 2, y)
             self.__posxy = self.width - 2, y
             self.__write_code(self.dch1)
@@ -270,12 +275,12 @@ class UnixConsole(Console):
             self.__write(newline[x])
             self.__posxy = x + 1, y
         else:
+            self.__hide_cursor()
             self.__move(x, y)
             if len(oldline) > len(newline):
                 self.__write_code(self._el)
             self.__write(newline[x:])
             self.__posxy = len(newline), y
-        self.flushoutput()
 
     def __write(self, text):
         self.__buffer.append((text, 0))
@@ -414,9 +419,19 @@ class UnixConsole(Console):
 
     def set_cursor_vis(self, vis):
         if vis:
-            self.__maybe_write_code(self._cnorm)
+            self.__show_cursor()
         else:
+            self.__hide_cursor()
+
+    def __hide_cursor(self):
+        if self.cursor_visible:
             self.__maybe_write_code(self._civis)
+            self.cursor_visible = 0
+
+    def __show_cursor(self):
+        if not self.cursor_visible:
+            self.__maybe_write_code(self._cnorm)
+            self.cursor_visible = 1
 
     def repaint_prep(self):
         if not self.__gone_tall:
