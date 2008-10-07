@@ -41,9 +41,11 @@ __all__ = ['add_history',
 
 # ____________________________________________________________
 
-class ReadlineAlikeReader(HistoricalReader, CompletingReader):
+class ReadlineConfig(object):
     readline_completer = None
     completer_delims = dict.fromkeys(' \t\n`~!@#$%^&*()-=+[{]}\\|;:\'",<>/?')
+
+class ReadlineAlikeReader(HistoricalReader, CompletingReader):
 
     def error(self, msg="none"):
         pass    # don't show error messages by default
@@ -51,13 +53,14 @@ class ReadlineAlikeReader(HistoricalReader, CompletingReader):
     def get_stem(self):
         b = self.buffer
         p = self.pos - 1
-        while p >= 0 and b[p] not in self.completer_delims:
+        completer_delims = self.config.completer_delims
+        while p >= 0 and b[p] not in completer_delims:
             p -= 1
         return ''.join(b[p+1:self.pos])
 
     def get_completions(self, stem):
         result = []
-        function = self.readline_completer
+        function = self.config.readline_completer
         if function is not None:
             try:
                 stem = str(stem)   # rlcompleter.py seems to not like unicode
@@ -148,11 +151,13 @@ class _ReadlineWrapper(object):
     reader = None
     saved_history_length = -1
     startup_hook = None
+    config = ReadlineConfig()
 
     def get_reader(self):
         if self.reader is None:
             console = UnixConsole(self.f_in, self.f_out, encoding=ENCODING)
             self.reader = ReadlineAlikeReader(console)
+            self.reader.config = self.config
         return self.reader
 
     def raw_input(self, prompt=''):
@@ -181,16 +186,16 @@ class _ReadlineWrapper(object):
         pass  # XXX we don't support parsing GNU-readline-style init files
 
     def set_completer(self, function=None):
-        self.get_reader().readline_completer = function
+        self.config.readline_completer = function
 
     def get_completer(self):
-        return self.get_reader().readline_completer
+        return self.config.readline_completer
 
     def set_completer_delims(self, string):
-        self.get_reader().completer_delims = dict.fromkeys(string)
+        self.config.completer_delims = dict.fromkeys(string)
 
     def get_completer_delims(self):
-        chars = self.get_reader().completer_delims.keys()
+        chars = self.config.completer_delims.keys()
         chars.sort()
         return ''.join(chars)
 
