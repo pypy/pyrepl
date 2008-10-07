@@ -400,7 +400,7 @@ class UnixConsole(Console):
             while 1: # All hail Unix!
                 try:
                     self.push_char(os.read(self.input_fd, 1))
-                except IOError, err:
+                except (IOError, OSError), err:
                     if err.errno == errno.EINTR:
                         if not self.event_queue.empty():
                             return self.event_queue.get()
