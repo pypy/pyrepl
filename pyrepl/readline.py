@@ -299,6 +299,9 @@ set_startup_hook = _wrapper.set_startup_hook
 # Extension
 multiline_input = _wrapper.multiline_input
 
+# Internal hook
+_get_reader = _wrapper.get_reader
+
 # ____________________________________________________________
 # Stubs
 
