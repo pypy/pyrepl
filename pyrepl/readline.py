@@ -330,7 +330,7 @@ def _setup():
     try:
         f_in = sys.stdin.fileno()
         f_out = sys.stdout.fileno()
-    except AttributeError:
+    except (AttributeError, ValueError):
         return
     if not os.isatty(f_in) or not os.isatty(f_out):
         return
