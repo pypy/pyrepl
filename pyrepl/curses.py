@@ -16,3 +16,4 @@ except ImportError:
 setupterm = _curses.setupterm
 tigetstr = _curses.tigetstr
 tparm = _curses.tparm
+error = _curses.error

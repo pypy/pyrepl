@@ -7,7 +7,7 @@ import sys, os
 from pyrepl import commands
 from pyrepl.historical_reader import HistoricalReader
 from pyrepl.completing_reader import CompletingReader
-from pyrepl.unix_console import UnixConsole
+from pyrepl.unix_console import UnixConsole, _error
 
 
 ENCODING = 'latin1'     # XXX hard-coded
@@ -161,7 +161,10 @@ class _ReadlineWrapper(object):
         return self.reader
 
     def raw_input(self, prompt=''):
-        reader = self.get_reader()
+        try:
+            reader = self.get_reader()
+        except _error:
+            return _old_raw_input(prompt)
         if self.startup_hook is not None:
             self.startup_hook()
         reader.ps1 = prompt
@@ -327,6 +330,7 @@ for _name, _ret in [
 # ____________________________________________________________
 
 def _setup():
+    global _old_raw_input
     try:
         f_in = sys.stdin.fileno()
         f_out = sys.stdout.fileno()
@@ -339,10 +343,12 @@ def _setup():
     _wrapper.f_out = f_out
 
     if hasattr(sys, '__raw_input__'):    # PyPy
+        _old_raw_input = sys.__raw_input__
         sys.__raw_input__ = _wrapper.raw_input
     else:
         # this is not really what readline.c does.  Better than nothing I guess
         import __builtin__
+        _old_raw_input = __builtin__.raw_input
         __builtin__.raw_input = _wrapper.raw_input
 
 _setup()

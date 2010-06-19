@@ -25,6 +25,8 @@ from pyrepl.fancy_termios import tcgetattr, tcsetattr
 from pyrepl.console import Console, Event
 from pyrepl import unix_eventqueue
 
+_error = (termios.error, curses.error)
+
 # there are arguments for changing this to "refresh"
 SIGWINCH_EVENT = 'repaint'
 
