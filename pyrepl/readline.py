@@ -68,7 +68,10 @@ class ReadlineAlikeReader(HistoricalReader, CompletingReader):
                 pass   # but feed unicode anyway if we have no choice
             state = 0
             while True:
-                next = function(stem, state)
+                try:
+                    next = function(stem, state)
+                except:
+                    break
                 if not isinstance(next, str):
                     break
                 result.append(next)
