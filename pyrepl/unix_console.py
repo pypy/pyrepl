@@ -251,7 +251,11 @@ class UnixConsole(Console):
         # avoid writing code generators these days...)
         x = 0
         minlen = min(len(oldline), len(newline))
-        while x < minlen and oldline[x] == newline[x]:
+        #
+        # reuse the oldline as much as possible, but stop as soon as we
+        # encounter an ESCAPE, because it might be the start of an escape
+        # sequene
+        while x < minlen and oldline[x] == newline[x] and newline[x] != '\x1b':
             x += 1
         if oldline[x:] == newline[x+1:] and self.ich1:
             if ( y == self.__posxy[1] and x > self.__posxy[0]

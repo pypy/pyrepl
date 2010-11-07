@@ -42,16 +42,41 @@ def prefix(wordlist, j = 0):
     except IndexError:
         return wordlist[0][j:i]
 
-def build_menu(cons, wordlist, start):
-    maxlen = min(max(map(len, wordlist)), cons.width - 4)
-    cols = cons.width / (maxlen + 4)
+import re
+def stripcolor(s):
+    return stripcolor.regexp.sub('', s)
+stripcolor.regexp = re.compile(r"\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[m|K]")
+
+def real_len(s):
+    return len(stripcolor(s))
+
+def left_align(s, maxlen):
+    stripped = stripcolor(s)
+    if len(stripped) > maxlen:
+        # too bad, we remove the color
+        return stripped[:maxlen]
+    padding = maxlen - len(stripped)
+    return s + ' '*padding
+
+USE_BRACKETS = True
+def build_menu(cons, wordlist, start, use_brackets=None):
+    if use_brackets is None:
+        use_brackets = USE_BRACKETS
+    if use_brackets:
+        item = "[ %s ]"
+        padding = 4
+    else:
+        item = "%s  "
+        padding = 2
+    maxlen = min(max(map(real_len, wordlist)), cons.width - padding)
+    cols = cons.width / (maxlen + padding)
     rows = (len(wordlist) - 1)/cols + 1
     menu = []
     i = start
     for r in range(rows):
         row = []
         for col in range(cols):
-            row.append("[ %-*s ]"%(maxlen, wordlist[i][:maxlen]))
+            row.append(item % left_align(wordlist[i], maxlen))
             i += 1
             if i >= len(wordlist):
                 break
