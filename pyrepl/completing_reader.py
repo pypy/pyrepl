@@ -58,10 +58,7 @@ def left_align(s, maxlen):
     padding = maxlen - len(stripped)
     return s + ' '*padding
 
-USE_BRACKETS = True
-def build_menu(cons, wordlist, start, use_brackets=None):
-    if use_brackets is None:
-        use_brackets = USE_BRACKETS
+def build_menu(cons, wordlist, start, use_brackets):
     if use_brackets:
         item = "[ %s ]"
         padding = 4
@@ -163,7 +160,8 @@ class complete(commands.Command):
                 if not r.cmpltn_menu_vis:
                     r.cmpltn_menu_vis = 1
                 r.cmpltn_menu, r.cmpltn_menu_end = build_menu(
-                    r.console, completions, r.cmpltn_menu_end)
+                    r.console, completions, r.cmpltn_menu_end,
+                    r.use_brackets)
                 r.dirty = 1
             elif stem + p in completions:
                 r.msg = "[ complete but not unique ]"
@@ -185,7 +183,7 @@ class self_insert(commands.self_insert):
                                if w.startswith(stem)]
                 if completions:
                     r.cmpltn_menu, r.cmpltn_menu_end = build_menu(
-                        r.console, completions, 0)
+                        r.console, completions, 0, r.use_brackets)
                 else:
                     r.cmpltn_reset()
 
@@ -198,6 +196,7 @@ class CompletingReader(Reader):
     """
     # see the comment for the complete command
     assume_immutable_completions = True
+    use_brackets = True # display completions inside []
     
     def collect_keymap(self):
         return super(CompletingReader, self).collect_keymap() + (
