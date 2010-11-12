@@ -136,6 +136,8 @@ class ReadlineAlikeReader(HistoricalReader, CompletingReader):
 class maybe_accept(commands.Command):
     def do(self):
         r = self.reader
+        r.dirty = 1 # this is needed to hide the completion menu, if visible
+        #
         # if there are already several lines and the cursor
         # is not on the last one, always insert a new \n.
         text = r.get_unicode()
