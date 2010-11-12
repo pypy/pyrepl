@@ -47,6 +47,8 @@ class ReadlineConfig(object):
 
 class ReadlineAlikeReader(HistoricalReader, CompletingReader):
 
+    assume_immutable_completions = False
+
     def error(self, msg="none"):
         pass    # don't show error messages by default
 

@@ -99,12 +99,19 @@ def build_menu(cons, wordlist, start, use_brackets=None):
 # the considerations are:
 # (1) how many completions are possible
 # (2) whether the last command was a completion
+# (3) if we can assume that the completer is going to return the same set of
+#     completions: this is controlled by the ``assume_immutable_completions``
+#     variable on the reader, which is True by default to match the historical
+#     behaviour of pyrepl, but e.g. False in the ReadlineAlikeReader to match
+#     more closely readline's semantics (this is needed e.g. by
+#     fancycompleter)
 #
 # if there's no possible completion, beep at the user and point this out.
 # this is easy.
 #
 # if there's only one possible completion, stick it in.  if the last thing
-# user did was a completion, point out that he isn't getting anywhere.
+# user did was a completion, point out that he isn't getting anywhere, but
+# only if the ``assume_immutable_completions`` is True.
 #
 # now it gets complicated.
 # 
@@ -133,7 +140,8 @@ class complete(commands.Command):
     def do(self):
         r = self.reader
         stem = r.get_stem()
-        if r.last_command_is(self.__class__):
+        if r.assume_immutable_completions and \
+                r.last_command_is(self.__class__):
             completions = r.cmpltn_menu_choices
         else:
             r.cmpltn_menu_choices = completions = \
@@ -141,7 +149,8 @@ class complete(commands.Command):
         if len(completions) == 0:
             r.error("no matches")
         elif len(completions) == 1:
-            if len(completions[0]) == len(stem) and \
+            if r.assume_immutable_completions and \
+                   len(completions[0]) == len(stem) and \
                    r.last_command_is(self.__class__):
                 r.msg = "[ sole completion ]"
                 r.dirty = 1
@@ -187,7 +196,9 @@ class CompletingReader(Reader):
       * cmpltn_menu, cmpltn_menu_vis, cmpltn_menu_end, cmpltn_choices:
       *
     """
-
+    # see the comment for the complete command
+    assume_immutable_completions = True
+    
     def collect_keymap(self):
         return super(CompletingReader, self).collect_keymap() + (
             (r'\t', 'complete'),)
