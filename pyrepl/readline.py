@@ -49,6 +49,7 @@ class ReadlineAlikeReader(HistoricalReader, CompletingReader):
 
     assume_immutable_completions = False
     use_brackets = False
+    sort_in_column = True
 
     def error(self, msg="none"):
         pass    # don't show error messages by default
@@ -80,11 +81,7 @@ class ReadlineAlikeReader(HistoricalReader, CompletingReader):
                 result.append(next)
                 state += 1
             # emulate the behavior of the standard readline that sorts
-            # the completions before displaying them.  Note that the
-            # screen order is still a bit different because pyrepl
-            # displays them in this order:   and readline in this one:
-            #                     [A][B][C]                       A C E
-            #                     [D][E][F]                       B D F
+            # the completions before displaying them.
             result.sort()
         return result
 

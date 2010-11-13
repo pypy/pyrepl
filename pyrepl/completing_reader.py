@@ -58,7 +58,7 @@ def left_align(s, maxlen):
     padding = maxlen - len(stripped)
     return s + ' '*padding
 
-def build_menu(cons, wordlist, start, use_brackets):
+def build_menu(cons, wordlist, start, use_brackets, sort_in_column):
     if use_brackets:
         item = "[ %s ]"
         padding = 4
@@ -68,6 +68,19 @@ def build_menu(cons, wordlist, start, use_brackets):
     maxlen = min(max(map(real_len, wordlist)), cons.width - padding)
     cols = cons.width / (maxlen + padding)
     rows = (len(wordlist) - 1)/cols + 1
+
+    if sort_in_column:
+        # sort_in_column=False (default)     sort_in_column=True
+        #          A B C                       A D G
+        #          D E F                       B E 
+        #          G                           C F
+        #
+        # "fill" the table with empty words, so we always have the same amout
+        # of rows for each column
+        missing = cols*rows - len(wordlist)
+        wordlist = wordlist + ['']*missing
+        indexes = [(i%cols)*rows + i//cols for i in range(len(wordlist))]
+        wordlist = [wordlist[i] for i in indexes]
     menu = []
     i = start
     for r in range(rows):
@@ -161,7 +174,7 @@ class complete(commands.Command):
                     r.cmpltn_menu_vis = 1
                 r.cmpltn_menu, r.cmpltn_menu_end = build_menu(
                     r.console, completions, r.cmpltn_menu_end,
-                    r.use_brackets)
+                    r.use_brackets, r.sort_in_column)
                 r.dirty = 1
             elif stem + p in completions:
                 r.msg = "[ complete but not unique ]"
@@ -183,7 +196,8 @@ class self_insert(commands.self_insert):
                                if w.startswith(stem)]
                 if completions:
                     r.cmpltn_menu, r.cmpltn_menu_end = build_menu(
-                        r.console, completions, 0, r.use_brackets)
+                        r.console, completions, 0,
+                        r.use_brackets, r.sort_in_column)
                 else:
                     r.cmpltn_reset()
 
@@ -197,6 +211,7 @@ class CompletingReader(Reader):
     # see the comment for the complete command
     assume_immutable_completions = True
     use_brackets = True # display completions inside []
+    sort_in_column = False
     
     def collect_keymap(self):
         return super(CompletingReader, self).collect_keymap() + (
