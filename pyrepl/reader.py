@@ -29,6 +29,7 @@ def _make_unctrl_map():
     for i in range(32):
         c = unichr(i)
         uc_map[c] = u'^' + unichr(ord('A') + i - 1)
+    uc_map['\t'] = '    ' # display TABs as 4 characters
     uc_map['\177'] = u'^?'
     for i in range(256):
         c = unichr(i)
