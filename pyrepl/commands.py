@@ -191,6 +191,7 @@ class suspend(Command):
         os.kill(os.getpid(), signal.SIGSTOP)
         ## this should probably be done
         ## in a handler for SIGCONT?
+        r.console.prepare()
         r.pos = p
         r.posxy = 0, 0
         r.dirty = 1
