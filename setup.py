@@ -17,7 +17,7 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 
 long_desc = """\
 pyrepl is a Python library, inspired by readline, for building flexible
