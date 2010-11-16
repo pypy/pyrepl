@@ -282,6 +282,9 @@ class _ReadlineWrapper(object):
     def set_startup_hook(self, function=None):
         self.startup_hook = function
 
+    def get_line_buffer(self):
+        return self.get_reader().get_buffer()
+
 _wrapper = _ReadlineWrapper()
 
 # ____________________________________________________________
@@ -303,6 +306,7 @@ remove_history_item = _wrapper.remove_history_item
 replace_history_item = _wrapper.replace_history_item
 add_history = _wrapper.add_history
 set_startup_hook = _wrapper.set_startup_hook
+get_line_buffer = _wrapper.get_line_buffer
 
 # Extension
 multiline_input = _wrapper.multiline_input
@@ -321,7 +325,6 @@ def _make_stub(_name, _ret):
     globals()[_name] = stub
 
 for _name, _ret in [
-    ('get_line_buffer', ''),
     ('insert_text', None),
     ('read_init_file', None),
     ('redisplay', None),
