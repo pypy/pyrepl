@@ -285,6 +285,22 @@ class _ReadlineWrapper(object):
     def get_line_buffer(self):
         return self.get_reader().get_buffer()
 
+    def _get_idxs(self):
+        start = cursor = self.get_reader().pos
+        buf = self.get_line_buffer()
+        for i in xrange(cursor - 1, -1, -1):
+            if buf[i] in self.get_completer_delims():
+                break
+            start = i
+        return start, cursor
+
+    def get_begidx(self):
+        return self._get_idxs()[0]
+
+    def get_endidx(self):
+        return self._get_idxs()[1]
+
+
 _wrapper = _ReadlineWrapper()
 
 # ____________________________________________________________
@@ -307,6 +323,8 @@ replace_history_item = _wrapper.replace_history_item
 add_history = _wrapper.add_history
 set_startup_hook = _wrapper.set_startup_hook
 get_line_buffer = _wrapper.get_line_buffer
+get_begidx = _wrapper.get_begidx
+get_endidx = _wrapper.get_endidx
 
 # Extension
 multiline_input = _wrapper.multiline_input
@@ -329,8 +347,6 @@ for _name, _ret in [
     ('read_init_file', None),
     ('redisplay', None),
     ('set_pre_input_hook', None),
-    ('get_begidx', 0),
-    ('get_endidx', 0),
     ]:
     assert _name not in globals(), _name
     _make_stub(_name, _ret)
