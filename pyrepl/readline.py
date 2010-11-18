@@ -300,6 +300,9 @@ class _ReadlineWrapper(object):
     def get_endidx(self):
         return self._get_idxs()[1]
 
+    def insert_text(self, text):
+        return self.get_reader().insert(text)
+
 
 _wrapper = _ReadlineWrapper()
 
@@ -325,6 +328,7 @@ set_startup_hook = _wrapper.set_startup_hook
 get_line_buffer = _wrapper.get_line_buffer
 get_begidx = _wrapper.get_begidx
 get_endidx = _wrapper.get_endidx
+insert_text = _wrapper.insert_text
 
 # Extension
 multiline_input = _wrapper.multiline_input
@@ -343,7 +347,6 @@ def _make_stub(_name, _ret):
     globals()[_name] = stub
 
 for _name, _ret in [
-    ('insert_text', None),
     ('read_init_file', None),
     ('redisplay', None),
     ('set_pre_input_hook', None),
