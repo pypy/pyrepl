@@ -1,4 +1,5 @@
 #   Copyright 2000-2008 Michael Hudson-Doyle <micahel@gmail.com>
+#                       Armin Rigo
 #
 #                        All Rights Reserved
 #

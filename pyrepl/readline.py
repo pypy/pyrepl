@@ -1,4 +1,8 @@
 #   Copyright 2000-2010 Michael Hudson-Doyle <micahel@gmail.com>
+#                       Alex Gaynor
+#                       Antonio Cuni
+#                       Armin Rigo
+#                       Holger Krekel
 #
 #                        All Rights Reserved
 #

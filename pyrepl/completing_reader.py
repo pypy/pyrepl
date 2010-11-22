@@ -1,4 +1,5 @@
 #   Copyright 2000-2010 Michael Hudson-Doyle <micahel@gmail.com>
+#                       Antonio Cuni
 #
 #                        All Rights Reserved
 #

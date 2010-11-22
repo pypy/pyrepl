@@ -1,4 +1,6 @@
 #   Copyright 2000-2007 Michael Hudson-Doyle <micahel@gmail.com>
+#                       Bob Ippolito
+#                       Maciek Fijalkowski
 #
 #                        All Rights Reserved
 #

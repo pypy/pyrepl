@@ -1,4 +1,6 @@
 #   Copyright 2000-2010 Michael Hudson-Doyle <micahel@gmail.com>
+#                       Antonio Cuni
+#                       Armin Rigo
 #
 #                        All Rights Reserved
 #
