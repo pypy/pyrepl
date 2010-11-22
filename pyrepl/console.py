@@ -1,4 +1,4 @@
-#   Copyright 2000-2004 Michael Hudson mwh@python.net
+#   Copyright 2000-2004 Michael Hudson-Doyle <micahel@gmail.com>
 #
 #                        All Rights Reserved
 #
