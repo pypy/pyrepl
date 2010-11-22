@@ -1,4 +1,4 @@
-This is pyrepl 0.8.1, a readline-a-like in Python.
+This is pyrepl 0.8.2, a readline-a-like in Python.
 
 http://pyrepl.codespeak.net/
 
@@ -43,6 +43,20 @@ Please direct comments to mwh@python.net.
 it is to see a couple of hundred downloads and only get a handful of
 emails, so don't think I'll be irritated by the banality of your
 comments!)
+
+Summary of 0.8.2:
+
+ + This is the same version which is distributed with PyPy 1.4, which uses it
+   as its default interactive interpreter:
+
+     - have the possibility of having a "CPython-like" prompt, with ">>>" as
+       PS1 and "..." as PS2
+
+     - add the pyrepl.readline module, which exposes a subset of CPython's
+       readline implemented on top of pyrepl
+
+ + Add support for colored completions: see e.g. fancycomplete:
+   http://bitbucket.org/antocuni/fancycompleter
 
 Summary of 0.8.1:
  + Fixes 
