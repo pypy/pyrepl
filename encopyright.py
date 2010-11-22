@@ -20,9 +20,10 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import os, time, sys
+import bzrlib.branch
 
-header = """\
-#   Copyright 2000-%s Michael Hudson-Doyle micahel@gmail.com
+header_template = """\
+#   Copyright 2000-%s Michael Hudson-Doyle <micahel@gmail.com>
 #
 #                        All Rights Reserved
 #
@@ -40,9 +41,14 @@ header = """\
 # RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.\
-"""%(time.localtime()[0])
+"""
 
-header_lines = header.split("\n")
+branch, path = bzrlib.branch.Branch.open_containing(sys.argv[0])
+rev_tree = branch.basis_tree()
+branch.lock_read()
+print rev_tree
+#sys.exit(0)
+
 
 def process(thing):
     if os.path.isdir(thing):
@@ -56,6 +62,10 @@ def process(thing):
 
 def process_file(file):
     ilines = open(file).readlines()
+    last_modified = rev_tree.get_file_mtime(rev_tree.path2id(file))
+    modified_year = time.gmtime(last_modified)[0]
+    header = header_template % (modified_year, )
+    header_lines = header.splitlines()
     prelines = []
     old_copyright = []
 
@@ -64,7 +74,6 @@ def process_file(file):
         return
 
     i = 0
-    diff = 0
 
     if ilines[0][:2] == '#!':
         prelines.append(ilines[0])
