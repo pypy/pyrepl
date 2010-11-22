@@ -33,8 +33,8 @@ command line interfaces, featuring:
 setup(
     name = "pyrepl",
     version = "0.8.2",
-    author = "Michael Hudson",
-    author_email = "mwh@python.net",
+    author = "Michael Hudson-Doyle",
+    author_email = "micahel@gmail.com",
     url = "http://codespeak.net/pyrepl/",
     license = "MIT X11 style",
     description = "A library for building flexible command line interfaces",

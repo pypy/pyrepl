@@ -22,7 +22,7 @@
 import os, time, sys
 
 header = """\
-#   Copyright 2000-%s Michael Hudson mwh@python.net
+#   Copyright 2000-%s Michael Hudson-Doyle micahel@gmail.com
 #
 #                        All Rights Reserved
 #
