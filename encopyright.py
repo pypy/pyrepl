@@ -21,9 +21,10 @@
 
 import os, time, sys
 import bzrlib.branch
+import bzrlib.log
 
 header_template = """\
-#   Copyright 2000-%s Michael Hudson-Doyle <micahel@gmail.com>
+#   Copyright 2000-%s Michael Hudson-Doyle <micahel@gmail.com>%s
 #
 #                        All Rights Reserved
 #
@@ -43,12 +44,11 @@ header_template = """\
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.\
 """
 
+author_template = "\n#%s%%s"%(' '*(header_template.index("Michael")+1),)
+
 branch, path = bzrlib.branch.Branch.open_containing(sys.argv[0])
 rev_tree = branch.basis_tree()
 branch.lock_read()
-print rev_tree
-#sys.exit(0)
-
 
 def process(thing):
     if os.path.isdir(thing):
@@ -60,11 +60,37 @@ def process(thing):
     else:
         print "W `%s' not file or directory"%(thing,)
 
+author_map = {
+    u'mwh': None,
+    u'Michael Hudson <michael.hudson@linaro.org>': None,
+    u'arigo': u"Armin Rigo",
+    u'antocuni': u'Antonio Cuni',
+    u'bob': u'Bob Ippolito',
+    u'fijal': u'Maciek Fijalkowski',
+    u'agaynor': u'Alex Gaynor',
+    u'hpk': u'Holger Krekel',
+    }
+
 def process_file(file):
     ilines = open(file).readlines()
-    last_modified = rev_tree.get_file_mtime(rev_tree.path2id(file))
+    file_id = rev_tree.path2id(file)
+    last_modified = rev_tree.get_file_mtime(file_id)
     modified_year = time.gmtime(last_modified)[0]
-    header = header_template % (modified_year, )
+    rev_ids = [rev_id for (revno, rev_id, what)
+               in bzrlib.log.find_touching_revisions(branch, file_id)]
+    revs = branch.repository.get_revisions(rev_ids)
+    authors = set()
+    for rev in revs:
+        authors.update(rev.get_apparent_authors())
+    extra_authors = []
+    for a in authors:
+        if a not in author_map:
+            print 'E: need real name for %r' % a
+        ea = author_map.get(a)
+        if ea:
+            extra_authors.append(ea)
+    extra_authors.sort()
+    header = header_template % (modified_year, ''.join([author_template%ea for ea in extra_authors]))
     header_lines = header.splitlines()
     prelines = []
     old_copyright = []
