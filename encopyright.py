@@ -120,7 +120,7 @@ def process_file(file):
         old_copyright.append(ilines[i])
         i += 1
 
-    if abs(len(old_copyright) - len(header_lines)) < 2:
+    if abs(len(old_copyright) - len(header_lines)) < 2 + len(extra_authors):
         for x, y in zip(old_copyright, header_lines):
             if x[:-1] != y:
                 print "C change needed in", file
