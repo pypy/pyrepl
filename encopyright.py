@@ -74,11 +74,18 @@ author_map = {
 def process_file(file):
     ilines = open(file).readlines()
     file_id = rev_tree.path2id(file)
-    last_modified = rev_tree.get_file_mtime(file_id)
-    modified_year = time.gmtime(last_modified)[0]
     rev_ids = [rev_id for (revno, rev_id, what)
                in bzrlib.log.find_touching_revisions(branch, file_id)]
     revs = branch.repository.get_revisions(rev_ids)
+    revs = sorted(revs, key=lambda x:x.timestamp)
+    modified_year = None
+    for rev in reversed(revs):
+        if 'encopyright' not in rev.message:
+            modified_year = time.gmtime(rev.timestamp)[0]
+            break
+    if not modified_year:
+        print 'E: no sensible modified_year found for %s' % file,
+        modified_year = time.gmtime(time.time())[0]
     authors = set()
     for rev in revs:
         authors.update(rev.get_apparent_authors())
