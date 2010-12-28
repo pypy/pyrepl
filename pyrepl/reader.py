@@ -19,14 +19,15 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import types, unicodedata
+import types
+from pyrepl import unicodedata_
 from pyrepl import commands
 from pyrepl import input
 
 def _make_unctrl_map():
     uc_map = {}
     for c in map(unichr, range(256)):
-        if unicodedata.category(c)[0] <> 'C':
+        if unicodedata_.category(c)[0] <> 'C':
             uc_map[c] = c
     for i in range(32):
         c = unichr(i)
@@ -51,11 +52,10 @@ try:
     del init_unctrl_map
 except ImportError:
     def _my_unctrl(c, u=_make_unctrl_map()):
-        import unicodedata
         if c in u:
             return u[c]
         else:
-            if unicodedata.category(c).startswith('C'):
+            if unicodedata_.category(c).startswith('C'):
                 return '\u%04x'%(ord(c),)
             else:
                 return c
