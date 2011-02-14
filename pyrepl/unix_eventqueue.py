@@ -25,6 +25,7 @@ from pyrepl import keymap
 from pyrepl.console import Event
 from pyrepl import curses
 from termios import tcgetattr, VERASE
+import os
 
 _keynames = {
     "delete" : "kdch1",
@@ -52,7 +53,8 @@ class EventQueue(object):
             keycode = curses.tigetstr(tiname)
             if keycode:
                 our_keycodes[keycode] = unicode(key)
-        our_keycodes[tcgetattr(fd)[6][VERASE]] = u'backspace'
+        if os.isatty(fd):
+            our_keycodes[tcgetattr(fd)[6][VERASE]] = u'backspace'
         self.k = self.ck = keymap.compile_keymap(our_keycodes)
         self.events = []
         self.buf = []
