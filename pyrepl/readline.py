@@ -283,18 +283,18 @@ class _ReadlineWrapper(object):
         else:
             return None        # blame readline.c for not raising
 
-    def remove_history_item(self, pos):
+    def remove_history_item(self, index):
         history = self.get_reader().history
-        if 1 <= index <= len(history):
-            del history[index-1]
+        if 0 <= index < len(history):
+            del history[index]
         else:
             raise ValueError("No history item at position %d" % index)
             # blame readline.c for raising ValueError
 
-    def replace_history_item(self, pos, line):
+    def replace_history_item(self, index, line):
         history = self.get_reader().history
-        if 1 <= index <= len(history):
-            history[index-1] = self._histline(line)
+        if 0 <= index < len(history):
+            history[index] = self._histline(line)
         else:
             raise ValueError("No history item at position %d" % index)
             # blame readline.c for raising ValueError
