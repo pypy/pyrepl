@@ -32,7 +32,7 @@ command line interfaces, featuring:
 
 setup(
     name = "pyrepl",
-    version = "0.8.2",
+    version = "0.8.3",
     author = "Michael Hudson-Doyle",
     author_email = "micahel@gmail.com",
     url = "http://codespeak.net/pyrepl/",

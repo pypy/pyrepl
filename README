@@ -1,4 +1,4 @@
-This is pyrepl 0.8.2, a readline-a-like in Python.
+This is pyrepl 0.8.3, a readline-a-like in Python.
 
 http://pyrepl.codespeak.net/
 
@@ -37,12 +37,19 @@ $ python setup.py install
 
 which will also install the above "pythoni" script.
 
-Please direct comments to mwh@python.net.
+Please direct comments to micahel@gmail.com.
 
 (If you've released open source software you'll know how frustrating
 it is to see a couple of hundred downloads and only get a handful of
 emails, so don't think I'll be irritated by the banality of your
 comments!)
+
+Summary of 0.8.3:
+
+ + First release from new home on bitbucket.
+ + Various fixes to pyrepl.readline.
+ + Allow pyrepl to run if unicodedata is unimportable.
+
 
 Summary of 0.8.2:
 
