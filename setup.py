@@ -39,8 +39,8 @@ setup(
     license = "MIT X11 style",
     description = "A library for building flexible command line interfaces",
     platforms = ["unix", "linux"],
-    packages = ["pyrepl"],
+    packages = ["pyrepl", "pyrepl.tests"],
     #ext_modules = [Extension("_pyrepl_utils", ["pyrepl_utilsmodule.c"])],
-    scripts = ["pythoni"],
+    scripts = ["pythoni", "pythoni1"],
     long_description = long_desc,
     )
