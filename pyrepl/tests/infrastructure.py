@@ -49,7 +49,7 @@ class TestConsole(Console):
         ev, sc = self.events.pop(0)
         self.next_screen = sc
         if not isinstance(ev, tuple):
-            ev = (ev,)
+            ev = (ev, None)
         self.last_event_name = ev[0]
         if self.verbose:
             print "event", ev
