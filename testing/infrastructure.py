@@ -61,7 +61,7 @@ class TestReader(Reader):
 
 def read_spec(test_spec, reader_class=TestReader):
     # remember to finish your test_spec with 'accept' or similar!
-    con = TestConsole(test_spec)
+    con = TestConsole(test_spec, verbose=True)
     reader = reader_class(con)
     reader.readline()
 
