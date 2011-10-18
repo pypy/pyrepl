@@ -47,4 +47,4 @@ class TestTerminal(object):
         child.sendline('a = 3')
         child.sendline('a')
         child.expect('3')
-        
+

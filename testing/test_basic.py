@@ -18,7 +18,7 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 from pyrepl.console import Event
-from pyrepl.tests.infrastructure import ReaderTestCase, EA, run_testcase
+from .infrastructure import ReaderTestCase, EA, run_testcase
 
 class SimpleTestCase(ReaderTestCase):
 
