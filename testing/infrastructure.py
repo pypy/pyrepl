@@ -19,8 +19,6 @@
 
 from pyrepl.reader import Reader
 from pyrepl.console import Console, Event
-import unittest
-import sys
 
 class EqualsAnything(object):
     def __eq__(self, other):
@@ -53,8 +51,10 @@ class TestConsole(Console):
         return Event(*ev)
 
 class TestReader(Reader):
+
     def get_prompt(self, lineno, cursor_on_line):
         return ''
+    
     def refresh(self):
         Reader.refresh(self)
         self.dirty = True
