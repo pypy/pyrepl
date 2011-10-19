@@ -290,7 +290,7 @@ feeling more loquacious than I am now."""
             p -= ll + 1
             prompt, lp = self.process_prompt(prompt)
             l, l2 = disp_str(line)
-            wrapcount = (len(l) + lp) / w
+            wrapcount = (len(l) + lp) // w
             if wrapcount == 0:
                 screen.append(prompt + l)
                 screeninfo.append((lp, l2+[1]))
