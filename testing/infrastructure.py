@@ -17,6 +17,7 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+from __future__ import print_function
 from pyrepl.reader import Reader
 from pyrepl.console import Console, Event
 
@@ -47,7 +48,7 @@ class TestConsole(Console):
             ev = (ev, None)
         self.last_event_name = ev[0]
         if self.verbose:
-            print "event", ev
+            print("event", ev)
         return Event(*ev)
 
 class TestReader(Reader):
