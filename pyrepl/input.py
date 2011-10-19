@@ -32,7 +32,7 @@
 # executive, temporary decision: [tab] and [C-i] are distinct, but
 # [meta-key] is identified with [esc key].  We demand that any console
 # class does quite a lot towards emulating a unix terminal.
-
+from __future__ import print_function
 from pyrepl import unicodedata_
 from collections import deque
 
@@ -60,25 +60,25 @@ class KeymapTranslator(InputTranslator):
             keyseq = tuple(parse_keys(keyspec))
             d[keyseq] = command
         if self.verbose:
-            print d
+            print(d)
         self.k = self.ck = compile_keymap(d, ())
         self.results = deque()
         self.stack = []
 
     def push(self, evt):
         if self.verbose:
-            print "pushed", evt.data,
+            print("pushed", evt.data, end='')
         key = evt.data
         d = self.k.get(key)
         if isinstance(d, dict):
             if self.verbose:
-                print "transition"
+                print("transition")
             self.stack.append(key)
             self.k = d
         else:
             if d is None:
                 if self.verbose:
-                    print "invalid"
+                    print("invalid")
                 if self.stack or len(key) > 1 or unicodedata_.category(key) == 'C':
                     self.results.append(
                         (self.invalid_cls, self.stack + [key]))
@@ -89,7 +89,7 @@ class KeymapTranslator(InputTranslator):
                         (self.character_cls, [key]))
             else:
                 if self.verbose:
-                    print "matched", d
+                    print("matched", d)
                 self.results.append((d, self.stack + [key]))
             self.stack = []
             self.k = self.ck
