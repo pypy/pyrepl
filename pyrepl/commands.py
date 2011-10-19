@@ -33,10 +33,12 @@ import sys, os
 class Command(object):
     finish = 0
     kills_digit_arg = 1
-    def __init__(self, reader, (event_name, event)):
+
+    def __init__(self, reader, event_name, event):
         self.reader = reader
         self.event = event
         self.event_name = event_name
+
     def do(self):
         pass
 
