@@ -22,7 +22,9 @@ from .infrastructure import EA, read_spec
 # this test case should contain as-verbatim-as-possible versions of
 # (applicable) bug reports
 
+import pytest
 
+@pytest.mark.xfail(reason='event missing', run=False)
 def test_transpose_at_start():
     read_spec([( 'transpose', [EA, '']),
                ( 'accept',    [''])])
