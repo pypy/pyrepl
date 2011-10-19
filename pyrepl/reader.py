@@ -19,25 +19,30 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import types
+from __future__ import unicode_literals
 from pyrepl import unicodedata_
 from pyrepl import commands
 from pyrepl import input
+try:
+    unicode
+except NameError:
+    unicode = str
+    unichr = chr
 
 def _make_unctrl_map():
     uc_map = {}
     for c in map(unichr, range(256)):
-        if unicodedata_.category(c)[0] <> 'C':
+        if unicodedata_.category(c)[0] != 'C':
             uc_map[c] = c
     for i in range(32):
         c = unichr(i)
-        uc_map[c] = u'^' + unichr(ord('A') + i - 1)
-    uc_map['\t'] = '    ' # display TABs as 4 characters
-    uc_map['\177'] = u'^?'
+        uc_map[c] = '^' + unichr(ord('A') + i - 1)
+    uc_map[b'\t'] = '    ' # display TABs as 4 characters
+    uc_map[b'\177'] = unicode('^?')
     for i in range(256):
         c = unichr(i)
-        if not uc_map.has_key(c):
-            uc_map[c] = u'\\%03o'%i 
+        if c not in uc_map:
+            uc_map[c] = unicode('\\%03o')%i 
     return uc_map
 
 # disp_str proved to be a bottleneck for large inputs, so it's been
@@ -56,7 +61,7 @@ except ImportError:
             return u[c]
         else:
             if unicodedata_.category(c).startswith('C'):
-                return '\u%04x'%(ord(c),)
+                return b'\u%04x'%(ord(c))
             else:
                 return c
 
@@ -72,9 +77,12 @@ except ImportError:
 
         the list always contains 0s or 1s at present; it could conceivably
         go higher as and when unicode support happens."""
-        s = map(uc, buffer)
-        return (join(s),
-                map(ord, join(map(lambda x:'\001'+(len(x)-1)*'\000', s))))
+        s = [uc(x) for x in buffer]
+        b = [] #XXX: bytearray
+        for x in s:
+            b.append(1)
+            b.extend([0]*(len(x)-1))
+        return join(s), b
 
     del _my_unctrl
 
@@ -93,7 +101,7 @@ def make_default_syntax_table():
         st[c] = SYNTAX_SYMBOL
     for c in [a for a in map(unichr, range(256)) if a.isalpha()]:
         st[c] = SYNTAX_WORD
-    st[u'\n'] = st[u' '] = SYNTAX_WHITESPACE
+    st[unicode('\n')] = st[unicode(' ')] = SYNTAX_WHITESPACE
     return st
 
 default_keymap = tuple(
@@ -141,7 +149,7 @@ default_keymap = tuple(
      #(r'\M-\n', 'insert-nl'),
      ('\\\\', 'self-insert')] + \
     [(c, 'self-insert')
-     for c in map(chr, range(32, 127)) if c <> '\\'] + \
+     for c in map(chr, range(32, 127)) if c != '\\'] + \
     [(c, 'self-insert')
      for c in map(chr, range(128, 256)) if c.isalpha()] + \
     [(r'\<up>', 'up'),
@@ -160,7 +168,8 @@ default_keymap = tuple(
                         # workaround
      ])
 
-del c # from the listcomps
+if 'c' in globals():  # only on python 2.x
+    del c # from the listcomps
 
 class Reader(object):
     """The Reader class implements the bare bones of a command reader,
@@ -337,7 +346,7 @@ feeling more loquacious than I am now."""
         st = self.syntax_table
         b = self.buffer
         p -= 1
-        while p >= 0 and st.get(b[p], SYNTAX_WORD) <> SYNTAX_WORD:
+        while p >= 0 and st.get(b[p], SYNTAX_WORD) != SYNTAX_WORD:
             p -= 1
         while p >= 0 and st.get(b[p], SYNTAX_WORD) == SYNTAX_WORD:
             p -= 1
@@ -353,7 +362,7 @@ feeling more loquacious than I am now."""
             p = self.pos
         st = self.syntax_table
         b = self.buffer
-        while p < len(b) and st.get(b[p], SYNTAX_WORD) <> SYNTAX_WORD:
+        while p < len(b) and st.get(b[p], SYNTAX_WORD) != SYNTAX_WORD:
             p += 1
         while p < len(b) and st.get(b[p], SYNTAX_WORD) == SYNTAX_WORD:
             p += 1
@@ -369,7 +378,7 @@ feeling more loquacious than I am now."""
             p = self.pos
         b = self.buffer
         p -= 1
-        while p >= 0 and b[p] <> '\n':
+        while p >= 0 and b[p] != '\n':
             p -= 1
         return p + 1
     
@@ -381,7 +390,7 @@ feeling more loquacious than I am now."""
         if p is None:
             p = self.pos
         b = self.buffer
-        while p < len(b) and b[p] <> '\n':
+        while p < len(b) and b[p] != '\n':
             p += 1
         return p
 
@@ -606,11 +615,11 @@ feeling more loquacious than I am now."""
     def get_buffer(self, encoding=None):
         if encoding is None:
             encoding = self.console.encoding
-        return u''.join(self.buffer).encode(self.console.encoding)
+        return unicode('').join(self.buffer).encode(self.console.encoding)
 
     def get_unicode(self):
         """Return the current buffer as a unicode string."""
-        return u''.join(self.buffer)
+        return unicode('').join(self.buffer)
 
 def test():
     from pyrepl.unix_console import UnixConsole
