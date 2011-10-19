@@ -20,12 +20,13 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 # one impressive collections of imports:
+from __future__ import print_function
 from pyrepl.completing_reader import CompletingReader
 from pyrepl.historical_reader import HistoricalReader
 from pyrepl import completing_reader, reader
 from pyrepl import copy_code, commands, completer
 from pyrepl import module_lister
-import new, sys, os, re, code, traceback
+import imp, sys, os, re, code, traceback
 import atexit, warnings
 try:
     import cPickle as pickle
@@ -46,6 +47,21 @@ CommandCompiler = code.CommandCompiler
 def eat_it(*args):
     """this function eats warnings, if you were wondering"""
     pass
+
+if sys.version_info >= (3,0):
+    def _reraise(cls, val, tb):
+        __tracebackhide__ = True
+        assert hasattr(val, '__traceback__')
+        raise val
+else:
+    exec ("""
+def _reraise(cls, val, tb):
+    __tracebackhide__ = True
+    raise cls, val, tb
+""")
+
+
+
 
 class maybe_accept(commands.Command):
     def do(self):
@@ -192,7 +208,7 @@ class ReaderConsole(code.InteractiveInterpreter):
                     finally:
                         warnings.showwarning = sv
                 except KeyboardInterrupt:
-                    print "KeyboardInterrupt"
+                    print("KeyboardInterrupt")
                 else:
                     if l:
                         self.execute(l)
@@ -217,7 +233,7 @@ class ReaderConsole(code.InteractiveInterpreter):
             r = self.reader.handle1(block)
         except KeyboardInterrupt:
             self.restore()
-            print "KeyboardInterrupt"
+            print("KeyboardInterrupt")
             self.prepare()
         else:
             if self.reader.finished:
@@ -253,7 +269,7 @@ class ReaderConsole(code.InteractiveInterpreter):
             if self.exc_info:
                 type, value, tb = self.exc_info
                 self.exc_info = None
-                raise type, value, tb
+                _reraise(type, value, tb)
         
     def tkinteract(self):
         """Run a Tk-aware Python interactive session.
@@ -370,13 +386,13 @@ def main(use_pygame_console=0, interactmethod=default_interactmethod, print_bann
                     encoding = None # so you get ASCII...
             con = UnixConsole(0, 1, None, encoding)
         if print_banner:
-            print "Python", sys.version, "on", sys.platform
-            print 'Type "help", "copyright", "credits" or "license" '\
-                  'for more information.'
+            print("Python", sys.version, "on", sys.platform)
+            print('Type "help", "copyright", "credits" or "license" '\
+                  'for more information.')
         sys.path.insert(0, os.getcwd())
 
         if clear_main and __name__ != '__main__':
-            mainmod = new.module('__main__')
+            mainmod = imp.new_module('__main__')
             sys.modules['__main__'] = mainmod
         else:
             mainmod = sys.modules['__main__']
