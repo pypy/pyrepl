@@ -34,6 +34,8 @@
 # class does quite a lot towards emulating a unix terminal.
 
 from pyrepl import unicodedata_
+from collections import deque
+
 
 class InputTranslator(object):
     def push(self, evt):
@@ -43,7 +45,9 @@ class InputTranslator(object):
     def empty(self):
         pass
 
+
 class KeymapTranslator(InputTranslator):
+
     def __init__(self, keymap, verbose=0,
                  invalid_cls=None, character_cls=None):
         self.verbose = verbose
@@ -58,8 +62,9 @@ class KeymapTranslator(InputTranslator):
         if self.verbose:
             print d
         self.k = self.ck = compile_keymap(d, ())
-        self.results = []
+        self.results = deque()
         self.stack = []
+
     def push(self, evt):
         if self.verbose:
             print "pushed", evt.data,
@@ -88,10 +93,12 @@ class KeymapTranslator(InputTranslator):
                 self.results.append((d, self.stack + [key]))
             self.stack = []
             self.k = self.ck
+
     def get(self):
         if self.results:
-            return self.results.pop(0)
+            return self.results.popleft()
         else:
             return None
+
     def empty(self):
         return not self.results
