@@ -28,6 +28,7 @@ try:
 except NameError:
     unicode = str
     unichr = chr
+    basestring = bytes, str
 
 def _make_unctrl_map():
     uc_map = {}
