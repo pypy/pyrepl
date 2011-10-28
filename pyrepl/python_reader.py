@@ -21,6 +21,7 @@
 
 # one impressive collections of imports:
 from __future__ import print_function
+from __future__ import unicode_literals
 from pyrepl.completing_reader import CompletingReader
 from pyrepl.historical_reader import HistoricalReader
 from pyrepl import completing_reader, reader
@@ -75,7 +76,7 @@ class maybe_accept(commands.Command):
         text = r.get_unicode()
         try:
             # ooh, look at the hack:
-            code = r.compiler("#coding:utf-8\n"+text)
+            code = r.compiler(text)
         except (OverflowError, SyntaxError, ValueError):
             self.finish = 1
         else:
@@ -89,16 +90,14 @@ from_line_prog = re.compile(
 import_line_prog = re.compile(
     "^(?:import|from)\s+(?P<mod>[A-Za-z_.0-9]*)\s*$")
 
-def mk_saver(reader):
-    def saver(reader=reader):
-        try:
-            file = open(os.path.expanduser("~/.pythoni.hist"), "w")
-        except IOError:
-            pass
-        else:
-            pickle.dump(reader.history, file)
-            file.close()
-    return saver
+def saver(reader=reader):
+    try:
+        with open(os.path.expanduser("~/.pythoni.hist"), "wb") as fp:
+            fp.write(b'\n'.join(item.encode('unicode_escape')
+                                for item in reader.history))
+    except IOError as e:
+        print(e)
+        pass
 
 class PythonicReader(CompletingReader, HistoricalReader):
     def collect_keymap(self):
@@ -119,17 +118,18 @@ class PythonicReader(CompletingReader, HistoricalReader):
         else:
             self.compiler = compiler
         try:
-            file = open(os.path.expanduser("~/.pythoni.hist"))
+            file = open(os.path.expanduser("~/.pythoni.hist"), 'rb')
         except IOError:
-            pass
+            self.history = []
         else:
             try:
-                self.history = pickle.load(file)
+                lines = file.readlines()
+                self.history = [ x.rstrip(b'\n').decode('unicode_escape') for x in lines]
             except:
                 self.history = []
             self.historyi = len(self.history)
             file.close()
-        atexit.register(mk_saver(self))
+        atexit.register(lambda: saver(self))
         for c in [maybe_accept]:
             self.commands[c.__name__] = c
             self.commands[c.__name__.replace('_', '-')] = c        
