@@ -30,6 +30,7 @@ from pyrepl import unix_eventqueue
 class InvalidTerminal(RuntimeError):
     pass
 
+
 _error = (termios.error, curses.error, InvalidTerminal)
 
 # there are arguments for changing this to "refresh"
@@ -58,7 +59,7 @@ for r in [0, 110, 115200, 1200, 134, 150, 1800, 19200, 200, 230400,
 
 del r, maybe_add_baudrate
 
-delayprog = re.compile("\\$<([0-9]+)((?:/|\\*){0,2})>")
+delayprog = re.compile(b"\\$<([0-9]+)((?:/|\\*){0,2})>")
 
 try:
     poll = select.poll
@@ -157,7 +158,7 @@ class UnixConsole(Console):
         self.__move = self.__move_short
 
         self.event_queue = unix_eventqueue.EventQueue(self.input_fd)
-        self.partial_char = ''
+        self.partial_char = b''
         self.cursor_visible = 1
 
     def change_encoding(self, encoding):
@@ -303,6 +304,7 @@ class UnixConsole(Console):
         self.__buffer.append((text, 0))
 
     def __write_code(self, fmt, *args):
+
         self.__buffer.append((curses.tparm(fmt, *args), 1))
 
     def __maybe_write_code(self, fmt, *args):
@@ -405,7 +407,7 @@ class UnixConsole(Console):
     def push_char(self, char):
         self.partial_char += char
         try:
-            c = unicode(self.partial_char, self.encoding)
+            c = self.partial_char.decode(self.encoding)
         except UnicodeError as e:
             if len(e.args) > 4 and \
                    e.args[4] == 'unexpected end of data':
@@ -413,7 +415,7 @@ class UnixConsole(Console):
             else:
                 raise
         else:
-            self.partial_char = ''
+            self.partial_char = b''
             self.event_queue.push(c)
         
     def get_event(self, block=1):

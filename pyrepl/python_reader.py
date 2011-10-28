@@ -32,6 +32,12 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
+
+try:
+    unicode
+except:
+    unicode = str
+
 try:
     import imp
     imp.find_module("twisted")
@@ -69,7 +75,7 @@ class maybe_accept(commands.Command):
         text = r.get_unicode()
         try:
             # ooh, look at the hack:
-            code = r.compiler("#coding:utf-8\n"+text.encode('utf-8'))
+            code = r.compiler("#coding:utf-8\n"+text)
         except (OverflowError, SyntaxError, ValueError):
             self.finish = 1
         else:
@@ -188,8 +194,7 @@ class ReaderConsole(code.InteractiveInterpreter):
     def execute(self, text):
         try:
             # ooh, look at the hack:            
-            code = self.compile("# coding:utf8\n"+text.encode('utf-8'),
-                                '<input>', 'single')
+            code = self.compile(text, '<input>', 'single')
         except (OverflowError, SyntaxError, ValueError):
             self.showsyntaxerror("<input>")
         else:

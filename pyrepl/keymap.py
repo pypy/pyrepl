@@ -170,8 +170,9 @@ def parse_keys(key):
         r.extend(k)
     return r
 
-def compile_keymap(keymap, empty=''):
+def compile_keymap(keymap, empty=b''):
     r = {}
+    import pprint
     for key, value in keymap.items():
         r.setdefault(key[0], {})[key[1:]] = value
     for key, value in r.items():
