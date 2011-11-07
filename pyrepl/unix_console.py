@@ -30,6 +30,10 @@ from pyrepl import unix_eventqueue
 class InvalidTerminal(RuntimeError):
     pass
 
+try:
+    unicode
+except NameError:
+    unicode = str
 
 _error = (termios.error, curses.error, InvalidTerminal)
 
