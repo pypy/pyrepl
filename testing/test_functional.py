@@ -24,7 +24,10 @@ import pytest
 import sys
 
 def pytest_funcarg__child(request):
-    pexpect = pytest.importorskip('pexpect')
+    try:
+        pexpect = pytest.importorskip('pexpect')
+    except SyntaxError:
+        pytest.skip('pexpect wont work on py3k')
     child = pexpect.spawn(sys.executable, ['-S'], timeout=10)
     child.logfile = sys.stdout
     child.sendline('from pyrepl.python_reader import main')
