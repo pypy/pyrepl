@@ -174,7 +174,7 @@ def compile_keymap(keymap, empty=b''):
     r = {}
     import pprint
     for key, value in keymap.items():
-        r.setdefault(key[0], {})[key[1:]] = value
+        r.setdefault(key[:1], {})[key[1:]] = value
     for key, value in r.items():
         if empty in value:
             if len(value) != 1:
