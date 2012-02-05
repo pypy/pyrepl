@@ -411,7 +411,9 @@ class UnixConsole(Console):
                    e.args[4] == 'unexpected end of data':
                 pass
             else:
-                raise
+                #raise  -- but better to ignore UnicodeDecodeErrors here...
+                self.partial_char = ''
+                return
         else:
             self.partial_char = ''
             self.event_queue.push(c)
