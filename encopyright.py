@@ -20,11 +20,10 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import os, time, sys
-import bzrlib.branch
-import bzrlib.log
+import py
 
 header_template = """\
-#   Copyright 2000-%s Michael Hudson-Doyle <micahel@gmail.com>%s
+#   Copyright 2000-%(lastyear)s Michael Hudson-Doyle <micahel@gmail.com>%(others)s
 #
 #                        All Rights Reserved
 #
@@ -46,64 +45,69 @@ header_template = """\
 
 author_template = "\n#%s%%s"%(' '*(header_template.index("Michael")+1),)
 
-branch, path = bzrlib.branch.Branch.open_containing(sys.argv[0])
-rev_tree = branch.basis_tree()
-branch.lock_read()
 
-def process(thing):
-    if os.path.isdir(thing):
-        for subthing in os.listdir(thing):
-            process(os.path.join(thing, subthing))
-    elif os.path.isfile(thing):
-        if thing[-3:] == '.py':
-            process_file(thing)
-    else:
-        print "W `%s' not file or directory"%(thing,)
 
 author_map = {
     u'mwh': None,
+    u'micahel': None,
     u'Michael Hudson <michael.hudson@linaro.org>': None,
     u'arigo': u"Armin Rigo",
     u'antocuni': u'Antonio Cuni',
+    u'anto': u'Antonio Cuni',
     u'bob': u'Bob Ippolito',
     u'fijal': u'Maciek Fijalkowski',
     u'agaynor': u'Alex Gaynor',
     u'hpk': u'Holger Krekel',
+    u'Ronny': u'Ronny Pfannschmidt',
+    u'amauryfa': u"Amaury Forgeot d'Arc",
     }
 
-def process_file(file):
-    ilines = open(file).readlines()
-    file_id = rev_tree.path2id(file)
-    rev_ids = [rev_id for (revno, rev_id, what)
-               in bzrlib.log.find_touching_revisions(branch, file_id)]
-    revs = branch.repository.get_revisions(rev_ids)
-    revs = sorted(revs, key=lambda x:x.timestamp)
-    modified_year = None
-    for rev in reversed(revs):
-        if 'encopyright' not in rev.message:
-            modified_year = time.gmtime(rev.timestamp)[0]
-            break
+
+def author_revs(path):
+    proc = py.std.subprocess.Popen([
+        'hg','log', str(path),
+        '--template', '{author|user} {date}\n',
+        '-r', 'not keyword("encopyright")',
+    ], stdout=py.std.subprocess.PIPE)
+    output, _ = proc.communicate()
+    lines = output.splitlines()
+    for line in lines:
+        try:
+            name, date = line.split(None, 1)
+        except ValueError:
+            pass
+        else:
+            if '-' in date:
+                date = date.split('-')[0]
+            yield name, float(date)
+
+
+def process(path):
+    ilines = path.readlines()
+    revs = sorted(author_revs(path), key=lambda x:x[1])
+    modified_year = time.gmtime(revs[-1][1])[0]
     if not modified_year:
-        print 'E: no sensible modified_year found for %s' % file,
+        print 'E: no sensible modified_year found for', path
         modified_year = time.gmtime(time.time())[0]
-    authors = set()
-    for rev in revs:
-        authors.update(rev.get_apparent_authors())
     extra_authors = []
+    authors = set(rev[0] for rev in revs)
     for a in authors:
         if a not in author_map:
-            print 'E: need real name for %r' % a
+            print 'E: need real name for', a
         ea = author_map.get(a)
         if ea:
             extra_authors.append(ea)
     extra_authors.sort()
-    header = header_template % (modified_year, ''.join([author_template%ea for ea in extra_authors]))
+    header = header_template % {
+        'lastyear': modified_year,
+        'others': ''.join([author_template%ea for ea in extra_authors])
+    }
     header_lines = header.splitlines()
     prelines = []
     old_copyright = []
 
     if not ilines:
-        print "W ignoring empty file `%s'"%(file,)
+        print "W ignoring empty file", path
         return
 
     i = 0
@@ -123,8 +127,8 @@ def process_file(file):
     if abs(len(old_copyright) - len(header_lines)) < 2 + len(extra_authors):
         for x, y in zip(old_copyright, header_lines):
             if x[:-1] != y:
-                print "C change needed in", file
-                ofile = open(file, "w")
+                print "C change needed in", path
+                ofile = path.open("w")
                 for l in prelines:
                     ofile.write(l)
                 ofile.write(header + "\n")
@@ -133,17 +137,21 @@ def process_file(file):
                 ofile.close()
                 break
         else:
-            print "M no change needed in", file
+            print "M no change needed in", path
     else:
         print "A no (c) in", file
-        ofile = open(file, "w")
-        for l in prelines:
-            ofile.write(l)
-        ofile.write(header + "\n\n")
-        for l in ilines[len(prelines):]:
-            ofile.write(l)
-        ofile.close()
-        
+        with path.open("w") as ofile:
+            for l in prelines:
+                ofile.write(l)
+            ofile.write(header + "\n\n")
+            for l in ilines[len(prelines):]:
+                ofile.write(l)
+
 
 for thing in sys.argv[1:]:
-    process(thing)
+    path = py.path.local(thing)
+    if path.check(dir=1):
+        for item in path.visit('*.py'):
+            process(item)
+    elif path.check(file=1, ext='py'):
+        process(path)
