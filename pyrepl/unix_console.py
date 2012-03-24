@@ -22,10 +22,10 @@
 import termios, select, os, struct, errno
 import signal, re, time, sys
 from fcntl import ioctl
-from pyrepl import curses
-from pyrepl.fancy_termios import tcgetattr, tcsetattr
-from pyrepl.console import Console, Event
-from pyrepl import unix_eventqueue
+from . import curses
+from .fancy_termios import tcgetattr, tcsetattr
+from .console import Console, Event
+from .unix_eventqueue import EventQueue
 
 class InvalidTerminal(RuntimeError):
     pass
@@ -98,6 +98,7 @@ class UnixConsole(Console):
         else:
             self.output_fd = f_out.fileno()
         
+
         self.pollob = poll()
         self.pollob.register(self.input_fd, POLLIN)
         curses.setupterm(term, self.output_fd)
@@ -161,7 +162,7 @@ class UnixConsole(Console):
 
         self.__move = self.__move_short
 
-        self.event_queue = unix_eventqueue.EventQueue(self.input_fd)
+        self.event_queue = EventQueue(self.input_fd)
         self.partial_char = b''
         self.cursor_visible = 1
 
