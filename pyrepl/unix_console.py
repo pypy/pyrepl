@@ -26,6 +26,7 @@ from . import curses
 from .fancy_termios import tcgetattr, tcsetattr
 from .console import Console, Event
 from .unix_eventqueue import EventQueue
+from .trace import trace
 
 class InvalidTerminal(RuntimeError):
     pass
@@ -410,6 +411,7 @@ class UnixConsole(Console):
         self.event_queue.insert(Event('resize', None))
 
     def push_char(self, char):
+        trace('push char {char!r}', char=char)
         self.partial_char += char
         try:
             c = self.partial_char.decode(self.encoding)
