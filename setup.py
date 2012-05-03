@@ -32,10 +32,10 @@ command line interfaces, featuring:
 
 setup(
     name = "pyrepl",
-    version = "0.8.3",
+    version = "0.8.4",
     author = "Michael Hudson-Doyle",
     author_email = "micahel@gmail.com",
-    url = "http://codespeak.net/pyrepl/",
+    url = "http://bitbucket.org/pypy/pyrepl/",
     license = "MIT X11 style",
     description = "A library for building flexible command line interfaces",
     platforms = ["unix", "linux"],
