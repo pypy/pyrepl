@@ -52,18 +52,29 @@ _keynames = {
     "up" : "kcuu1",
     }
 
-class EventQueue(object):
-    def __init__(self, fd, encoding):
-        our_keycodes = {}
-        for key, tiname in _keynames.items():
-            keycode = curses.tigetstr(tiname)
-            trace('key {key} tiname {tiname} keycode {keycode!r}', **locals())
-            if keycode:
-                our_keycodes[keycode] = key
-        if os.isatty(fd):
-            our_keycodes[tcgetattr(fd)[6][VERASE]] = unicode('backspace')
-        self.k = self.ck = keymap.compile_keymap(our_keycodes)
-        trace('keymap {k!r}', k=self.k)
+def general_keycodes():
+    keycodes = {}
+    for key, tiname in _keynames.items():
+        keycode = curses.tigetstr(tiname)
+        trace('key {key} tiname {tiname} keycode {keycode!r}', **locals())
+        if keycode:
+            keycodes[keycode] = key
+    return keycodes
+
+
+
+def EventQueue(fd, encoding):
+    keycodes = general_keycodes()
+    if os.isatty(fd):
+        backspace = tcgetattr(fd)[6][VERASE]
+        keycodes[backspace] = unicode('backspace')
+    k = keymap.compile_keymap(keycodes)
+    trace('keymap {k!r}', k=k)
+    return EncodedQueue(k, encoding)
+
+class EncodedQueue(object):
+    def __init__(self, keymap, encoding):
+        self.k = self.ck = keymap
         self.events = []
         self.buf = []
         self.encoding=encoding

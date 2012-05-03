@@ -1,9 +1,8 @@
-from pyrepl.unix_eventqueue import EventQueue
+from pyrepl.unix_eventqueue import EncodedQueue
 
 from pyrepl import curses
 
 
-@pytest.mark.xfail(run=False, reason='wtf segfault')
 def test_simple():
-    q = EventQueue(0, 'utf-8')
+    q = EncodedQueue({}, 'utf-8')
 
