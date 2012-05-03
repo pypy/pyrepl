@@ -14,4 +14,6 @@ def test_simple():
 
     event = q.get()
     assert q.get() is None
+    assert event.data == a
+    assert event.raw == b
 
