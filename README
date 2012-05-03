@@ -2,8 +2,7 @@ This is pyrepl 0.8.3, a readline-a-like in Python.
 
 http://pyrepl.codespeak.net/
 
-It requires python 2.2 (or newer) with the curses and termios modules
-built and features:
+It requires python 2.7 (or newer) and features:
 
  * sane multi-line editing
  * history, with incremental search
