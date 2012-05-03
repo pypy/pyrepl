@@ -35,8 +35,8 @@ def check():     # returns False if there is a problem initializing the state
 
 def run_multiline_interactive_console(mainmodule=None):
     import code
-    if mainmodule is None:
-        import __main__ as mainmodule
+    import __main__
+    mainmodule = mainmodule or __main__
     console = code.InteractiveConsole(mainmodule.__dict__)
 
     def more_lines(unicodetext):
