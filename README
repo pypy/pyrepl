@@ -43,6 +43,13 @@ it is to see a couple of hundred downloads and only get a handful of
 emails, so don't think I'll be irritated by the banality of your
 comments!)
 
+
+Summary of 0.8.4:
+
+ + python3 support
+ + support for more readline hooks
+ + backport various fixes from pypy
+
 Summary of 0.8.3:
 
  + First release from new home on bitbucket.

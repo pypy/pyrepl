@@ -35,6 +35,8 @@ setup(
     version = "0.8.4",
     author = "Michael Hudson-Doyle",
     author_email = "micahel@gmail.com",
+    maintainer="Ronny Pfannschmidt",
+    maintainer_email="ronny.pfannschmidt@gmx.de",
     url = "http://bitbucket.org/pypy/pyrepl/",
     license = "MIT X11 style",
     description = "A library for building flexible command line interfaces",
