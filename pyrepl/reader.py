@@ -20,7 +20,7 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 from __future__ import unicode_literals
-from pyrepl import unicodedata_
+import unicodedata
 from pyrepl import commands
 from pyrepl import input
 try:
@@ -33,7 +33,7 @@ except NameError:
 def _make_unctrl_map():
     uc_map = {}
     for c in map(unichr, range(256)):
-        if unicodedata_.category(c)[0] != 'C':
+        if unicodedata.category(c)[0] != 'C':
             uc_map[c] = c
     for i in range(32):
         c = unichr(i)
@@ -61,7 +61,7 @@ except ImportError:
         if c in u:
             return u[c]
         else:
-            if unicodedata_.category(c).startswith('C'):
+            if unicodedata.category(c).startswith('C'):
                 return b'\u%04x'%(ord(c))
             else:
                 return c

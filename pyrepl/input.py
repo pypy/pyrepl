@@ -33,7 +33,7 @@
 # [meta-key] is identified with [esc key].  We demand that any console
 # class does quite a lot towards emulating a unix terminal.
 from __future__ import print_function
-from pyrepl import unicodedata_
+import unicodedata
 from collections import deque
 
 
@@ -79,7 +79,7 @@ class KeymapTranslator(InputTranslator):
             if d is None:
                 if self.verbose:
                     print("invalid")
-                if self.stack or len(key) > 1 or unicodedata_.category(key) == 'C':
+                if self.stack or len(key) > 1 or unicodedata.category(key) == 'C':
                     self.results.append(
                         (self.invalid_cls, self.stack + [key]))
                 else:
