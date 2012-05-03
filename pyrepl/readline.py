@@ -174,12 +174,14 @@ class maybe_accept(commands.Command):
 # ____________________________________________________________
 
 class _ReadlineWrapper(object):
-    f_in = 0
-    f_out = 1
     reader = None
     saved_history_length = -1
     startup_hook = None
     config = ReadlineConfig()
+
+    def __init__(self):
+        self.f_in = os.dup(0)
+        self.f_ut = os.dup(1)
 
     def get_reader(self):
         if self.reader is None:
