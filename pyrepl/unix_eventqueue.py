@@ -52,7 +52,7 @@ _keynames = {
     }
 
 class EventQueue(object):
-    def __init__(self, fd):
+    def __init__(self, fd, encoding):
         our_keycodes = {}
         for key, tiname in _keynames.items():
             keycode = curses.tigetstr(tiname)
@@ -63,27 +63,39 @@ class EventQueue(object):
         self.k = self.ck = keymap.compile_keymap(our_keycodes)
         self.events = []
         self.buf = []
+        self.encoding=encoding
+
     def get(self):
         if self.events:
             return self.events.pop(0)
         else:
             return None
+
     def empty(self):
         return not self.events
+
+    def flush_buf(self):
+        raw = b''.join(self.buf)
+        self.buf = []
+        return raw
+
     def insert(self, event):
         self.events.append(event)
+
     def push(self, char):
         if char in self.k:
             k = self.k[char]
+            self.buf.append(char)
             if isinstance(k, dict):
-                self.buf.append(char)
                 self.k = k
             else:
-                self.events.append(Event('key', k, ''.join(self.buf) + char))
-                self.buf = []
+                self.events.append(Event('key', k, self.flush_buf()))
                 self.k = self.ck
         elif self.buf:
-            self.events.extend([Event('key', c, c) for c in self.buf])
+            keys = self.flush_buf()
+            decoded = keys.decode(self.encoding, 'ignore')  # XXX surogate?
+            #XXX: incorrect
+            self.events.extend(Event('key', c, c) for c in decoded)
             self.buf = []
             self.k = self.ck
             self.push(char)

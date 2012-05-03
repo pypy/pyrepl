@@ -163,8 +163,7 @@ class UnixConsole(Console):
 
         self.__move = self.__move_short
 
-        self.event_queue = EventQueue(self.input_fd)
-        self.partial_char = b''
+        self.event_queue = EventQueue(self.input_fd, self.encoding)
         self.cursor_visible = 1
 
     def change_encoding(self, encoding):
@@ -402,23 +401,7 @@ class UnixConsole(Console):
 
     def push_char(self, char):
         trace('push char {char!r}', char=char)
-        self.partial_char += char
-        try:
-            c = self.partial_char.decode(self.encoding)
-        except UnicodeError as e:
-            if len(e.args) > 4 and \
-                   e.args[4] == 'unexpected end of data':
-                pass
-            else:
-                # was: "raise".  But it crashes pyrepl, and by extension the
-                # pypy currently running, in which we are e.g. in the middle
-                # of some debugging session.  Argh.  Instead just print an
-                # error message to stderr and continue running, for now.
-                self.partial_char = ''
-                sys.stderr.write('\n%s: %s\n' % (e.__class__.__name__, e))
-        else:
-            self.partial_char = b''
-            self.event_queue.push(c)
+        self.event_queue.push(char)
         
     def get_event(self, block=1):
         while self.event_queue.empty():
