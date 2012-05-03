@@ -76,7 +76,7 @@ class EncodedQueue(object):
     def __init__(self, keymap, encoding):
         self.k = self.ck = keymap
         self.events = []
-        self.buf = []
+        self.buf = bytearray()
         self.encoding=encoding
 
     def get(self):
@@ -89,32 +89,33 @@ class EncodedQueue(object):
         return not self.events
 
     def flush_buf(self):
-        raw = b''.join(self.buf)
-        self.buf = []
-        return raw
+        old = self.buf
+        self.buf = bytearray()
+        return old
 
     def insert(self, event):
         trace('added event {event}', event=event)
         self.events.append(event)
 
     def push(self, char):
+        self.buf.append(char)
         if char in self.k:
+            if self.k is self.ck:
+                #sanity check, buffer is empty when a special key comes
+                assert len(self.buf) == 1
             k = self.k[char]
             trace('found map {k!r}', k=k)
-            self.buf.append(char)
             if isinstance(k, dict):
                 self.k = k
             else:
                 self.insert(Event('key', k, self.flush_buf()))
                 self.k = self.ck
-        elif self.buf:
-            keys = self.flush_buf()
-            decoded = keys.decode(self.encoding, 'ignore')  # XXX surogate?
-            #XXX: incorrect
-            for c in decoded:
-                self.insert(Event('key', c, c))
-            self.buf = []
-            self.k = self.ck
-            self.push(char)
+
         else:
-            self.insert(Event('key', char.decode(self.encoding), char))
+            try:
+                decoded = bytes(self.buf).decode(self.encoding)
+            except:
+                return
+
+            self.insert(Event('key', decoded, self.flush_buf()))
+            self.k = self.ck
