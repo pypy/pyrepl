@@ -24,6 +24,7 @@
 from pyrepl import keymap
 from pyrepl.console import Event
 from pyrepl import curses
+from .trace import trace
 from termios import tcgetattr, VERASE
 import os
 try:
@@ -56,11 +57,13 @@ class EventQueue(object):
         our_keycodes = {}
         for key, tiname in _keynames.items():
             keycode = curses.tigetstr(tiname)
+            trace('key {key} tiname {tiname} keycode {keycode!r}', **locals())
             if keycode:
-                our_keycodes[keycode] = unicode(key)
+                our_keycodes[keycode] = key
         if os.isatty(fd):
             our_keycodes[tcgetattr(fd)[6][VERASE]] = unicode('backspace')
         self.k = self.ck = keymap.compile_keymap(our_keycodes)
+        trace('keymap {k!r}', k=self.k)
         self.events = []
         self.buf = []
         self.encoding=encoding
@@ -80,24 +83,27 @@ class EventQueue(object):
         return raw
 
     def insert(self, event):
+        trace('added event {event}', event=event)
         self.events.append(event)
 
     def push(self, char):
         if char in self.k:
             k = self.k[char]
+            trace('found map {k!r}', k=k)
             self.buf.append(char)
             if isinstance(k, dict):
                 self.k = k
             else:
-                self.events.append(Event('key', k, self.flush_buf()))
+                self.insert(Event('key', k, self.flush_buf()))
                 self.k = self.ck
         elif self.buf:
             keys = self.flush_buf()
             decoded = keys.decode(self.encoding, 'ignore')  # XXX surogate?
             #XXX: incorrect
-            self.events.extend(Event('key', c, c) for c in decoded)
+            for c in decoded:
+                self.insert(Event('key', c, c))
             self.buf = []
             self.k = self.ck
             self.push(char)
         else:
-            self.events.append(Event('key', char, char))
+            self.insert(Event('key', char.decode(self.encoding), char))

@@ -173,7 +173,11 @@ def parse_keys(key):
 def compile_keymap(keymap, empty=b''):
     r = {}
     for key, value in keymap.items():
-        r.setdefault(key[0], {})[key[1:]] = value
+        if isinstance(key, bytes):
+            first = key[:1]
+        else:
+            first = key[0]
+        r.setdefault(first, {})[key[1:]] = value
     for key, value in r.items():
         if empty in value:
             if len(value) != 1:
