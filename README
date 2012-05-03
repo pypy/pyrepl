@@ -49,6 +49,7 @@ Summary of 0.8.4:
  + python3 support
  + support for more readline hooks
  + backport various fixes from pypy
+ + gracefully break on sys.stdout.close()
 
 Summary of 0.8.3:
 
