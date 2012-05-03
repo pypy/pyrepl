@@ -45,13 +45,7 @@ def _make_module_list_dir(dir, suffs, prefix=''):
 def _make_module_list():
     import imp
     suffs = [x[0] for x in imp.get_suffixes() if x[0] != '.pyc']
-    def compare(x, y):
-        c = -cmp(len(x), len(y))
-        if c:
-            return c
-        else:
-            return -cmp(x, y)
-    suffs.sort(compare)
+    suffs.sort(reverse=True)
     _packages[''] = list(sys.builtin_module_names)
     for dir in sys.path:
         if dir == '':
