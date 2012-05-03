@@ -17,7 +17,7 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 import pytest
-from .infrastructure import read_spec, EA
+from .infrastructure import read_spec
 
 
 def test_basic():

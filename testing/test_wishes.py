@@ -17,7 +17,7 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-from .infrastructure import EA, read_spec
+from .infrastructure import read_spec
 
 # this test case should contain as-verbatim-as-possible versions of
 # (applicable) feature requests
@@ -25,7 +25,7 @@ from .infrastructure import EA, read_spec
 
 def test_quoted_insert_repeat():
    read_spec([(('digit-arg', '3'),      ['']),
-              ( 'quoted-insert',        ['']),
+              (('quoted-insert',),        ['']),
               (('self-insert', '\033'), ['^[^[^[']),
-              ( 'accept',               None)])
+              (('accept',),              None)])
 

@@ -9,4 +9,4 @@ def test_compile_keymap():
         b'bc': 'test2',
     })
 
-    assert k == {b'a': 'test', b'b': { b'c': 'test2'}}
+    assert k == {b'a': 'test', b'b': {b'c': 'test2'}}
