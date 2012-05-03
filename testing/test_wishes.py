@@ -25,7 +25,7 @@ from .infrastructure import read_spec
 
 def test_quoted_insert_repeat():
    read_spec([(('digit-arg', '3'),      ['']),
-              (('quoted-insert',),        ['']),
+              (('quoted-insert', None), ['']),
               (('self-insert', '\033'), ['^[^[^[']),
-              (('accept',),              None)])
+              (('accept', None),        None)])
 
