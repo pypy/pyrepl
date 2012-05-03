@@ -25,14 +25,10 @@ from __future__ import unicode_literals
 from pyrepl.completing_reader import CompletingReader
 from pyrepl.historical_reader import HistoricalReader
 from pyrepl import completing_reader, reader
-from pyrepl import copy_code, commands, completer
+from pyrepl import commands, completer
 from pyrepl import module_lister
 import imp, sys, os, re, code, traceback
 import atexit, warnings
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
 
 try:
     unicode
@@ -40,10 +36,7 @@ except:
     unicode = str
 
 try:
-    import imp
     imp.find_module("twisted")
-    from twisted.internet import reactor
-    from twisted.internet.abstract import FileDescriptor
 except ImportError:
     default_interactmethod = "interact"
 else:
