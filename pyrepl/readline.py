@@ -181,7 +181,7 @@ class _ReadlineWrapper(object):
 
     def __init__(self):
         self.f_in = os.dup(0)
-        self.f_ut = os.dup(1)
+        self.f_out = os.dup(1)
 
     def get_reader(self):
         if self.reader is None:
@@ -196,7 +196,7 @@ class _ReadlineWrapper(object):
         except _error:
             return _old_raw_input(prompt)
         reader.ps1 = prompt
-        return reader.readline(reader, startup_hook=self.startup_hook)
+        return reader.readline(startup_hook=self.startup_hook)
 
     def multiline_input(self, more_lines, ps1, ps2, returns_unicode=False):
         """Read an input on possibly multiple lines, asking for more
