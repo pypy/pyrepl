@@ -358,6 +358,7 @@ class UnixConsole(Console):
         # per-readline preparations:
         self.__svtermstate = tcgetattr(self.input_fd)
         raw = self.__svtermstate.copy()
+        raw.iflag |= termios.ICRNL
         raw.iflag &=~ (termios.BRKINT | termios.INPCK |
                        termios.ISTRIP | termios.IXON)
         raw.oflag &=~ (termios.OPOST)
