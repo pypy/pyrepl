@@ -1,6 +1,11 @@
 This file contains more verbose descriptions of the changes between
 versions than those in README.
 
+New in Version 0.8.x:
+
+ * propper command usage + fix one wrong call (thanks Trundle)
+
+
 New in 0.7.3:
  + ^T at the start of a line should not crash.
 
