@@ -526,7 +526,7 @@ feeling more loquacious than I am now."""
             cmd = self.commands.get(cmd[0],
                                     commands.invalid_command)(self, *cmd)
         elif isinstance(cmd[0], type):
-            cmd = cmd[0](self, cmd)
+            cmd = cmd[0](self, *cmd)
         else:
             return  # nothing to do
 
