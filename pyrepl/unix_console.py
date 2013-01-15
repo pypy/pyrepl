@@ -19,14 +19,22 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import termios, select, os, struct, errno
-import signal, re, time, sys
+import termios
+import select
+import os
+import struct
+import errno
+import signal
+import re
+import time
+import sys
 from fcntl import ioctl
 from . import curses
 from .fancy_termios import tcgetattr, tcsetattr
 from .console import Console, Event
 from .unix_eventqueue import EventQueue
 from .trace import trace
+
 
 class InvalidTerminal(RuntimeError):
     pass
@@ -44,12 +52,14 @@ SIGWINCH_EVENT = 'repaint'
 FIONREAD = getattr(termios, "FIONREAD", None)
 TIOCGWINSZ = getattr(termios, "TIOCGWINSZ", None)
 
+
 def _my_getstr(cap, optional=0):
     r = curses.tigetstr(cap)
     if not optional and r is None:
         raise InvalidTerminal(
-              "terminal doesn't have the required '%s' capability"%cap)
+            "terminal doesn't have the required '%s' capability" % cap)
     return r
+
 
 # at this point, can we say: AAAAAAAAAAAAAAAAAAAAAARGH!
 def maybe_add_baudrate(dict, rate):
@@ -74,19 +84,22 @@ except AttributeError:
     class poll:
         def __init__(self):
             pass
+
         def register(self, fd, flag):
             self.fd = fd
+
         def poll(self, timeout=None):
-            r,w,e = select.select([self.fd],[],[],timeout)
+            r, w, e = select.select([self.fd],[],[],timeout)
             return r
 
 POLLIN = getattr(select, "POLLIN", None)
+
 
 class UnixConsole(Console):
     def __init__(self, f_in=0, f_out=1, term=None, encoding=None):
         if encoding is None:
             encoding = sys.getdefaultencoding()
-            
+
         self.encoding = encoding
 
         if isinstance(f_in, int):
@@ -98,13 +111,12 @@ class UnixConsole(Console):
             self.output_fd = f_out
         else:
             self.output_fd = f_out.fileno()
-        
 
         self.pollob = poll()
         self.pollob.register(self.input_fd, POLLIN)
         curses.setupterm(term, self.output_fd)
         self.term = term
-        
+
         self._bel   = _my_getstr("bel")
         self._civis = _my_getstr("civis", optional=1)
         self._clear = _my_getstr("clear")
@@ -166,9 +178,6 @@ class UnixConsole(Console):
         self.event_queue = EventQueue(self.input_fd, self.encoding)
         self.cursor_visible = 1
 
-    def change_encoding(self, encoding):
-        self.encoding = encoding
-    
     def refresh(self, screen, c_xy):
         # this function is still too long (over 90 lines)
         cx, cy = c_xy
@@ -181,7 +190,7 @@ class UnixConsole(Console):
                 self.screen.append("")
         else:
             while len(self.screen) < len(screen):
-                self.screen.append("")            
+                self.screen.append("")
 
         if len(screen) > self.height:
             self.__gone_tall = 1
@@ -190,7 +199,6 @@ class UnixConsole(Console):
         px, py = self.__posxy
         old_offset = offset = self.__offset
         height = self.height
-
 
         # we make sure the cursor is on the screen, and that we're
         # using all of the screen if we can
@@ -230,7 +238,7 @@ class UnixConsole(Console):
                                         newscr):
             if oldline != newline:
                 self.__write_changed_line(y, oldline, newline, px)
-                
+
         y = len(newscr)
         while y < len(oldscr):
             self.__hide_cursor()
@@ -240,7 +248,7 @@ class UnixConsole(Console):
             y += 1
 
         self.__show_cursor()
-        
+
         self.screen = screen
         self.move_cursor(cx, cy)
         self.flushoutput()
@@ -288,7 +296,7 @@ class UnixConsole(Console):
                 self.__write_code(self._el)
             self.__write(newline[x:])
             self.__posxy = len(newline), y
-        
+
         if '\x1b' in newline:
             # ANSI escape characters are present, so we can't assume
             # anything about the position of the cursor.  Moving the cursor
@@ -362,10 +370,10 @@ class UnixConsole(Console):
         raw.iflag &=~ (termios.BRKINT | termios.INPCK |
                        termios.ISTRIP | termios.IXON)
         raw.oflag &=~ (termios.OPOST)
-        raw.cflag &=~ (termios.CSIZE|termios.PARENB)
+        raw.cflag &=~ (termios.CSIZE | termios.PARENB)
         raw.cflag |=  (termios.CS8)
-        raw.lflag &=~ (termios.ICANON|termios.ECHO|
-                       termios.IEXTEN|(termios.ISIG*1))
+        raw.lflag &=~ (termios.ICANON | termios.ECHO|
+                       termios.IEXTEN | (termios.ISIG * 1))
         raw.cc[termios.VMIN] = 1
         raw.cc[termios.VTIME] = 0
         tcsetattr(self.input_fd, termios.TCSADRAIN, raw)
@@ -374,7 +382,7 @@ class UnixConsole(Console):
         self.height, self.width = self.getheightwidth()
 
         self.__buffer = []
-        
+
         self.__posxy = 0, 0
         self.__gone_tall = 0
         self.__move = self.__move_short
@@ -403,10 +411,11 @@ class UnixConsole(Console):
     def push_char(self, char):
         trace('push char {char!r}', char=char)
         self.event_queue.push(char)
-        
+
     def get_event(self, block=1):
         while self.event_queue.empty():
-            while 1: # All hail Unix!
+            while 1: 
+                # All hail Unix!
                 try:
                     self.push_char(os.read(self.input_fd, 1))
                 except (IOError, OSError) as err:
@@ -461,7 +470,8 @@ class UnixConsole(Console):
             except KeyError:
                 height, width = struct.unpack(
                     "hhhh", ioctl(self.input_fd, TIOCGWINSZ, "\000"*8))[0:2]
-                if not height: return 25, 80
+                if not height:
+                    return 25, 80
                 return height, width
     else:
         def getheightwidth(self):
@@ -528,7 +538,7 @@ class UnixConsole(Console):
                 e2 = self.event_queue.get()
                 e.data += e2.data
                 e.raw += e.raw
-                
+
             amount = struct.unpack(
                 "i", ioctl(self.input_fd, FIONREAD, "\0\0\0\0"))[0]
             raw = unicode(os.read(self.input_fd, amount), self.encoding, 'replace')
