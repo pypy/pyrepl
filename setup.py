@@ -17,7 +17,7 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-from setuptools import setup, Extension
+from setuptools import setup
 
 long_desc = """\
 pyrepl is a Python library, inspired by readline, for building flexible
@@ -31,17 +31,17 @@ command line interfaces, featuring:
 
 
 setup(
-    name = "pyrepl",
-    version = "0.8.4",
-    author = "Michael Hudson-Doyle",
-    author_email = "micahel@gmail.com",
+    name="pyrepl",
+    version="0.8.4",
+    author="Michael Hudson-Doyle",
+    author_email="micahel@gmail.com",
     maintainer="Ronny Pfannschmidt",
     maintainer_email="ronny.pfannschmidt@gmx.de",
-    url = "http://bitbucket.org/pypy/pyrepl/",
-    license = "MIT X11 style",
-    description = "A library for building flexible command line interfaces",
-    platforms = ["unix", "linux"],
-    packages = ["pyrepl" ],
-    scripts = ["pythoni", "pythoni1"],
-    long_description = long_desc,
-    )
+    url="http://bitbucket.org/pypy/pyrepl/",
+    license="MIT X11 style",
+    description="A library for building flexible command line interfaces",
+    platforms=["unix", "linux"],
+    packages=["pyrepl"],
+    scripts=["pythoni", "pythoni1"],
+    long_description=long_desc,
+)
