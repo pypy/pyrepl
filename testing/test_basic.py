@@ -24,10 +24,12 @@ def test_basic():
     read_spec([(('self-insert', 'a'), ['a']),
                ( 'accept',            ['a'])])
 
+
 def test_repeat():
     read_spec([(('digit-arg', '3'),   ['']),
                (('self-insert', 'a'), ['aaa']),
                ( 'accept',            ['aaa'])])
+
 
 def test_kill_line():
     read_spec([(('self-insert', 'abc'), ['abc']),
@@ -35,11 +37,13 @@ def test_kill_line():
                ( 'kill-line',           ['ab']),
                ( 'accept',              ['ab'])])
 
+
 def test_unix_line_discard():
     read_spec([(('self-insert', 'abc'), ['abc']),
                ( 'left',                None),
                ( 'unix-word-rubout',    ['c']),
                ( 'accept',              ['c'])])
+
 
 def test_kill_word():
     read_spec([(('self-insert', 'ab cd'), ['ab cd']),

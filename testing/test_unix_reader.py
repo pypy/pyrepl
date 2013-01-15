@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 from pyrepl.unix_eventqueue import EncodedQueue
 
+
 def test_simple():
     q = EncodedQueue({}, 'utf-8')
 
@@ -13,4 +14,3 @@ def test_simple():
     assert q.get() is None
     assert event.data == a
     assert event.raw == b
-

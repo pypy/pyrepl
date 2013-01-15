@@ -25,13 +25,17 @@ from .infrastructure import EA, TestReader, read_spec
 
 import pytest
 
+
 class HistoricalTestReader(HistoricalReader, TestReader):
     pass
 
+
 @pytest.mark.xfail(reason='event missing', run=False)
 def test_transpose_at_start():
-    read_spec([( 'transpose', [EA, '']),
-               ( 'accept',    [''])])
+    read_spec([
+        ('transpose', [EA, '']),
+        ('accept',    [''])])
+
 
 def test_cmd_instantiation_crash():
     spec = [
