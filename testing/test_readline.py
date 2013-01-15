@@ -12,4 +12,3 @@ def test_raw_input():
     assert result == 'input'
     # A bytes string on python2, a unicode string on python3.
     assert isinstance(result, str)
-

@@ -55,18 +55,19 @@ class TestConsole(Console):
             print("event", ev)
         return Event(*ev)
 
+
 class TestReader(Reader):
 
     def get_prompt(self, lineno, cursor_on_line):
         return ''
-    
+
     def refresh(self):
         Reader.refresh(self)
         self.dirty = True
+
 
 def read_spec(test_spec, reader_class=TestReader):
     # remember to finish your test_spec with 'accept' or similar!
     con = TestConsole(test_spec, verbose=True)
     reader = reader_class(con)
     reader.readline()
-

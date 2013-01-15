@@ -51,10 +51,12 @@ def test_kill_word():
                ( 'kill-word',             [' cd']),
                ( 'accept',                [' cd'])])
 
+
 def test_backward_kill_word():
     read_spec([(('self-insert', 'ab cd'), ['ab cd']),
                ( 'backward-kill-word',    ['ab ']),
                ( 'accept',                ['ab '])])
+
 
 def test_yank():
     read_spec([(('self-insert', 'ab cd'), ['ab cd']),
@@ -62,7 +64,8 @@ def test_yank():
                ( 'beginning-of-line',     ['ab ']),
                ( 'yank',                  ['cdab ']),
                ( 'accept',                ['cdab '])])
-    
+
+
 def test_yank_pop():
     read_spec([(('self-insert', 'ab cd'), ['ab cd']),
                ( 'backward-kill-word',    ['ab ']),
@@ -72,17 +75,19 @@ def test_yank_pop():
                ( 'yank-pop',              ['cd ']),
                ( 'accept',                ['cd '])])
 
+
 def test_interrupt():
     with pytest.raises(KeyboardInterrupt):
-        read_spec([( 'interrupt',  [''])])
+        read_spec([('interrupt', [''])])
+
 
 # test_suspend -- hah
-
 def test_up():
     read_spec([(('self-insert', 'ab\ncd'), ['ab', 'cd']),
                ( 'up',                     ['ab', 'cd']),
                (('self-insert', 'e'),      ['abe', 'cd']),
                ( 'accept',                 ['abe', 'cd'])])
+
 
 def test_down():
     read_spec([(('self-insert', 'ab\ncd'), ['ab', 'cd']),
@@ -92,11 +97,13 @@ def test_down():
                (('self-insert', 'f'),      ['abe', 'cdf']),
                ( 'accept',                 ['abe', 'cdf'])])
 
+
 def test_left():
     read_spec([(('self-insert', 'ab'), ['ab']),
                ( 'left',               ['ab']),
                (('self-insert', 'c'),  ['acb']),
                ( 'accept',             ['acb'])])
+
 
 def test_right():
     read_spec([(('self-insert', 'ab'), ['ab']),
@@ -105,4 +112,3 @@ def test_right():
                ( 'right',              ['acb']),
                (('self-insert', 'd'),  ['acbd']),
                ( 'accept',             ['acbd'])])
-
