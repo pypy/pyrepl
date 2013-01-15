@@ -21,6 +21,8 @@
 # Bah, this would be easier to test if curses/terminfo didn't have so
 # much non-introspectable global state.
 
+from collections import deque
+
 from pyrepl import keymap
 from pyrepl.console import Event
 from pyrepl import curses
@@ -34,23 +36,23 @@ except NameError:
 
 
 _keynames = {
-    "delete" : "kdch1",
-    "down" : "kcud1",
-    "end" : "kend",
-    "enter" : "kent",
-    "f1"  : "kf1",    "f2"  : "kf2",    "f3"  : "kf3",    "f4"  : "kf4",
-    "f5"  : "kf5",    "f6"  : "kf6",    "f7"  : "kf7",    "f8"  : "kf8",
-    "f9"  : "kf9",    "f10" : "kf10",   "f11" : "kf11",   "f12" : "kf12",
-    "f13" : "kf13",   "f14" : "kf14",   "f15" : "kf15",   "f16" : "kf16",
-    "f17" : "kf17",   "f18" : "kf18",   "f19" : "kf19",   "f20" : "kf20",
-    "home" : "khome",
-    "insert" : "kich1",
-    "left" : "kcub1",
-    "page down" : "knp",
-    "page up"   : "kpp",
-    "right" : "kcuf1",
-    "up" : "kcuu1",
-    }
+    "delete": "kdch1",
+    "down": "kcud1",
+    "end": "kend",
+    "enter": "kent",
+    "home": "khome",
+    "insert": "kich1",
+    "left": "kcub1",
+    "page down": "knp",
+    "page up": "kpp",
+    "right": "kcuf1",
+    "up": "kcuu1",
+}
+
+
+#function keys x in 1-20 -> fX: kfX
+_keynames.update(('f%d' % i, 'kf%d' % i) for i in range(1, 21))
+
 
 def general_keycodes():
     keycodes = {}
@@ -62,7 +64,6 @@ def general_keycodes():
     return keycodes
 
 
-
 def EventQueue(fd, encoding):
     keycodes = general_keycodes()
     if os.isatty(fd):
@@ -72,16 +73,17 @@ def EventQueue(fd, encoding):
     trace('keymap {k!r}', k=k)
     return EncodedQueue(k, encoding)
 
+
 class EncodedQueue(object):
     def __init__(self, keymap, encoding):
         self.k = self.ck = keymap
-        self.events = []
+        self.events = deque()
         self.buf = bytearray()
-        self.encoding=encoding
+        self.encoding = encoding
 
     def get(self):
         if self.events:
-            return self.events.pop(0)
+            return self.events.popleft()
         else:
             return None
 
