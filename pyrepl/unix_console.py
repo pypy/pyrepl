@@ -63,7 +63,7 @@ def _my_getstr(cap, optional=0):
 
 # at this point, can we say: AAAAAAAAAAAAAAAAAAAAAARGH!
 def maybe_add_baudrate(dict, rate):
-    name = 'B%d'%rate
+    name = 'B%d' % rate
     if hasattr(termios, name):
         dict[getattr(termios, name)] = rate
 
@@ -89,10 +89,16 @@ except AttributeError:
             self.fd = fd
 
         def poll(self, timeout=None):
-            r, w, e = select.select([self.fd],[],[],timeout)
+            r, w, e = select.select([self.fd], [], [], timeout)
             return r
 
 POLLIN = getattr(select, "POLLIN", None)
+
+
+required_curses_tistrings = 'bel clear cup el'
+optional_curses_tistrings = (
+    'civis cnorm cub cub1 cud cud1 cud cud1 cuf '
+    'cuf1 cuu cuu1 dch dch1 hpa ich ich1 ind pad ri rmkx smkx')
 
 
 class UnixConsole(Console):
@@ -117,33 +123,15 @@ class UnixConsole(Console):
         curses.setupterm(term, self.output_fd)
         self.term = term
 
-        self._bel   = _my_getstr("bel")
-        self._civis = _my_getstr("civis", optional=1)
-        self._clear = _my_getstr("clear")
-        self._cnorm = _my_getstr("cnorm", optional=1)
-        self._cub   = _my_getstr("cub",   optional=1)
-        self._cub1  = _my_getstr("cub1",  1)
-        self._cud   = _my_getstr("cud",   1)
-        self._cud1  = _my_getstr("cud1",  1)
-        self._cuf   = _my_getstr("cuf",   1)
-        self._cuf1  = _my_getstr("cuf1",  1)
-        self._cup   = _my_getstr("cup")
-        self._cuu   = _my_getstr("cuu",   1)
-        self._cuu1  = _my_getstr("cuu1",  1)
-        self._dch1  = _my_getstr("dch1",  1)
-        self._dch   = _my_getstr("dch",   1)
-        self._el    = _my_getstr("el")
-        self._hpa   = _my_getstr("hpa",   1)
-        self._ich   = _my_getstr("ich",   1)
-        self._ich1  = _my_getstr("ich1",  1)
-        self._ind   = _my_getstr("ind",   1)
-        self._pad   = _my_getstr("pad",   1)
-        self._ri    = _my_getstr("ri",    1)
-        self._rmkx  = _my_getstr("rmkx",  1)
-        self._smkx  = _my_getstr("smkx",  1)
-        
+        for name in required_curses_tistrings.split():
+            setattr(self, '_' + name, _my_getstr(name))
+
+        for name in optional_curses_tistrings.split():
+            setattr(self, '_' + name, _my_getstr(name, optional=1))
+
         ## work out how we're going to sling the cursor around
-        if 0 and self._hpa: # hpa don't work in windows telnet :-(
+        # hpa don't work in windows telnet :-(
+        if 0 and self._hpa:
             self.__move_x = self.__move_x_hpa
         elif self._cub and self._cuf:
             self.__move_x = self.__move_x_cub_cuf
@@ -264,11 +252,12 @@ class UnixConsole(Console):
         # reuse the oldline as much as possible, but stop as soon as we
         # encounter an ESCAPE, because it might be the start of an escape
         # sequene
+        #XXX unicode check!
         while x < minlen and oldline[x] == newline[x] and newline[x] != '\x1b':
             x += 1
         if oldline[x:] == newline[x+1:] and self.ich1:
-            if ( y == self.__posxy[1] and x > self.__posxy[0]
-                 and oldline[px:x] == newline[px+1:x+1] ):
+            if (y == self.__posxy[1] and x > self.__posxy[0] and
+                    oldline[px:x] == newline[px+1:x+1]):
                 x = px
             self.__move(x, y)
             self.__write_code(self.ich1)
@@ -297,6 +286,7 @@ class UnixConsole(Console):
             self.__write(newline[x:])
             self.__posxy = len(newline), y
 
+        #XXX: check for unicode mess
         if '\x1b' in newline:
             # ANSI escape characters are present, so we can't assume
             # anything about the position of the cursor.  Moving the cursor
@@ -367,12 +357,12 @@ class UnixConsole(Console):
         self.__svtermstate = tcgetattr(self.input_fd)
         raw = self.__svtermstate.copy()
         raw.iflag |= termios.ICRNL
-        raw.iflag &=~ (termios.BRKINT | termios.INPCK |
+        raw.iflag &= ~(termios.BRKINT | termios.INPCK |
                        termios.ISTRIP | termios.IXON)
-        raw.oflag &=~ (termios.OPOST)
-        raw.cflag &=~ (termios.CSIZE | termios.PARENB)
-        raw.cflag |=  (termios.CS8)
-        raw.lflag &=~ (termios.ICANON | termios.ECHO|
+        raw.oflag &= ~termios.OPOST
+        raw.cflag &= ~(termios.CSIZE | termios.PARENB)
+        raw.cflag |= (termios.CS8)
+        raw.lflag &= ~(termios.ICANON | termios.ECHO |
                        termios.IEXTEN | (termios.ISIG * 1))
         raw.cc[termios.VMIN] = 1
         raw.cc[termios.VTIME] = 0
@@ -414,7 +404,7 @@ class UnixConsole(Console):
 
     def get_event(self, block=1):
         while self.event_queue.empty():
-            while 1: 
+            while 1:
                 # All hail Unix!
                 try:
                     self.push_char(os.read(self.input_fd, 1))
@@ -541,7 +531,9 @@ class UnixConsole(Console):
 
             amount = struct.unpack(
                 "i", ioctl(self.input_fd, FIONREAD, "\0\0\0\0"))[0]
-            raw = unicode(os.read(self.input_fd, amount), self.encoding, 'replace')
+            data = os.read(self.input_fd, amount)
+            raw = unicode(data, self.encoding, 'replace')
+            #XXX: something is wrong here
             e.data += raw
             e.raw += raw
             return e
@@ -553,9 +545,11 @@ class UnixConsole(Console):
                 e2 = self.event_queue.get()
                 e.data += e2.data
                 e.raw += e.raw
-                
+
             amount = 10000
-            raw = unicode(os.read(self.input_fd, amount), self.encoding, 'replace')
+            data = os.read(self.input_fd, amount)
+            raw = unicode(data, self.encoding, 'replace')
+            #XXX: something is wrong here
             e.data += raw
             e.raw += raw
             return e
@@ -566,4 +560,3 @@ class UnixConsole(Console):
         self.__move = self.__move_tall
         self.__posxy = 0, 0
         self.screen = []
-
