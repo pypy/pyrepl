@@ -26,12 +26,14 @@ allowing multiline input and multiline history entries.
 import sys
 from pyrepl.readline import multiline_input, _error, _get_reader
 
+
 def check():     # returns False if there is a problem initializing the state
     try:
         _get_reader()
     except _error:
         return False
     return True
+
 
 def run_multiline_interactive_console(mainmodule=None):
     import code
