@@ -1,4 +1,3 @@
-import pytest
 from pyrepl.keymap import compile_keymap
 
 

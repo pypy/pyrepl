@@ -143,11 +143,11 @@ default_keymap = tuple(
      (r'\M-8', 'digit-arg'),
      (r'\M-9', 'digit-arg'),
      #(r'\M-\n', 'insert-nl'),
-     ('\\\\', 'self-insert')] + \
+     ('\\\\', 'self-insert')] +
     [(c, 'self-insert')
-     for c in map(chr, range(32, 127)) if c != '\\'] + \
+     for c in map(chr, range(32, 127)) if c != '\\'] +
     [(c, 'self-insert')
-     for c in map(chr, range(128, 256)) if c.isalpha()] + \
+     for c in map(chr, range(128, 256)) if c.isalpha()] +
     [(r'\<up>', 'up'),
      (r'\<down>', 'down'),
      (r'\<left>', 'left'),
@@ -244,9 +244,9 @@ feeling more loquacious than I am now."""
         self.commands = {}
         self.msg = ''
         for v in vars(commands).values():
-            if (isinstance(v, type)
-                and issubclass(v, commands.Command)
-                and v.__name__[0].islower()):
+            if (isinstance(v, type) and
+                    issubclass(v, commands.Command) and
+                    v.__name__[0].islower()):
                 self.commands[v.__name__] = v
                 self.commands[v.__name__.replace('_', '-')] = v
         self.syntax_table = make_default_syntax_table()

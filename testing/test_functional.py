@@ -6,6 +6,7 @@
 import pytest
 import sys
 
+
 def pytest_funcarg__child(request):
     try:
         pexpect = pytest.importorskip('pexpect')
@@ -17,8 +18,8 @@ def pytest_funcarg__child(request):
     child.sendline('main()')
     return child
 
+
 def test_basic(child):
     child.sendline('a = 3')
     child.sendline('a')
     child.expect('3')
-
