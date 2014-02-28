@@ -4,3 +4,4 @@ build/
 \.tox/
 .*\.egg-info
 \.pyc
+\.swp
