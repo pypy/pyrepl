@@ -13,7 +13,10 @@ def pytest_funcarg__child(request):
     except SyntaxError:
         pytest.skip('pexpect wont work on py3k')
     child = pexpect.spawn(sys.executable, ['-S'], timeout=10)
-    child.logfile = sys.stdout
+    if sys.version_info >= (3, ):
+        child.logfile = sys.stdout.buffer
+    else:
+        child.logfile = sys.stdout
     child.sendline('from pyrepl.python_reader import main')
     child.sendline('main()')
     return child
