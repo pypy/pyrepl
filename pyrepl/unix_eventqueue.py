@@ -100,7 +100,8 @@ class EncodedQueue(object):
         self.events.append(event)
 
     def push(self, char):
-        self.buf.append(ord(char))
+        ord_char = char if isinstance(char, int) else ord(char)
+        self.buf.append(ord_char)
         if char in self.k:
             if self.k is self.ck:
                 #sanity check, buffer is empty when a special key comes
