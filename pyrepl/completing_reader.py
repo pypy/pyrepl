@@ -40,9 +40,8 @@ def prefix(wordlist, j=0):
 
 STRIPCOLOR_REGEX = re.compile(r"\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[m|K]")
 
-
 def stripcolor(s):
-    return STRIPCOLOR_REGEX.regexp.sub('', s)
+    return STRIPCOLOR_REGEX.sub('', s)
 
 
 def real_len(s):
