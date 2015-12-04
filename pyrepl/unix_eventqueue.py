@@ -53,6 +53,24 @@ _keynames = {
 #function keys x in 1-20 -> fX: kfX
 _keynames.update(('f%d' % i, 'kf%d' % i) for i in range(1, 21))
 
+# this is a bit of a hack: CTRL-left and CTRL-right are not standardized
+# termios sequences: each terminal emulator implements its own slightly
+# different incarnation, and as far as I know, there is no way to know
+# programmatically which sequences correspond to CTRL-left and
+# CTRL-right. In bash, these keys usually work because there are bindings
+# in ~/.inputrc, but pyrepl does not support it. The workaround is to
+# hard-code here a bunch of known sequences, which will be seen as "ctrl
+# left" and "ctrl right" keys, which can be finally be mapped to commands
+# by the reader's keymaps.
+#
+CTRL_ARROW_KEYCODE = {
+    # for xterm, gnome-terminal, xfce terminal, etc.
+    '\033[1;5D': 'ctrl left',
+    '\033[1;5C': 'ctrl right',
+    # for rxvt
+    '\033Od': 'ctrl left',
+    '\033Oc': 'ctrl right',
+}
 
 def general_keycodes():
     keycodes = {}
@@ -61,6 +79,7 @@ def general_keycodes():
         trace('key {key} tiname {tiname} keycode {keycode!r}', **locals())
         if keycode:
             keycodes[keycode] = key
+    keycodes.update(CTRL_ARROW_KEYCODE)
     return keycodes
 
 

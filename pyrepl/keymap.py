@@ -89,6 +89,8 @@ _keynames = {
     'space':     ' ',
     'tab':       '\t',
     'up':        'up',
+    'ctrl left': 'ctrl left',
+    'ctrl right': 'ctrl right',
     }
 
 class KeySpecError(Exception):
