@@ -114,11 +114,21 @@ class EncodedQueue(object):
                 self.insert(Event('key', k, self.flush_buf()))
                 self.k = self.ck
 
+        elif self.buf and self.buf[0] == 033: # 033 == escape
+            # escape sequence not recognized by our keymap: propagate it
+            # outside so that i can be recognized as an M-... key (see also
+            # the docstring in keymap.py, in particular the line \\E.
+            trace('unrecognized escape sequence, propagating...')
+            self.k = self.ck
+            self.insert(Event('key', '\033', '\033'))
+            for c in self.flush_buf()[1:]:
+                self.push(chr(c))
+
         else:
             try:
                 decoded = bytes(self.buf).decode(self.encoding)
-            except:
+            except UnicodeError:
                 return
-
-            self.insert(Event('key', decoded, self.flush_buf()))
+            else:
+                self.insert(Event('key', decoded, self.flush_buf()))
             self.k = self.ck
