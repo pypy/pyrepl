@@ -370,7 +370,7 @@ class invalid_command(Command):
 class qIHelp(Command):
     def do(self):
         r = self.reader
-        r.insert((self.event + r.console.getpending().data) * r.get_arg())
+        r.insert((bytes(self.event) + r.console.getpending().data) * r.get_arg())
         r.pop_input_trans()
 
 from pyrepl import input
