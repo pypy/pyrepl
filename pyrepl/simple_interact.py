@@ -35,11 +35,13 @@ def check():     # returns False if there is a problem initializing the state
     return True
 
 
-def run_multiline_interactive_console(mainmodule=None):
+def run_multiline_interactive_console(mainmodule=None, future_flags=0):
     import code
     import __main__
     mainmodule = mainmodule or __main__
     console = code.InteractiveConsole(mainmodule.__dict__, filename='<stdin>')
+    if future_flags:
+        console.compile.compiler.flags |= future_flags
 
     def more_lines(unicodetext):
         # ooh, look at the hack:
