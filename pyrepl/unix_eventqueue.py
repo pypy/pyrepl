@@ -65,11 +65,11 @@ _keynames.update(('f%d' % i, 'kf%d' % i) for i in range(1, 21))
 #
 CTRL_ARROW_KEYCODE = {
     # for xterm, gnome-terminal, xfce terminal, etc.
-    '\033[1;5D': 'ctrl left',
-    '\033[1;5C': 'ctrl right',
+    b'\033[1;5D': 'ctrl left',
+    b'\033[1;5C': 'ctrl right',
     # for rxvt
-    '\033Od': 'ctrl left',
-    '\033Oc': 'ctrl right',
+    b'\033Od': 'ctrl left',
+    b'\033Oc': 'ctrl right',
 }
 
 def general_keycodes():
@@ -120,6 +120,7 @@ class EncodedQueue(object):
 
     def push(self, char):
         ord_char = char if isinstance(char, int) else ord(char)
+        char = bytes(bytearray((ord_char,)))
         self.buf.append(ord_char)
         if char in self.k:
             if self.k is self.ck:
@@ -133,13 +134,13 @@ class EncodedQueue(object):
                 self.insert(Event('key', k, self.flush_buf()))
                 self.k = self.ck
 
-        elif self.buf and self.buf[0] == 033: # 033 == escape
+        elif self.buf and self.buf[0] == 27:  # escape
             # escape sequence not recognized by our keymap: propagate it
             # outside so that i can be recognized as an M-... key (see also
             # the docstring in keymap.py, in particular the line \\E.
             trace('unrecognized escape sequence, propagating...')
             self.k = self.ck
-            self.insert(Event('key', '\033', '\033'))
+            self.insert(Event('key', '\033', bytearray(b'\033')))
             for c in self.flush_buf()[1:]:
                 self.push(chr(c))
 

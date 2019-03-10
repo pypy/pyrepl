@@ -36,7 +36,7 @@ from __future__ import print_function
 import unicodedata
 from collections import deque
 import pprint
-from trace import trace
+from .trace import trace
 
 
 class InputTranslator(object):
