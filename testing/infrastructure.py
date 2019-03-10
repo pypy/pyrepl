@@ -55,6 +55,10 @@ class TestConsole(Console):
             print("event", ev)
         return Event(*ev)
 
+    def getpending(self):
+        """Nothing pending, but do not return None here."""
+        return Event('key', '', b'')
+
 
 class TestReader(Reader):
     __test__ = False
