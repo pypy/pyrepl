@@ -1,6 +1,15 @@
+import sys
+
 import pytest
 
 from .infrastructure import sane_term
+
+if sys.version_info < (3, ):
+    bytes_type = str
+    unicode_type = unicode  # noqa: F821
+else:
+    bytes_type = bytes
+    unicode_type = str
 
 
 @pytest.mark.skipif("os.name != 'posix' or 'darwin' in sys.platform or "
@@ -18,4 +27,4 @@ def test_raw_input():
         result = readline_wrapper.raw_input('prompt:')
     assert result == 'input'
     # A bytes string on python2, a unicode string on python3.
-    assert isinstance(result, str)
+    assert isinstance(result, unicode_type)

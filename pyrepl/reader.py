@@ -55,7 +55,7 @@ def _my_unctrl(c, u=_make_unctrl_map()):
         return u[c]
     else:
         if unicodedata.category(c).startswith('C'):
-            return r'\u%04x' % ord(c)
+            return b'\u%04x' % ord(c)
         else:
             return c
 
