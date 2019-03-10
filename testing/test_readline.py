@@ -5,7 +5,7 @@ import sys
 
 if sys.version_info < (3, ):
     bytes_type = str
-    unicode_type = unicode
+    unicode_type = unicode  # noqa: F821
 else:
     bytes_type = bytes
     unicode_type = str
@@ -37,5 +37,9 @@ def test_raw_input():
     os.write(master, b'input\n')
 
     result = readline_wrapper.raw_input('prompt:')
-    assert result == b'input'
-    assert isinstance(result, bytes_type)
+    if sys.version_info < (3, ):
+        assert result == b'input'
+        assert isinstance(result, bytes_type)
+    else:
+        assert result == 'input'
+        assert isinstance(result, unicode_type)

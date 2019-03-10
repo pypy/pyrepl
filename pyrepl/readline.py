@@ -205,9 +205,13 @@ class _ReadlineWrapper(object):
         except _error:
             return _old_raw_input(prompt)
         reader.ps1 = prompt
+
+        ret = reader.readline(startup_hook=self.startup_hook)
+        if sys.version_info < (3, ):
+            return ret
         # Unicode/str is required for Python 3 (3.5.2).
-        return unicode(reader.readline(startup_hook=self.startup_hook),
-                       ENCODING)
+        # Ref: https://bitbucket.org/pypy/pyrepl/issues/20/#comment-30647029
+        return unicode(ret, ENCODING)
 
     def multiline_input(self, more_lines, ps1, ps2, returns_unicode=False):
         """Read an input on possibly multiple lines, asking for more
