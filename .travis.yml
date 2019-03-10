@@ -1,0 +1,13 @@
+dist: xenial
+language: python
+
+python:
+  - '2.7'
+  - '3.3'
+  - 'pypy2.7-6.0'
+
+install:
+  - pip install tox-travis
+
+script:
+  - tox
