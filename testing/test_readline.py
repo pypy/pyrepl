@@ -1,7 +1,16 @@
-from pyrepl.readline import _ReadlineWrapper
 import os
 import pty
 import sys
+
+import pytest
+from pyrepl.readline import _ReadlineWrapper
+
+
+@pytest.fixture
+def readline_wrapper():
+    master, slave = pty.openpty()
+    return _ReadlineWrapper(slave, slave)
+
 
 if sys.version_info < (3, ):
     bytes_type = str
@@ -43,3 +52,17 @@ def test_raw_input():
     else:
         assert result == 'input'
         assert isinstance(result, unicode_type)
+
+
+def test_read_history_file(readline_wrapper, tmp_path):
+    histfile = tmp_path / "history"
+    histfile.touch()
+
+    assert readline_wrapper.reader is None
+
+    readline_wrapper.read_history_file(str(histfile))
+    assert readline_wrapper.reader.history == []
+
+    histfile.write_bytes(b"foo\nbar\n")
+    readline_wrapper.read_history_file(str(histfile))
+    assert readline_wrapper.reader.history == ["foo", "bar"]

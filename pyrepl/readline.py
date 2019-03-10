@@ -34,7 +34,9 @@ from pyrepl.completing_reader import CompletingReader
 from pyrepl.unix_console import UnixConsole, _error
 try:
     unicode
+    PY3 = False
 except NameError:
+    PY3 = True
     unicode = str
     unichr = chr
     basestring = bytes, str
@@ -207,8 +209,9 @@ class _ReadlineWrapper(object):
         reader.ps1 = prompt
 
         ret = reader.readline(startup_hook=self.startup_hook)
-        if sys.version_info < (3, ):
+        if not PY3:
             return ret
+
         # Unicode/str is required for Python 3 (3.5.2).
         # Ref: https://bitbucket.org/pypy/pyrepl/issues/20/#comment-30647029
         return unicode(ret, ENCODING)
@@ -247,6 +250,9 @@ class _ReadlineWrapper(object):
 
     def _histline(self, line):
         line = line.rstrip('\n')
+        if PY3:
+            return line
+
         try:
             return unicode(line, ENCODING)
         except UnicodeDecodeError:   # bah, silently fall back...
