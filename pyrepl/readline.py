@@ -32,6 +32,12 @@ from pyrepl import commands
 from pyrepl.historical_reader import HistoricalReader
 from pyrepl.completing_reader import CompletingReader
 from pyrepl.unix_console import UnixConsole, _error
+try:
+    unicode
+except NameError:
+    unicode = str
+    unichr = chr
+    basestring = bytes, str
 
 
 ENCODING = sys.getfilesystemencoding() or 'latin1'     # XXX review
@@ -199,7 +205,9 @@ class _ReadlineWrapper(object):
         except _error:
             return _old_raw_input(prompt)
         reader.ps1 = prompt
-        return reader.readline(startup_hook=self.startup_hook)
+        # Unicode/str is required for Python 3 (3.5.2).
+        return unicode(reader.readline(startup_hook=self.startup_hook),
+                       ENCODING)
 
     def multiline_input(self, more_lines, ps1, ps2, returns_unicode=False):
         """Read an input on possibly multiple lines, asking for more
@@ -229,7 +237,7 @@ class _ReadlineWrapper(object):
         self.config.completer_delims = dict.fromkeys(string)
 
     def get_completer_delims(self):
-        chars = self.config.completer_delims.keys()
+        chars = list(self.config.completer_delims.keys())
         chars.sort()
         return ''.join(chars)
 
@@ -423,9 +431,14 @@ def _setup():
 
     else:
         # this is not really what readline.c does.  Better than nothing I guess
-        import __builtin__
-        _old_raw_input = __builtin__.raw_input
-        __builtin__.raw_input = _wrapper.raw_input
+        try:
+            import __builtin__
+            _old_raw_input = __builtin__.raw_input
+            __builtin__.raw_input = _wrapper.raw_input
+        except ImportError:
+            import builtins
+            _old_raw_input = builtins.input
+            builtins.input = _wrapper.raw_input
 
 _old_raw_input = None
 _setup()
