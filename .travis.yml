@@ -13,3 +13,9 @@ install:
 
 script:
   - tox
+
+# Only master and releases.  PRs are used otherwise.
+branches:
+  only:
+    - master
+    - /^\d+\.\d+(\.\d+)?(-\S*)?$/
