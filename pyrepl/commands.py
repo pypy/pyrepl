@@ -370,7 +370,7 @@ class invalid_command(Command):
 class qIHelp(Command):
     def do(self):
         r = self.reader
-        r.insert((bytes(self.event) + r.console.getpending().data) * r.get_arg())
+        r.insert((self.event + r.console.getpending().data) * r.get_arg())
         r.pop_input_trans()
 
 from pyrepl import input
@@ -384,4 +384,7 @@ class QITrans(object):
 class quoted_insert(Command):
     kills_digit_arg = 0
     def do(self):
-        self.reader.push_input_trans(QITrans())
+        # XXX in Python 3, processing insert/C-q/C-v keys crashes
+        # because of a mixture of str and bytes.  Disable these keys.
+        pass
+        #self.reader.push_input_trans(QITrans())

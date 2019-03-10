@@ -189,7 +189,7 @@ class ReaderConsole(code.InteractiveInterpreter):
             # ooh, look at the hack:
             code = self.compile(text, '<stdin>', 'single')
         except (OverflowError, SyntaxError, ValueError):
-            self.showsyntaxerror("<stdin>")
+            self.showsyntaxerror('<stdin>')
         else:
             self.runcode(code)
             if sys.stdout and not sys.stdout.closed:
