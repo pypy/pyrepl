@@ -50,12 +50,8 @@ def test_raw_input():
 
     with sane_term():
         result = readline_wrapper.raw_input('prompt:')
-    if sys.version_info < (3, ):
-        assert result == b'input'
-        assert isinstance(result, bytes_type)
-    else:
-        assert result == 'input'
-        assert isinstance(result, unicode_type)
+    assert result == 'input'
+    assert isinstance(result, unicode_type)
 
 
 def test_read_history_file(readline_wrapper, tmp_path):
