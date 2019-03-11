@@ -165,6 +165,8 @@ default_keymap = tuple(
      (r'\EOF', 'end'),   # the entries in the terminfo database for xterms
      (r'\EOH', 'home'),  # seem to be wrong.  this is a less than ideal
                          # workaround
+     (r'\<ctrl left>',  'backward-word'),
+     (r'\<ctrl right>', 'forward-word'),
      ])
 
 if 'c' in globals():  # only on python 2.x
