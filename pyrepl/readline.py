@@ -348,9 +348,11 @@ class _ReadlineWrapper(object):
 
         fname = os.path.expanduser(filename)
         if PY2:
-            open(fname, 'w').write(entries)
+            f = open(fname, 'w')
         else:
-            open(fname, 'w', encoding='utf-8').write(entries)
+            f = open(fname, 'w', encoding='utf-8')
+        f.write(entries)
+        f.close()
 
     def clear_history(self):
         del self.get_reader().history[:]
