@@ -66,3 +66,17 @@ def test_read_history_file(readline_wrapper, tmp_path):
     histfile.write_bytes(b"foo\nbar\n")
     readline_wrapper.read_history_file(str(histfile))
     assert readline_wrapper.reader.history == ["foo", "bar"]
+
+
+def test_write_history_file(readline_wrapper, tmp_path):
+    histfile = tmp_path / "history"
+
+    reader = readline_wrapper.get_reader()
+    history = reader.history
+    assert history == []
+    history.extend(["foo", "bar"])
+
+    readline_wrapper.write_history_file(str(histfile))
+
+    with open(str(histfile), "r") as f:
+        assert f.readlines() == ["foo\n", "bar\n"]
