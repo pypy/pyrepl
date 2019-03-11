@@ -36,23 +36,41 @@ except NameError:
 
 
 _keynames = {
-    "delete" : "kdch1",
-    "down" : "kcud1",
-    "end" : "kend",
-    "enter" : "kent",
-    "f1"  : "kf1",    "f2"  : "kf2",    "f3"  : "kf3",    "f4"  : "kf4",
-    "f5"  : "kf5",    "f6"  : "kf6",    "f7"  : "kf7",    "f8"  : "kf8",
-    "f9"  : "kf9",    "f10" : "kf10",   "f11" : "kf11",   "f12" : "kf12",
-    "f13" : "kf13",   "f14" : "kf14",   "f15" : "kf15",   "f16" : "kf16",
-    "f17" : "kf17",   "f18" : "kf18",   "f19" : "kf19",   "f20" : "kf20",
-    "home" : "khome",
-    "insert" : "kich1",
-    "left" : "kcub1",
-    "page down" : "knp",
-    "page up"   : "kpp",
-    "right" : "kcuf1",
-    "up" : "kcuu1",
-    }
+    "delete": "kdch1",
+    "down": "kcud1",
+    "end": "kend",
+    "enter": "kent",
+    "home": "khome",
+    "insert": "kich1",
+    "left": "kcub1",
+    "page down": "knp",
+    "page up": "kpp",
+    "right": "kcuf1",
+    "up": "kcuu1",
+}
+
+
+#function keys x in 1-20 -> fX: kfX
+_keynames.update(('f%d' % i, 'kf%d' % i) for i in range(1, 21))
+
+# this is a bit of a hack: CTRL-left and CTRL-right are not standardized
+# termios sequences: each terminal emulator implements its own slightly
+# different incarnation, and as far as I know, there is no way to know
+# programmatically which sequences correspond to CTRL-left and
+# CTRL-right. In bash, these keys usually work because there are bindings
+# in ~/.inputrc, but pyrepl does not support it. The workaround is to
+# hard-code here a bunch of known sequences, which will be seen as "ctrl
+# left" and "ctrl right" keys, which can be finally be mapped to commands
+# by the reader's keymaps.
+#
+CTRL_ARROW_KEYCODE = {
+    # for xterm, gnome-terminal, xfce terminal, etc.
+    b'\033[1;5D': 'ctrl left',
+    b'\033[1;5C': 'ctrl right',
+    # for rxvt
+    b'\033Od': 'ctrl left',
+    b'\033Oc': 'ctrl right',
+}
 
 def general_keycodes():
     keycodes = {}
@@ -61,8 +79,8 @@ def general_keycodes():
         trace('key {key} tiname {tiname} keycode {keycode!r}', **locals())
         if keycode:
             keycodes[keycode] = key
+    keycodes.update(CTRL_ARROW_KEYCODE)
     return keycodes
-
 
 
 def EventQueue(fd, encoding):
@@ -73,6 +91,7 @@ def EventQueue(fd, encoding):
     k = keymap.compile_keymap(keycodes)
     trace('keymap {k!r}', k=k)
     return EncodedQueue(k, encoding)
+
 
 class EncodedQueue(object):
     def __init__(self, keymap, encoding):
@@ -128,8 +147,8 @@ class EncodedQueue(object):
         else:
             try:
                 decoded = bytes(self.buf).decode(self.encoding)
-            except:
+            except UnicodeError:
                 return
-
-            self.insert(Event('key', decoded, self.flush_buf()))
+            else:
+                self.insert(Event('key', decoded, self.flush_buf()))
             self.k = self.ck
