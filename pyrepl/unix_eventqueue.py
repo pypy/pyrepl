@@ -21,6 +21,8 @@
 # Bah, this would be easier to test if curses/terminfo didn't have so
 # much non-introspectable global state.
 
+from collections import deque
+
 from pyrepl import keymap
 from pyrepl.console import Event
 from pyrepl import curses
@@ -75,13 +77,13 @@ def EventQueue(fd, encoding):
 class EncodedQueue(object):
     def __init__(self, keymap, encoding):
         self.k = self.ck = keymap
-        self.events = []
+        self.events = deque()
         self.buf = bytearray()
-        self.encoding=encoding
+        self.encoding = encoding
 
     def get(self):
         if self.events:
-            return self.events.pop(0)
+            return self.events.popleft()
         else:
             return None
 
@@ -91,14 +93,16 @@ class EncodedQueue(object):
     def flush_buf(self):
         old = self.buf
         self.buf = bytearray()
-        return bytes(old)
+        return old
 
     def insert(self, event):
         trace('added event {event}', event=event)
         self.events.append(event)
 
     def push(self, char):
-        self.buf.append(ord(char))
+        ord_char = ord(char)
+        char = bytes(bytearray((ord_char,)))
+        self.buf.append(ord_char)
         if char in self.k:
             if self.k is self.ck:
                 #sanity check, buffer is empty when a special key comes
@@ -110,6 +114,16 @@ class EncodedQueue(object):
             else:
                 self.insert(Event('key', k, self.flush_buf()))
                 self.k = self.ck
+
+        elif self.buf and self.buf[0] == 27:  # escape
+            # escape sequence not recognized by our keymap: propagate it
+            # outside so that i can be recognized as an M-... key (see also
+            # the docstring in keymap.py, in particular the line \\E.
+            trace('unrecognized escape sequence, propagating...')
+            self.k = self.ck
+            self.insert(Event('key', '\033', bytearray(b'\033')))
+            for c in self.flush_buf()[1:]:
+                self.push(chr(c))
 
         else:
             try:
