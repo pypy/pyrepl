@@ -27,7 +27,12 @@ class Event(object):
         self.raw = raw
 
     def __repr__(self):
-        return 'Event(%r, %r)'%(self.evt, self.data)
+        return 'Event(%r, %r)' % (self.evt, self.data)
+
+    def __eq__(self, other):
+        return (self.evt == other.evt and
+                self.data == other.data and
+                self.raw == other.raw)
 
 class Console(object):
     """Attributes:
