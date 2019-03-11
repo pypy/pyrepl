@@ -9,7 +9,8 @@ Note that there is also a built-in module _minimal_curses which will
 hide this one if compiled in.
 """
 
-import ctypes, ctypes.util
+import ctypes.util
+
 
 class error(Exception):
     pass
@@ -42,8 +43,11 @@ ERR = -1
 
 # ____________________________________________________________
 
-try: from __pypy__ import builtinify
-except ImportError: builtinify = lambda f: f
+try:
+    from __pypy__ import builtinify
+except ImportError:
+    builtinify = lambda f: f
+
 
 @builtinify
 def setupterm(termstr, fd):
@@ -51,6 +55,7 @@ def setupterm(termstr, fd):
     result = clib.setupterm(termstr, fd, ctypes.byref(err))
     if result == ERR:
         raise error("setupterm() failed (err=%d)" % err.value)
+
 
 @builtinify
 def tigetstr(cap):
@@ -60,6 +65,7 @@ def tigetstr(cap):
     if ctypes.cast(result, ctypes.c_void_p).value == ERR:
         return None
     return ctypes.cast(result, ctypes.c_char_p).value
+
 
 @builtinify
 def tparm(str, i1=0, i2=0, i3=0, i4=0, i5=0, i6=0, i7=0, i8=0, i9=0):
