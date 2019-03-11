@@ -26,12 +26,12 @@ on top of pyrepl.  Not all functionalities are supported.  Contains
 extensions for multiline input.
 """
 
-import sys, os
+import sys
+import os
 from pyrepl import commands
 from pyrepl.historical_reader import HistoricalReader
 from pyrepl.completing_reader import CompletingReader
 from pyrepl.unix_console import UnixConsole, _error
-
 try:
     unicode
     PY2 = True
@@ -41,41 +41,43 @@ except NameError:
 
 ENCODING = sys.getfilesystemencoding() or 'latin1'     # XXX review
 
-__all__ = ['add_history',
-           'clear_history',
-           'get_begidx',
-           'get_completer',
-           'get_completer_delims',
-           'get_current_history_length',
-           'get_endidx',
-           'get_history_item',
-           'get_history_length',
-           'get_line_buffer',
-           'insert_text',
-           'parse_and_bind',
-           'read_history_file',
-           'read_init_file',
-           'redisplay',
-           'remove_history_item',
-           'replace_history_item',
-           'set_completer',
-           'set_completer_delims',
-           'set_history_length',
-           'set_pre_input_hook',
-           'set_startup_hook',
-           'write_history_file',
-           # ---- multiline extensions ----
-           'multiline_input',
-           ]
+__all__ = [
+    'add_history',
+    'clear_history',
+    'get_begidx',
+    'get_completer',
+    'get_completer_delims',
+    'get_current_history_length',
+    'get_endidx',
+    'get_history_item',
+    'get_history_length',
+    'get_line_buffer',
+    'insert_text',
+    'parse_and_bind',
+    'read_history_file',
+    'read_init_file',
+    'redisplay',
+    'remove_history_item',
+    'replace_history_item',
+    'set_completer',
+    'set_completer_delims',
+    'set_history_length',
+    'set_pre_input_hook',
+    'set_startup_hook',
+    'write_history_file',
+    # ---- multiline extensions ----
+    'multiline_input',
+]
 
 # ____________________________________________________________
+
 
 class ReadlineConfig(object):
     readline_completer = None
     completer_delims = dict.fromkeys(' \t\n`~!@#$%^&*()-=+[{]}\\|;:\'",<>/?')
 
-class ReadlineAlikeReader(HistoricalReader, CompletingReader):
 
+class ReadlineAlikeReader(HistoricalReader, CompletingReader):
     assume_immutable_completions = False
     use_brackets = False
     sort_in_column = True
@@ -198,7 +200,7 @@ def _get_previous_line_indent(buffer, pos):
 class maybe_accept(commands.Command):
     def do(self):
         r = self.reader
-        r.dirty = 1 # this is needed to hide the completion menu, if visible
+        r.dirty = 1  # this is needed to hide the completion menu, if visible
         #
         # if there are already several lines and the cursor
         # is not on the last one, always insert a new \n.
@@ -444,6 +446,7 @@ _get_reader = _wrapper.get_reader
 # ____________________________________________________________
 # Stubs
 
+
 def _make_stub(_name, _ret):
     def stub(*args, **kwds):
         import warnings
@@ -455,16 +458,16 @@ for _name, _ret in [
     ('read_init_file', None),
     ('redisplay', None),
     ('set_pre_input_hook', None),
-    ]:
+]:
     assert _name not in globals(), _name
     _make_stub(_name, _ret)
 
-# ____________________________________________________________
 
 def _setup():
     global _old_raw_input
     if _old_raw_input is not None:
-        return # don't run _setup twice
+        # Don't run _setup twice.
+        return
 
     try:
         f_in = sys.stdin.fileno()
