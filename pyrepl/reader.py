@@ -51,11 +51,12 @@ def _make_unctrl_map():
 
 def _my_unctrl(c, u=_make_unctrl_map()):
     # takes an integer, returns a unicode
+    assert isinstance(c, int)
     if c in u:
         return u[c]
     else:
         if unicodedata.category(c).startswith('C'):
-            return '\\u%04x' % ord(c)
+            return '\\u%04x' % c
         else:
             return c  # XXX: does not "return a unicode"?!
 
