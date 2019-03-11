@@ -373,7 +373,7 @@ class qIHelp(Command):
 
         r = self.reader
         pending = r.console.getpending().data
-        disp = disp_str((self.event + pending).encode())[0]
+        disp = disp_str((self.event + pending))[0]
         r.insert(disp * r.get_arg())
         r.pop_input_trans()
 

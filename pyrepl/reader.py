@@ -60,11 +60,6 @@ def _my_unctrl(c, u=_make_unctrl_map()):
         else:
             return c  # XXX: does not "return a unicode"?!
 
-if 'a'[0] == b'a':
-    # When running tests with python2, bytes characters are bytes.
-    def _my_unctrl(c, uc=_my_unctrl):
-        return uc(ord(c))
-
 
 def disp_str(buffer, join=''.join, uc=_my_unctrl):
     """ disp_str(buffer:string) -> (string, [int])
@@ -80,7 +75,7 @@ def disp_str(buffer, join=''.join, uc=_my_unctrl):
     go higher as and when unicode support happens."""
     # disp_str proved to be a bottleneck for large inputs,
     # so it needs to be rewritten in C; it's not required though.
-    s = [uc(x) for x in buffer]
+    s = [uc(ord(x)) for x in buffer]
     b = []  # XXX: bytearray
     for x in s:
         b.append(1)
