@@ -40,6 +40,7 @@ def prefix(wordlist, j=0):
 
 STRIPCOLOR_REGEX = re.compile(r"\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[m|K]")
 
+
 def stripcolor(s):
     return STRIPCOLOR_REGEX.sub('', s)
 
@@ -65,8 +66,8 @@ def build_menu(cons, wordlist, start, use_brackets, sort_in_column):
         item = "%s  "
         padding = 2
     maxlen = min(max(map(real_len, wordlist)), cons.width - padding)
-    cols = int(cons.width / (maxlen + padding))
-    rows = int((len(wordlist) - 1)/cols + 1)
+    cols = cons.width // (maxlen + padding)
+    rows = (len(wordlist) - 1) // cols + 1
 
     if sort_in_column:
         # sort_in_column=False (default)     sort_in_column=True
@@ -104,7 +105,7 @@ def build_menu(cons, wordlist, start, use_brackets, sort_in_column):
 #  To summarise the summary of the summary:- people are a problem.
 #                  -- The Hitch-Hikers Guide to the Galaxy, Episode 12
 
-#### Desired behaviour of the completions commands.
+# Desired behaviour of the completions commands.
 # the considerations are:
 # (1) how many completions are possible
 # (2) whether the last command was a completion
@@ -275,7 +276,7 @@ def test():
     reader.ps1 = "c**> "
     reader.ps2 = "c/*> "
     reader.ps3 = "c|*> "
-    reader.ps4 = "c\*> "
+    reader.ps4 = r"c\*> "
     while reader.readline():
         pass
 

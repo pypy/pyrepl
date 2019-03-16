@@ -34,6 +34,11 @@ from .fancy_termios import tcgetattr, tcsetattr
 from .console import Console, Event
 from .unix_eventqueue import EventQueue
 from .trace import trace
+try:
+    from __pypy__ import pyos_inputhook
+except ImportError:
+    def pyos_inputhook():
+        pass
 
 
 class InvalidTerminal(RuntimeError):
@@ -252,7 +257,6 @@ class UnixConsole(Console):
         # reuse the oldline as much as possible, but stop as soon as we
         # encounter an ESCAPE, because it might be the start of an escape
         # sequene
-        #XXX unicode check!
         while x < minlen and oldline[x] == newline[x] and newline[x] != '\x1b':
             x += 1
         if oldline[x:] == newline[x+1:] and self.ich1:
@@ -286,7 +290,6 @@ class UnixConsole(Console):
             self.__write(newline[x:])
             self.__posxy = len(newline), y
 
-        #XXX: check for unicode mess
         if '\x1b' in newline:
             # ANSI escape characters are present, so we can't assume
             # anything about the position of the cursor.  Moving the cursor
@@ -407,6 +410,7 @@ class UnixConsole(Console):
         while self.event_queue.empty():
             while 1:
                 # All hail Unix!
+                pyos_inputhook()
                 try:
                     self.push_char(os.read(self.input_fd, 1))
                 except (IOError, OSError) as err:
@@ -534,7 +538,6 @@ class UnixConsole(Console):
                 "i", ioctl(self.input_fd, FIONREAD, "\0\0\0\0"))[0]
             data = os.read(self.input_fd, amount)
             raw = unicode(data, self.encoding, 'replace')
-            #XXX: something is wrong here
             e.data += raw
             e.raw += raw
             return e
@@ -550,7 +553,6 @@ class UnixConsole(Console):
             amount = 10000
             data = os.read(self.input_fd, amount)
             raw = unicode(data, self.encoding, 'replace')
-            #XXX: something is wrong here
             e.data += raw
             e.raw += raw
             return e

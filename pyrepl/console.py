@@ -17,7 +17,6 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-
 class Event(object):
     """An Event.  `evt' is 'key' or somesuch."""
     __slots__ = 'evt', 'data', 'raw'
@@ -42,7 +41,7 @@ class Console(object):
     height,
     width,
     """
-
+    
     def refresh(self, screen, xy):
         pass
 

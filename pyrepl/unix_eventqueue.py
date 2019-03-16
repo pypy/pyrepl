@@ -119,7 +119,7 @@ class EncodedQueue(object):
         self.events.append(event)
 
     def push(self, char):
-        ord_char = char if isinstance(char, int) else ord(char)
+        ord_char = ord(char)
         char = bytes(bytearray((ord_char,)))
         self.buf.append(ord_char)
         if char in self.k:

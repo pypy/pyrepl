@@ -7,8 +7,8 @@ def test_simple():
 
     a = u'\u1234'
     b = a.encode('utf-8')
-    for c in b:
-        q.push(c)
+    for c in bytearray(a, 'utf-8'):
+        q.push(chr(c))
 
     event = q.get()
     assert q.get() is None
@@ -18,8 +18,8 @@ def test_simple():
 
 def test_propagate_escape():
     def send(keys):
-        for c in keys:
-            q.push(c)
+        for c in bytearray(keys):
+            q.push(chr(c))
 
         events = []
         while True:
@@ -27,7 +27,7 @@ def test_propagate_escape():
             if event is None:
                 break
             events.append(event)
-        return events        
+        return events
 
     keymap = {
         b'\033': {b'U': 'up', b'D': 'down'},
