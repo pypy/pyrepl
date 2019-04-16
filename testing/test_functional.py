@@ -6,8 +6,8 @@
 import pytest
 import sys
 
-
-def pytest_funcarg__child(request):
+@pytest.fixture
+def child(request):
     try:
         pexpect = pytest.importorskip('pexpect')
     except SyntaxError:
