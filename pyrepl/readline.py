@@ -308,15 +308,21 @@ class _ReadlineWrapper(object):
     def write_history_file(self, filename='~/.history'):
         maxlength = self.saved_history_length
         history = self.get_reader().get_trimmed_history(maxlength)
-        f = open(os.path.expanduser(filename), 'w')
+        entries = ''
         for entry in history:
-            if isinstance(entry, unicode):
-                try:
-                    entry = entry.encode(ENCODING)
-                except UnicodeEncodeError:   # bah, silently fall back...
-                    entry = entry.encode('utf-8')
+            # if we are on py3k, we don't need to encode strings before
+            # writing it to a file
+            if isinstance(entry, unicode) and sys.version_info < (3,):
+                entry = entry.encode('utf-8')
             entry = entry.replace('\n', '\r\n')   # multiline history support
-            f.write(entry + '\n')
+            entries += entry + '\n'
+
+        fname = os.path.expanduser(filename)
+        if PY3:
+            f = open(fname, 'w', encoding='utf-8')
+        else:
+            f = open(fname, 'w')
+        f.write(entries)
         f.close()
 
     def clear_history(self):

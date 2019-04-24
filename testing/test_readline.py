@@ -66,3 +66,40 @@ def test_read_history_file(readline_wrapper, tmp_path):
     histfile.write_bytes(b"foo\nbar\n")
     readline_wrapper.read_history_file(str(histfile))
     assert readline_wrapper.reader.history == ["foo", "bar"]
+
+
+def test_write_history_file(readline_wrapper, tmp_path):
+    histfile = tmp_path / "history"
+
+    reader = readline_wrapper.get_reader()
+    history = reader.history
+    assert history == []
+    history.extend(["foo", "bar"])
+
+    readline_wrapper.write_history_file(str(histfile))
+
+    assert open(str(histfile), "r").readlines() == ["foo\n", "bar\n"]
+
+
+def test_write_history_file_with_exception(readline_wrapper, tmp_path):
+    """The history file should not get nuked on inner exceptions.
+
+    This was the case with unicode decoding previously."""
+    histfile = tmp_path / "history"
+    histfile.write_bytes(b"foo\nbar\n")
+
+    class BadEntryException(Exception):
+        pass
+
+    class BadEntry(object):
+        @classmethod
+        def replace(cls, *args):
+            raise BadEntryException
+
+    history = readline_wrapper.get_reader().history
+    history.extend([BadEntry])
+
+    with pytest.raises(BadEntryException):
+        readline_wrapper.write_history_file(str(histfile))
+
+    assert open(str(histfile), "r").readlines() == ["foo\n", "bar\n"]
