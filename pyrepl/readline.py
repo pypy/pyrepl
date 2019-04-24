@@ -189,10 +189,18 @@ class _ReadlineWrapper(object):
     saved_history_length = -1
     startup_hook = None
     config = ReadlineConfig()
+    stdin = None
+    stdout = None
+    stderr = None
 
     def __init__(self, f_in=None, f_out=None):
         self.f_in = f_in if f_in is not None else os.dup(0)
         self.f_out = f_out if f_out is not None else os.dup(1)
+
+    def setup_std_streams(self, stdin, stdout, stderr):
+        self.stdin = stdin
+        self.stdout = stdout
+        self.stderr = stderr
 
     def get_reader(self):
         if self.reader is None:
@@ -207,6 +215,16 @@ class _ReadlineWrapper(object):
         except _error:
             return _old_raw_input(prompt)
         reader.ps1 = prompt
+
+        # the builtin raw_input calls PyOS_StdioReadline, which flushes
+        # stdout/stderr before displaying the prompt. Try to mimic this
+        # behavior: it seems to be the correct thing to do, and moreover it
+        # mitigates this pytest issue:
+        # https://github.com/pytest-dev/pytest/issues/5134
+        if self.stdout and hasattr(self.stdout, 'flush'):
+            self.stdout.flush()
+        if self.stderr and hasattr(self.stderr, 'flush'):
+            self.stderr.flush()
 
         ret = reader.readline(startup_hook=self.startup_hook)
         if not PY3:
@@ -423,6 +441,7 @@ def _setup():
 
     _wrapper.f_in = f_in
     _wrapper.f_out = f_out
+    _wrapper.setup_std_streams(sys.stdin, sys.stdout, sys.stderr)
 
     if '__pypy__' in sys.builtin_module_names:    # PyPy
 
