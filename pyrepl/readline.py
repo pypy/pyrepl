@@ -310,11 +310,10 @@ class _ReadlineWrapper(object):
         history = self.get_reader().get_trimmed_history(maxlength)
         entries = ''
         for entry in history:
-            if isinstance(entry, unicode):
-                try:
-                    entry = entry.encode(ENCODING)
-                except UnicodeEncodeError:   # bah, silently fall back...
-                    entry = entry.encode('utf-8')
+            # if we are on py3k, we don't need to encode strings before
+            # writing it to a file
+            if isinstance(entry, unicode) and sys.version_info < (3,):
+                entry = entry.encode('utf-8')
             entry = entry.replace('\n', '\r\n')   # multiline history support
             entries += entry + '\n'
 
