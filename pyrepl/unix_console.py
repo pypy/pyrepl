@@ -359,7 +359,6 @@ class UnixConsole(Console):
         raw.iflag |= termios.ICRNL
         raw.iflag &= ~(termios.BRKINT | termios.INPCK |
                        termios.ISTRIP | termios.IXON)
-        raw.oflag &= ~termios.OPOST
         raw.cflag &= ~(termios.CSIZE | termios.PARENB)
         raw.cflag |= (termios.CS8)
         raw.lflag &= ~(termios.ICANON | termios.ECHO |
