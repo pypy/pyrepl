@@ -392,8 +392,12 @@ class UnixConsole(Console):
         tcsetattr(self.input_fd, termios.TCSADRAIN, self.__svtermstate)
 
         if hasattr(self, 'old_sigwinch'):
-            signal.signal(signal.SIGWINCH, self.old_sigwinch)
-            del self.old_sigwinch
+            try:
+                signal.signal(signal.SIGWINCH, self.old_sigwinch)
+                del self.old_sigwinch
+            except ValueError:
+                # signal only works in main thread.
+                pass
 
     def __sigwinch(self, signum, frame):
         self.height, self.width = self.getheightwidth()
