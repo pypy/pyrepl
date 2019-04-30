@@ -217,7 +217,7 @@ class _ReadlineWrapper(object):
         if self.stderr and hasattr(self.stderr, 'flush'):
             self.stderr.flush()
 
-        reader.ps1 = prompt            
+        reader.ps1 = prompt
         return reader.readline(startup_hook=self.startup_hook)
 
     def multiline_input(self, more_lines, ps1, ps2, returns_unicode=False):
