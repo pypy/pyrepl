@@ -359,6 +359,7 @@ class UnixConsole(Console):
         except termios.error:  # (25, 'Inappropriate ioctl for device')
             # assert not os.fdopen(self.input_fd).isatty()
             raise EOFError
+        self._prepared = True
         raw = self.__svtermstate.copy()
         raw.iflag |= termios.ICRNL
         raw.iflag &= ~(termios.BRKINT | termios.INPCK |
@@ -390,6 +391,9 @@ class UnixConsole(Console):
             pass
 
     def restore(self):
+        if not hasattr(self, '_prepared'):
+            return
+        del self._prepared
         self.__maybe_write_code(self._rmkx)
         self.flushoutput()
         tcsetattr(self.input_fd, termios.TCSADRAIN, self.__svtermstate)
