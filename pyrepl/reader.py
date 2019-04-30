@@ -478,8 +478,8 @@ feeling more loquacious than I am now."""
         """Get ready to run.  Call restore when finished.  You must not
         write to the console in between the calls to prepare and
         restore."""
+        self.console.prepare()
         try:
-            self.console.prepare()
             self.arg = None
             self.screeninfo = []
             self.finished = 0
