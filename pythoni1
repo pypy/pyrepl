@@ -4,14 +4,16 @@ CPython prompt as much as possible, with the exception of allowing
 multiline input and multiline history entries.
 """
 
-import os, sys
+import os
+import sys
+
 from pyrepl import readline
 from pyrepl.simple_interact import run_multiline_interactive_console
 
 sys.modules['readline'] = readline
 
 if os.getenv('PYTHONSTARTUP'):
-    execfile(os.getenv('PYTHONSTARTUP'))
+    exec(open(os.getenv('PYTHONSTARTUP')).read())
 
-print 'Python', sys.version
+print('Python', sys.version)
 run_multiline_interactive_console()
