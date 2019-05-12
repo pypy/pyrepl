@@ -17,6 +17,8 @@ jobs:
       env: TOXENV=py36-coverage
     - python: '3.7'
       env: TOXENV=py37-coverage
+    - python: '3.8-dev'
+      env: TOXENV=py38-coverage
     - python: 'pypy2.7-6.0'
       env: TOXENV=pypy-coverage
     - python: 'pypy3.5-6.0'
