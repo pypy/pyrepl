@@ -32,12 +32,12 @@ command line interfaces, featuring:
 
 setup(
     name="pyrepl",
-    version="0.9.0",
+    setup_requires="setupmeta",
+    versioning="devcommit",
     author="Michael Hudson-Doyle",
     author_email="micahel@gmail.com",
-    maintainer="Ronny Pfannschmidt",
-    maintainer_email="ronny.pfannschmidt@gmx.de",
-    url="http://bitbucket.org/pypy/pyrepl/",
+    maintainer="Daniel Hahler",
+    url="https://github.com/pdbpp/pyrepl",
     license="MIT X11 style",
     description="A library for building flexible command line interfaces",
     platforms=["unix", "linux"],
