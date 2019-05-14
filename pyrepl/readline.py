@@ -363,7 +363,7 @@ class _ReadlineWrapper(object):
     def _get_idxs(self):
         start = cursor = self.get_reader().pos
         buf = self.get_line_buffer()
-        for i in xrange(cursor - 1, -1, -1):
+        for i in range(cursor - 1, -1, -1):
             if buf[i] in self.get_completer_delims():
                 break
             start = i
