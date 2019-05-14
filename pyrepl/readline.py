@@ -358,6 +358,8 @@ class _ReadlineWrapper(object):
         self.startup_hook = function
 
     def get_line_buffer(self):
+        if PY3:
+            return self.get_reader().get_unicode()
         return self.get_reader().get_buffer()
 
     def _get_idxs(self):
