@@ -3,7 +3,7 @@ language: python
 
 env:
   global:
-    - PYTEST_ADDOPTS="--cov --cov-report=xml"
+    - PYTEST_ADDOPTS="-vv --cov --cov-report=xml"
 
 jobs:
   include:
