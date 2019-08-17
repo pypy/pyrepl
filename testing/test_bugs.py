@@ -46,8 +46,6 @@ def test_cmd_instantiation_crash():
     read_spec(spec, HistoricalTestReader)
 
 
-@pytest.mark.skipif("os.name != 'posix' or 'darwin' in sys.platform or "
-                    "'kfreebsd' in sys.platform")
 def test_signal_failure(monkeypatch):
     import os
     import pty
@@ -61,15 +59,22 @@ def test_signal_failure(monkeypatch):
         raise AssertionError
 
     mfd, sfd = pty.openpty()
+    print("openpty", mfd, sfd)
     try:
         with sane_term():
             c = UnixConsole(sfd, sfd)
+            print("c", c)
             c.prepare()
+            print("prepared")
             c.restore()
+            print("restored")
             monkeypatch.setattr(signal, 'signal', failing_signal)
             c.prepare()
+            print("prepared 2")
             monkeypatch.setattr(signal, 'signal', really_failing_signal)
             c.restore()
+            print("restored 2")
     finally:
+        print("finally")
         os.close(mfd)
         os.close(sfd)
