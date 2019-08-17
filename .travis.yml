@@ -11,7 +11,7 @@ jobs:
       osx_image: xcode10.2
       language: generic
       env: TOXENV=py37-coverage
-      before_install:
+      install:
         - ln -sfn "$(which python3)" /usr/local/bin/python
         - python -V
         - test $(python -c 'import sys; print("%d%d" % sys.version_info[0:2])') = 37
@@ -22,7 +22,7 @@ jobs:
     # - python: '3.7'
     #   env: TOXENV=qa
 
-install:
+before_install:
   - pip install tox
 
 script:
