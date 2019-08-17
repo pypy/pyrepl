@@ -17,6 +17,8 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+import sys
+
 from pyrepl.historical_reader import HistoricalReader
 from .infrastructure import EA, TestReader, read_spec
 
@@ -46,6 +48,7 @@ def test_cmd_instantiation_crash():
     read_spec(spec, HistoricalTestReader)
 
 
+@pytest.mark.skipif(sys.platform == "osx", reason="hangs on osx")
 def test_signal_failure(monkeypatch):
     import os
     import pty
