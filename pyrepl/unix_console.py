@@ -386,17 +386,25 @@ class UnixConsole(Console):
             pass
 
     def restore(self):
+        print("restore: 1")
         self.__maybe_write_code(self._rmkx)
+        print("restore: 2")
         self.flushoutput()
+        print("restore: 3")
         tcsetattr(self.input_fd, termios.TCSADRAIN, self.__svtermstate)
+        print("restore: 4")
 
         if hasattr(self, 'old_sigwinch'):
             try:
+                print("restore: 5")
                 signal.signal(signal.SIGWINCH, self.old_sigwinch)
+                print("restore: 6")
                 del self.old_sigwinch
             except ValueError:
+                print("restore: 7")
                 # signal only works in main thread.
                 pass
+        print("restore: end")
 
     def __sigwinch(self, signum, frame):
         self.height, self.width = self.getheightwidth()
