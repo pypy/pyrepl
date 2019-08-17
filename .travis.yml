@@ -7,14 +7,6 @@ env:
 
 jobs:
   include:
-    - os: windows
-      language: shell
-      env:
-        - PATH=/c/Python37:/c/Python37/Scripts:$PATH
-        - TOXENV=py37-coverage
-      before_install:
-        - choco install --no-progress python
-
     - os: osx
       osx_image: xcode10.2
       language: generic
