@@ -17,10 +17,8 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import sys
-
 from pyrepl.historical_reader import HistoricalReader
-from .infrastructure import EA, TestReader, read_spec
+from .infrastructure import EA, BaseTestReader, sane_term, read_spec
 
 # this test case should contain as-verbatim-as-possible versions of
 # (applicable) bug reports
@@ -28,7 +26,7 @@ from .infrastructure import EA, TestReader, read_spec
 import pytest
 
 
-class HistoricalTestReader(HistoricalReader, TestReader):
+class HistoricalTestReader(HistoricalReader, BaseTestReader):
     pass
 
 
@@ -48,7 +46,8 @@ def test_cmd_instantiation_crash():
     read_spec(spec, HistoricalTestReader)
 
 
-@pytest.mark.skipif(sys.platform == "osx", reason="hangs on osx")
+@pytest.mark.skipif("os.name != 'posix' or 'darwin' in sys.platform or "
+                    "'kfreebsd' in sys.platform")
 def test_signal_failure(monkeypatch):
     import os
     import pty
@@ -63,13 +62,14 @@ def test_signal_failure(monkeypatch):
 
     mfd, sfd = pty.openpty()
     try:
-        c = UnixConsole(sfd, sfd)
-        c.prepare()
-        c.restore()
-        monkeypatch.setattr(signal, 'signal', failing_signal)
-        c.prepare()
-        monkeypatch.setattr(signal, 'signal', really_failing_signal)
-        c.restore()
+        with sane_term():
+            c = UnixConsole(sfd, sfd)
+            c.prepare()
+            c.restore()
+            monkeypatch.setattr(signal, 'signal', failing_signal)
+            c.prepare()
+            monkeypatch.setattr(signal, 'signal', really_failing_signal)
+            c.restore()
     finally:
         os.close(mfd)
         os.close(sfd)

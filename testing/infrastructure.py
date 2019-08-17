@@ -18,6 +18,9 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 from __future__ import print_function
+from contextlib import contextmanager
+import os
+
 from pyrepl.reader import Reader
 from pyrepl.console import Console, Event
 
@@ -60,8 +63,7 @@ class TestConsole(Console):
         return Event('key', '', b'')
 
 
-class TestReader(Reader):
-    __test__ = False
+class BaseTestReader(Reader):
 
     def get_prompt(self, lineno, cursor_on_line):
         return ''
@@ -71,8 +73,19 @@ class TestReader(Reader):
         self.dirty = True
 
 
-def read_spec(test_spec, reader_class=TestReader):
+def read_spec(test_spec, reader_class=BaseTestReader):
     # remember to finish your test_spec with 'accept' or similar!
     con = TestConsole(test_spec, verbose=True)
     reader = reader_class(con)
     reader.readline()
+
+
+@contextmanager
+def sane_term():
+    """Ensure a TERM that supports clear"""
+    old_term, os.environ['TERM'] = os.environ.get('TERM'), 'xterm'
+    yield
+    if old_term is not None:
+        os.environ['TERM'] = old_term
+    else:
+        del os.environ['TERM']
