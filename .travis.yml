@@ -7,6 +7,23 @@ env:
 
 jobs:
   include:
+    - os: windows
+      language: shell
+      env:
+        - PATH=/c/Python37:/c/Python37/Scripts:$PATH
+        - TOXENV=py37-coverage
+      before_install:
+        - choco install --no-progress python
+
+    - os: osx
+      osx_image: xcode10.2
+      language: generic
+      env: TOXENV=py37-coverage
+      before_install:
+        - ln -sfn "$(which python3)" /usr/local/bin/python
+        - python -V
+        - test $(python -c 'import sys; print("%d%d" % sys.version_info[0:2])') = 37
+
     - python: '2.7'
       env: TOXENV=py27-coverage
     - python: '3.4'
