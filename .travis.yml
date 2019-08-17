@@ -15,6 +15,7 @@ jobs:
         - ln -sfn "$(which python3)" /usr/local/bin/python
         - python -V
         - test $(python -c 'import sys; print("%d%d" % sys.version_info[0:2])') = 37
+      before_script:
         - tox --notest
         - .tox/py37-coverage/bin/python -m pip install pytest-timeout
 
