@@ -52,10 +52,14 @@ except ImportError:
 
 @builtinify
 def setupterm(termstr, fd):
+    if termstr is not None:
+        if not isinstance(termstr, bytes):
+            termstr = termstr.encode()
     err = ctypes.c_int(0)
     result = clib.setupterm(termstr, fd, ctypes.byref(err))
     if result == ERR:
-        raise error("setupterm() failed (err=%d)" % err.value)
+        raise error("setupterm(%r, %d) failed (err=%d)" % (
+            termstr, fd, err.value))
 
 
 @builtinify
