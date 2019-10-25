@@ -189,22 +189,30 @@ class _ReadlineWrapper(object):
     saved_history_length = -1
     startup_hook = None
     config = ReadlineConfig()
-    stdin = None
-    stdout = None
-    stderr = None
+
+    # Forced input/output, otherwise sys.stdin/sys.stdout will be used.
+    f_in = None
+    f_out = None
 
     def __init__(self, f_in=None, f_out=None):
-        self.f_in = f_in if f_in is not None else os.dup(0)
-        self.f_out = f_out if f_out is not None else os.dup(1)
-
-    def setup_std_streams(self, stdin, stdout, stderr):
-        self.stdin = stdin
-        self.stdout = stdout
-        self.stderr = stderr
+        if f_in is not None:
+            self.f_in = f_in
+        if f_out is not None:
+            self.f_out = f_out
 
     def get_reader(self):
-        if self.reader is None:
-            console = UnixConsole(self.f_in, self.f_out, encoding=ENCODING)
+        if self.f_in is None:
+            fd_in = sys.stdin.fileno()
+        else:
+            fd_in = self.f_in
+        if self.f_out is None:
+            fd_out = sys.stdout.fileno()
+        else:
+            fd_out = self.f_out
+        if (self.reader is None
+                or fd_in != self.reader.console.input_fd
+                or fd_out != self.reader.console.output_fd):
+            console = UnixConsole(fd_in, fd_out, encoding=ENCODING)
             self.reader = ReadlineAlikeReader(console)
             self.reader.config = self.config
         return self.reader
@@ -221,10 +229,14 @@ class _ReadlineWrapper(object):
         # behavior: it seems to be the correct thing to do, and moreover it
         # mitigates this pytest issue:
         # https://github.com/pytest-dev/pytest/issues/5134
-        if self.stdout and hasattr(self.stdout, 'flush'):
-            self.stdout.flush()
-        if self.stderr and hasattr(self.stderr, 'flush'):
-            self.stderr.flush()
+        try:
+            sys.stdout.flush()
+        except AttributeError:
+            pass
+        try:
+            sys.stderr.flush()
+        except AttributeError:
+            pass
 
         ret = reader.readline(startup_hook=self.startup_hook)
         if not PY3:
@@ -447,9 +459,6 @@ def _setup():
     if not os.isatty(f_in) or not os.isatty(f_out):
         return
 
-    _wrapper.f_in = f_in
-    _wrapper.f_out = f_out
-    _wrapper.setup_std_streams(sys.stdin, sys.stdout, sys.stderr)
 
     if '__pypy__' in sys.builtin_module_names:    # PyPy
 
