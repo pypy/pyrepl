@@ -356,9 +356,8 @@ class UnixConsole(Console):
         # per-readline preparations:
         try:
             self.__svtermstate = tcgetattr(self.input_fd)
-        except termios.error:  # (25, 'Inappropriate ioctl for device')
-            # assert not os.fdopen(self.input_fd).isatty()
-            raise EOFError
+        except termios.error as exc:
+            raise EOFError("could not prepare fd %d: %s" % (self.input_fd, exc))
         self._prepared = True
         raw = self.__svtermstate.copy()
         raw.iflag |= termios.ICRNL
