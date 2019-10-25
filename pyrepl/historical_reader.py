@@ -304,7 +304,7 @@ def test():
     reader.ps1 = "h**> "
     reader.ps2 = "h/*> "
     reader.ps3 = "h|*> "
-    reader.ps4 = "h\*> "
+    reader.ps4 = r"h\*> "
     while reader.readline():
         pass
 

@@ -275,7 +275,7 @@ def test():
     reader.ps1 = "c**> "
     reader.ps2 = "c/*> "
     reader.ps3 = "c|*> "
-    reader.ps4 = "c\*> "
+    reader.ps4 = r"c\*> "
     while reader.readline():
         pass
 
