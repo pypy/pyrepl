@@ -108,7 +108,7 @@ class ReadlineAlikeReader(HistoricalReader, CompletingReader):
             while True:
                 try:
                     next = function(stem, state)
-                except:
+                except StopIteration:
                     break
                 if not isinstance(next, str):
                     break
@@ -424,13 +424,13 @@ def _make_stub(_name, _ret):
     stub.func_name = _name
     globals()[_name] = stub
 
-for _name, _ret in [
-    ('read_init_file', None),
-    ('redisplay', None),
-    ('set_pre_input_hook', None),
-]:
-    assert _name not in globals(), _name
-    _make_stub(_name, _ret)
+
+assert 'read_init_file' not in globals()
+read_init_file = _make_stub('read_init_file', None)
+assert 'redisplay' not in globals()
+redisplay = _make_stub('redisplay', None)
+assert 'set_pre_input_hook' not in globals()
+set_pre_input_hook = _make_stub('set_pre_input_hook', None)
 
 
 def _setup():
@@ -463,7 +463,7 @@ def _setup():
                 del sys.__raw_input__
             except AttributeError:
                 pass
-            return raw_input(prompt)
+            return raw_input(prompt)  # noqa: F821
         sys.__raw_input__ = _wrapper.raw_input
 
     else:
@@ -476,6 +476,7 @@ def _setup():
             import builtins
             _old_raw_input = builtins.input
             builtins.input = _wrapper.raw_input
+
 
 _old_raw_input = None
 _setup()
