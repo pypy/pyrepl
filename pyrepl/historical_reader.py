@@ -207,6 +207,7 @@ class HistoricalReader(R):
         self.transient_history = {}
         self.next_history = None
         self.isearch_direction = ISEARCH_DIRECTION_NONE
+        self.should_auto_add_history = True
         for c in [next_history, previous_history, restore_history,
                   first_history, last_history, yank_arg,
                   forward_history_isearch, reverse_history_isearch,
@@ -291,12 +292,13 @@ class HistoricalReader(R):
 
     def finish(self):
         super(HistoricalReader, self).finish()
-        ret = self.get_unicode()
-        for i, t in self.transient_history.items():
-            if i < len(self.history) and i != self.historyi:
-                self.history[i] = t
-        if ret:
-            self.history.append(ret)
+        if self.should_auto_add_history:
+            ret = self.get_unicode()
+            for i, t in self.transient_history.items():
+                if i < len(self.history) and i != self.historyi:
+                    self.history[i] = t
+            if ret:
+                self.history.append(ret)
 
 def test():
     from pyrepl.unix_console import UnixConsole

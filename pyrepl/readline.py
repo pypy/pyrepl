@@ -62,6 +62,7 @@ __all__ = [
     'redisplay',
     'remove_history_item',
     'replace_history_item',
+    'set_auto_history',
     'set_completer',
     'set_completer_delims',
     'set_history_length',
@@ -252,6 +253,9 @@ class _ReadlineWrapper(object):
     def parse_and_bind(self, string):
         pass  # XXX we don't support parsing GNU-readline-style init files
 
+    def set_auto_history(self, enabled):
+        self.get_reader().should_auto_add_history = enabled
+
     def set_completer(self, function=None):
         self.config.readline_completer = function
 
@@ -400,6 +404,7 @@ clear_history = _wrapper.clear_history
 get_history_item = _wrapper.get_history_item
 remove_history_item = _wrapper.remove_history_item
 replace_history_item = _wrapper.replace_history_item
+set_auto_history = _wrapper.set_auto_history
 add_history = _wrapper.add_history
 set_startup_hook = _wrapper.set_startup_hook
 get_line_buffer = _wrapper.get_line_buffer

@@ -105,3 +105,15 @@ def test_write_history_file_with_exception(readline_wrapper, tmp_path):
 
     with open(str(histfile), "r") as f:
         assert f.readlines() == ["foo\n", "bar\n"]
+
+
+@pytest.mark.parametrize('auto_history,expected', [(True, 1), (False, 0)])
+def test_set_auto_history(auto_history, expected):
+    master, slave = pty.openpty()
+    readline_wrapper = _ReadlineWrapper(slave, slave)
+    readline_wrapper.set_auto_history(auto_history)
+
+    os.write(master, b'input\n')
+    readline_wrapper.get_reader().readline()
+
+    assert readline_wrapper.get_current_history_length() == expected
