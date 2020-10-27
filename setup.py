@@ -37,7 +37,7 @@ setup(
     author="Michael Hudson-Doyle",
     author_email="micahel@gmail.com",
     maintainer="Daniel Hahler",
-    url="https://github.com/pdbpp/pyrepl",
+    url="https://github.com/pypy/pyrepl",
     license="MIT X11 style",
     description="A library for building flexible command line interfaces",
     platforms=["unix", "linux"],
