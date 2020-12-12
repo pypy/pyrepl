@@ -6,6 +6,9 @@ import pytest
 from pyrepl.readline import _ReadlineWrapper
 
 
+pytest_plugins = ["pytester"]
+
+
 @pytest.fixture
 def readline_wrapper():
     master, slave = pty.openpty()
@@ -103,3 +106,38 @@ def test_write_history_file_with_exception(readline_wrapper, tmp_path):
         readline_wrapper.write_history_file(str(histfile))
 
     assert open(str(histfile), "r").readlines() == ["foo\n", "bar\n"]
+
+
+@pytest.mark.parametrize("use_pyrepl", (True, False))
+def test_uses_current_stdin(use_pyrepl, testdir):
+    p1 = testdir.makepyfile("""
+        import io, os, sys
+
+        assert os.isatty(0)
+        dup_stdin = io.FileIO(os.dup(0))
+        assert os.isatty(dup_stdin.fileno())
+
+        old_stdin = sys.stdin
+        sys.stdin = dup_stdin
+
+        if {use_pyrepl!r}:
+            import pyrepl.readline
+
+        print("input1:", input())
+        dup_stdin.close()
+
+        sys.stdin = old_stdin
+        print("input2:", input())
+    """.format(use_pyrepl=use_pyrepl))
+
+    child = testdir.spawn(sys.executable + " " + str(p1), expect_timeout=1)
+    child.sendline("line1")
+    if use_pyrepl:
+        child.expect_exact("input1: line1\r\n")
+    else:
+        child.expect_exact("input1: b'line1'\r\n")
+    child.sendline("line2")
+    if use_pyrepl:
+        child.expect_exact("input2: line2\r\n")
+    else:
+        child.expect_exact(b'line2\r\ninput2: line2\r\n')
