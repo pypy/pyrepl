@@ -401,7 +401,8 @@ class UnixConsole(Console):
     def __sigwinch(self, signum, frame):
         self.height, self.width = self.getheightwidth()
         self.event_queue.insert(Event('resize', None))
-        self.old_sigwinch(signum, frame)
+        if self.old_sigwinch != signal.SIG_DFL:
+            self.old_sigwinch(signum, frame)
 
     def push_char(self, char):
         trace('push char {char!r}', char=char)
