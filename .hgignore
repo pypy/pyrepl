@@ -1,7 +1,0 @@
-dist/
-build/
-.cache/
-\.tox/
-.*\.egg-info
-\.pyc
-\.swp
