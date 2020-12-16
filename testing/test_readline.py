@@ -78,7 +78,8 @@ def test_write_history_file(readline_wrapper, tmp_path):
 
     readline_wrapper.write_history_file(str(histfile))
 
-    assert open(str(histfile), "r").readlines() == ["foo\n", "bar\n"]
+    with open(str(histfile), "r") as f:
+        assert f.readlines() == ["foo\n", "bar\n"]
 
 
 def test_write_history_file_with_exception(readline_wrapper, tmp_path):
@@ -102,4 +103,5 @@ def test_write_history_file_with_exception(readline_wrapper, tmp_path):
     with pytest.raises(BadEntryException):
         readline_wrapper.write_history_file(str(histfile))
 
-    assert open(str(histfile), "r").readlines() == ["foo\n", "bar\n"]
+    with open(str(histfile), "r") as f:
+        assert f.readlines() == ["foo\n", "bar\n"]
