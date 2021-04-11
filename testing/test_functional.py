@@ -19,10 +19,10 @@ except ImportError as exc:
 
 @pytest.fixture
 def start_child():
-    ret = []
+    ret_childs = []
 
     def start_child_func(env_update=None):
-        assert not ret, "child started already"
+        assert not ret_childs, "child started already"
 
         env = {k: v for k, v in os.environ.items() if k in (
             "TERM",
@@ -36,14 +36,13 @@ def start_child():
             child.logfile = sys.stdout
         child.expect_exact(">>> ")
         child.sendline('from pyrepl.python_reader import main')
-        # child.sendline('main()')
-        ret.append(child)
+        ret_childs.append(child)
         return child
 
     yield start_child_func
 
-    assert ret, "child was not started"
-    child = ret[0]
+    assert ret_childs, "child was not started"
+    child = ret_childs[0]
 
     child.sendeof()
     child.expect_exact(">>> ")
