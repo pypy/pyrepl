@@ -10,7 +10,7 @@ jobs:
     - python: '3.4'
       env:
         - TOXENV=py34-coverage
-        - PYTEST="pytest @ git+https://github.com/blueyed/pytest@fix-4.6-attrs"  # TODO: adjust
+        - PYTEST="pytest @ git+https://github.com/blueyed/pytest@my-4.6-maintenance"
 
 install:
   - pip install tox
