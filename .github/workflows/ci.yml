@@ -85,28 +85,23 @@ jobs:
         python -m pip install -U virtualenv==20.4.3
 
     - name: Install tox
-      run: python -m pip install ${{ matrix.tox || 'git+https://github.com/blueyed/tox@master' }}
+      run: python -m pip install git+https://github.com/blueyed/tox@master
 
     - name: Version information
       run: python -m pip list
 
     - name: Setup tox environment
       id: setup-tox
-      env:
-        PYTEST: ${{ matrix.pytest || 'pytest' }}
-        TOX_ARGS: "${{ matrix.tox_args || format('--durations -e {0}', matrix.tox_env) }}"
-      run: python -m tox --notest -v $TOX_ARGS --force-dep="$PYTEST"
+      run: python -m tox --notest -v --durations -e ${{ matrix.tox_env }}
 
     - name: Test
       env:
         COLUMNS: "90"  # better alignment (working around https://github.com/blueyed/pytest/issues/491).
         PY_COLORS: "1"
-        PYTEST: ${{ matrix.pytest || 'pytest' }}
         # UTF-8 mode for Windows (https://docs.python.org/3/using/windows.html#utf-8-mode).
         PYTHONUTF8: "1"
-        TOX_ARGS: "${{ matrix.tox_args || format('--durations -e {0}', matrix.tox_env) }}"
         TOX_TESTENV_PASSENV: "PYTHONUTF8"
-      run: python -m tox -v $TOX_ARGS --force-dep="$PYTEST"
+      run: python -m tox -v --durations -e ${{ matrix.tox_env }}
 
     - name: Report coverage
       if: always() && (steps.setup-tox.outcome == 'success' && contains(matrix.tox_env, '-coverage'))
