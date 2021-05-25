@@ -12,10 +12,6 @@ env:
   PIP_DISABLE_PIP_VERSION_CHECK: true
   TERM: xterm-256color
 
-defaults:
-  run:
-    shell: bash
-
 jobs:
   tests:
     runs-on: ${{ matrix.os }}
