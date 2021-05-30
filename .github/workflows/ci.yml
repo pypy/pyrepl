@@ -9,7 +9,7 @@ on:
 
 env:
   PIP_DISABLE_PIP_VERSION_CHECK: true
-  PYTEST_ADDOPTS: "-vv --cov-report=xml:coverage-ci.xml"
+  PYTEST_ADDOPTS: "-vv"
   # Set TERM to some commonly used default
   # (not provided/setup by GitHub Actions by default).
   TERM: xterm-256color
@@ -106,7 +106,7 @@ jobs:
         if: always() && (steps.setup-tox.outcome == 'success' && contains(matrix.tox_env, '-coverage'))
         uses: codecov/codecov-action@v1
         with:
-          files: ./coverage-ci.xml
+          files: ./coverage.xml
           flags: ${{ runner.os }}
           name: ${{ matrix.tox_env }}
           fail_ci_if_error: true
