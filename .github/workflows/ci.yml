@@ -70,6 +70,7 @@ jobs:
 
       - name: (Initial) version information/pinning
         run: |
+          set -x
           python -m site
           python -m pip --version
           python -m pip list
