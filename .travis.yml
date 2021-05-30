@@ -3,7 +3,7 @@ language: python
 
 env:
   global:
-    - PYTEST_ADDOPTS="--vv"
+    - PYTEST_ADDOPTS="-vv"
 
 jobs:
   include:
