@@ -50,6 +50,11 @@ jobs:
             python: "pypy-2.7"
             os: ubuntu-20.04
 
+          # macos
+          - tox_env: "py39-coverage"
+            python: "3.9"
+            os: macos-11
+
     steps:
       - uses: actions/checkout@v2
         with:
