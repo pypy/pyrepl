@@ -53,7 +53,7 @@ jobs:
           # macos
           - tox_env: "py39-coverage"
             python: "3.9"
-            os: macos-11
+            os: macos-10.15
 
     steps:
       - uses: actions/checkout@v2
