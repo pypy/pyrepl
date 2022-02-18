@@ -102,6 +102,9 @@ jobs:
           TOX_TESTENV_PASSENV: "PYTHONUTF8"
         run: python -m tox -v --durations -e ${{ matrix.tox_env }}
 
+      - name: Test compile
+        run: python -m compileall pyrepl pythoni pythoni1
+
       - name: Report coverage
         if: always() && (steps.setup-tox.outcome == 'success' && contains(matrix.tox_env, '-coverage'))
         uses: codecov/codecov-action@v1
