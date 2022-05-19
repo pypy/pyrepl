@@ -184,7 +184,7 @@ class interrupt(FinishCommand):
     def do(self):
         import signal
         self.reader.console.finish()
-        os.kill(os.getpid(), signal.SIGINT)
+        os.kill(0, signal.SIGINT)
 
 class suspend(Command):
     def do(self):
