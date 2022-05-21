@@ -192,7 +192,7 @@ class suspend(Command):
         r = self.reader
         p = r.pos
         r.console.finish()
-        os.kill(os.getpid(), signal.SIGSTOP)
+        os.kill(0, signal.SIGSTOP)
         ## this should probably be done
         ## in a handler for SIGCONT?
         r.console.prepare()
