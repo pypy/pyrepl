@@ -290,9 +290,11 @@ class _ReadlineWrapper(object):
         # are actually continuations inside a single multiline_input()
         # history item: we use \r\n instead of just \n.  If the history
         # file is passed to GNU readline, the extra \r are just ignored.
+        import codecs  # for py27 compatibility.
+
         history = self.get_reader().history
         buffer = []
-        with open(os.path.expanduser(filename), 'r', errors='replace') as f:
+        with codecs.open(os.path.expanduser(filename), 'r', errors='replace') as f:
             for line in f:
                 if line.endswith('\r\n'):
                     buffer.append(line)
