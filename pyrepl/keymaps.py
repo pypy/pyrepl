@@ -124,7 +124,6 @@ reader_vi_command_keymap = tuple(
         (r"\<insert>", "enter-insert-mode"),
     ]
     + [(c, "digit-arg") for c in "01234567689"]
-    + []
 )
 
 
