@@ -77,8 +77,7 @@ reader_emacs_keymap = tuple(
         (r"\<home>", "home"),
         (r"\<f1>", "help"),
         (r"\EOF", "end"),  # the entries in the terminfo database for xterms
-        (r"\EOH", "home"),  # seem to be wrong.  this is a less than ideal
-        # workaround
+        (r"\EOH", "home"),  # seem to be wrong. this is a less than ideal workaround
     ]
 )
 
