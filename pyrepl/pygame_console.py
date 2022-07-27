@@ -89,7 +89,7 @@ class PyGameConsole(Console):
     height,
     width,
     """
-    
+
     def __init__(self):
         self.pygame_screen = pygame.display.set_mode((800, 600))
         pygame.font.init()
@@ -105,7 +105,7 @@ class PyGameConsole(Console):
         pygame.display.update()
         pygame.event.set_allowed(None)
         pygame.event.set_allowed(KEYDOWN)
-        
+
     def install_keymap(self, keymap):
         """Install a given keymap.
 
@@ -130,7 +130,8 @@ class PyGameConsole(Console):
         s.fill(c, [0, 600 - bmargin, 800, bmargin])
         s.fill(c, [800 - rmargin, 0, lmargin, 600])
 
-    def refresh(self, screen, (cx, cy)):
+    def refresh(self, screen, c):
+        c = cx, cy
         self.screen = screen
         self.pygame_screen.fill(colors.bg,
                                 [0, tmargin + self.cur_top + self.scroll,
@@ -282,9 +283,9 @@ class PyGameConsole(Console):
 
     def forgetinput(self):
         """Forget all pending, but not yet processed input."""
-        while pygame.event.poll().type <> NOEVENT:
+        while pygame.event.poll().type != NOEVENT:
             pass
-    
+
     def getpending(self):
         """Return the characters that have been typed but not yet
         processed."""
@@ -299,7 +300,7 @@ class PyGameConsole(Console):
 
     def wait(self):
         """Wait for an event."""
-        raise Exception, "erp!"
+        raise Exception("erp!")
 
     def repaint(self):
         # perhaps we should consolidate grobs?
