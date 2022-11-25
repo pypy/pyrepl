@@ -1,6 +1,8 @@
 This file contains more verbose descriptions of the changes between
 versions than those in README.
 
+XXX: outdated/not maintained?
+
 New in Version 0.8.x:
 
  * propper command usage + fix one wrong call (thanks Trundle)
