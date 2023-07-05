@@ -275,7 +275,7 @@ class HistoricalReader(R):
                 self.select_item(i)
                 self.pos = p
                 return
-            elif ((forwards and i == len(self.history) - 1)
+            elif ((forwards and i >= len(self.history) - 1)
                   or (not forwards and i == 0)):
                 self.error("not found")
                 return
