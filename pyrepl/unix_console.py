@@ -354,7 +354,11 @@ class UnixConsole(Console):
 
     def prepare(self):
         # per-readline preparations:
-        self.__svtermstate = tcgetattr(self.input_fd)
+        try:
+            self.__svtermstate = tcgetattr(self.input_fd)
+        except termios.error as exc:
+            raise EOFError("could not prepare fd %d: %s" % (self.input_fd, exc))
+        self._prepared = True
         raw = self.__svtermstate.copy()
         raw.iflag |= termios.ICRNL
         raw.iflag &= ~(termios.BRKINT | termios.INPCK |
@@ -386,6 +390,9 @@ class UnixConsole(Console):
             pass
 
     def restore(self):
+        if not hasattr(self, '_prepared'):
+            return
+        del self._prepared
         self.__maybe_write_code(self._rmkx)
         self.flushoutput()
         tcsetattr(self.input_fd, termios.TCSADRAIN, self.__svtermstate)
