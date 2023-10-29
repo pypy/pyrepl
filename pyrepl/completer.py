@@ -79,7 +79,7 @@ class Completer:
         n = len(attr)
         for word in words:
             if word[:n] == attr and word != "__builtins__":
-                matches.append("%s.%s" % (expr, word))
+                matches.append(f"{expr}.{word}")
         return matches
 
 

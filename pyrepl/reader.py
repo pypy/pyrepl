@@ -168,11 +168,7 @@ default_keymap = tuple(
     ]
 )
 
-if "c" in globals():  # only on python 2.x
-    del c  # from the listcomps
-
-
-class Reader(object):
+class Reader:
     """The Reader class implements the bare bones of a command reader,
     handling such details as editing and cursor motion.  What it does
     not support are such things as completion or history support -
@@ -576,10 +572,7 @@ feeling more loquacious than I am now."""
             else:
                 translate = False
 
-            if translate:
-                cmd = self.input_trans.get()
-            else:
-                cmd = event.evt, event.data
+            cmd = self.input_trans.get() if translate else (event.evt, event.data)
 
             if cmd is None:
                 if block:
@@ -624,7 +617,7 @@ feeling more loquacious than I am now."""
 
     def get_unicode(self):
         """Return the current buffer as a unicode string."""
-        return str("").join(self.buffer)
+        return "".join(self.buffer)
 
 
 def test():

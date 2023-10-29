@@ -19,6 +19,7 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+import contextlib
 import errno
 import os
 import re
@@ -157,7 +158,7 @@ class UnixConsole(Console):
 
         ## work out how we're going to sling the cursor around
         # hpa don't work in windows telnet :-(
-        if 0 and self._hpa:
+        if False:
             self.__move_x = self.__move_x_hpa
         elif self._cub and self._cuf:
             self.__move_x = self.__move_x_cub_cuf
@@ -232,7 +233,7 @@ class UnixConsole(Console):
             self.__hide_cursor()
             self.__write_code(self._cup, 0, 0)
             self.__posxy = 0, old_offset
-            for i in range(old_offset - offset):
+            for _ in range(old_offset - offset):
                 self.__write_code(self._ri)
                 oldscr.pop(-1)
                 oldscr.insert(0, "")
@@ -240,7 +241,7 @@ class UnixConsole(Console):
             self.__hide_cursor()
             self.__write_code(self._cup, self.height - 1, 0)
             self.__posxy = 0, old_offset + self.height - 1
-            for i in range(offset - old_offset):
+            for _ in range(offset - old_offset):
                 self.__write_code(self._ind)
                 oldscr.pop(0)
                 oldscr.append("")
@@ -413,10 +414,8 @@ class UnixConsole(Console):
 
         self.__maybe_write_code(self._smkx)
 
-        try:
+        with contextlib.suppress(ValueError):
             self.old_sigwinch = signal.signal(signal.SIGWINCH, self.__sigwinch)
-        except ValueError:
-            pass
 
     def restore(self):
         self.__maybe_write_code(self._rmkx)
@@ -447,7 +446,7 @@ class UnixConsole(Console):
                 # All hail Unix!
                 try:
                     self.push_char(os.read(self.input_fd, 1))
-                except (IOError, OSError) as err:
+                except OSError as err:
                     if err.errno == errno.EINTR:
                         if not self.event_queue.empty():
                             return self.event_queue.get()

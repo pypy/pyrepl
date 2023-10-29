@@ -1,6 +1,5 @@
 import os
 import pty
-import sys
 
 import pytest
 from pyrepl.readline import _ReadlineWrapper
@@ -38,12 +37,8 @@ def test_raw_input():
     os.write(master, b"input\n")
 
     result = readline_wrapper.raw_input("prompt:")
-    if sys.version_info < (3,):
-        assert result == b"input"
-        assert isinstance(result, bytes)
-    else:
-        assert result == "input"
-        assert isinstance(result, str)
+    assert result == "input"
+    assert isinstance(result, str)
 
 
 def test_read_history_file(readline_wrapper, tmp_path):
@@ -70,7 +65,7 @@ def test_write_history_file(readline_wrapper, tmp_path):
 
     readline_wrapper.write_history_file(str(histfile))
 
-    with open(str(histfile), "r") as f:
+    with open(str(histfile)) as f:
         assert f.readlines() == ["foo\n", "bar\n"]
 
 
@@ -84,7 +79,7 @@ def test_write_history_file_with_exception(readline_wrapper, tmp_path):
     class BadEntryException(Exception):
         pass
 
-    class BadEntry(object):
+    class BadEntry:
         @classmethod
         def replace(cls, *args):
             raise BadEntryException
@@ -95,5 +90,5 @@ def test_write_history_file_with_exception(readline_wrapper, tmp_path):
     with pytest.raises(BadEntryException):
         readline_wrapper.write_history_file(str(histfile))
 
-    with open(str(histfile), "r") as f:
+    with open(str(histfile)) as f:
         assert f.readlines() == ["foo\n", "bar\n"]

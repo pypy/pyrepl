@@ -40,7 +40,7 @@ from collections import deque
 from .trace import trace
 
 
-class InputTranslator(object):
+class InputTranslator:
     def push(self, evt):
         pass
 

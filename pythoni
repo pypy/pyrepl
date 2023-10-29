@@ -19,18 +19,21 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import locale, pdb, sys
+import locale
+import pdb
+import sys
+
 # I forget exactly why this is necessary:
 try:
-    locale.setlocale(locale.LC_ALL, '')
+    locale.setlocale(locale.LC_ALL, "")
 except locale.Error:
-    pass # oh well
+    pass  # oh well
 
 
-from pyrepl.python_reader import main
 from pyrepl import cmdrepl
+from pyrepl.python_reader import main
 
 # whizzy feature:  graft pyrepl support onto pdb
-#pdb.Pdb = cmdrepl.replize(pdb.Pdb, 1)
+# pdb.Pdb = cmdrepl.replize(pdb.Pdb, 1)
 
-main(use_pygame_console=('pg' in sys.argv))
+main(use_pygame_console=("pg" in sys.argv))

@@ -20,7 +20,8 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import os
-import sys
+
+from pyrepl import input  # noqa: F401
 
 # Catgories of actions:
 #  killing
@@ -32,7 +33,7 @@ import sys
 # [completion]
 
 
-class Command(object):
+class Command:
     finish = 0
     kills_digit_arg = 1
 
@@ -159,21 +160,21 @@ class unix_line_discard(KillCommand):
 class unix_word_rubout(KillCommand):
     def do(self):
         r = self.reader
-        for i in range(r.get_arg()):
+        for _i in range(r.get_arg()):
             self.kill_range(r.bow(), r.pos)
 
 
 class kill_word(KillCommand):
     def do(self):
         r = self.reader
-        for i in range(r.get_arg()):
+        for _i in range(r.get_arg()):
             self.kill_range(r.pos, r.eow())
 
 
 class backward_kill_word(KillCommand):
     def do(self):
         r = self.reader
-        for i in range(r.get_arg()):
+        for _i in range(r.get_arg()):
             self.kill_range(r.bow(), r.pos)
 
 
@@ -232,7 +233,7 @@ class suspend(Command):
 class up(MotionCommand):
     def do(self):
         r = self.reader
-        for i in range(r.get_arg()):
+        for _i in range(r.get_arg()):
             bol1 = r.bol()
             if bol1 == 0:
                 if r.historyi > 0:
@@ -254,7 +255,7 @@ class down(MotionCommand):
     def do(self):
         r = self.reader
         b = r.buffer
-        for i in range(r.get_arg()):
+        for _i in range(r.get_arg()):
             bol1 = r.bol()
             eol1 = r.eol()
             if eol1 == len(b):
@@ -275,7 +276,7 @@ class down(MotionCommand):
 class left(MotionCommand):
     def do(self):
         r = self.reader
-        for i in range(r.get_arg()):
+        for _i in range(r.get_arg()):
             p = r.pos - 1
             if p >= 0:
                 r.pos = p
@@ -287,7 +288,7 @@ class right(MotionCommand):
     def do(self):
         r = self.reader
         b = r.buffer
-        for i in range(r.get_arg()):
+        for _i in range(r.get_arg()):
             p = r.pos + 1
             if p <= len(b):
                 r.pos = p
@@ -302,7 +303,6 @@ class beginning_of_line(MotionCommand):
 
 class end_of_line(MotionCommand):
     def do(self):
-        r = self.reader
         self.reader.pos = self.reader.eol()
 
 
@@ -319,14 +319,14 @@ class end(MotionCommand):
 class forward_word(MotionCommand):
     def do(self):
         r = self.reader
-        for i in range(r.get_arg()):
+        for _i in range(r.get_arg()):
             r.pos = r.eow()
 
 
 class backward_word(MotionCommand):
     def do(self):
         r = self.reader
-        for i in range(r.get_arg()):
+        for _i in range(r.get_arg()):
             r.pos = r.bow()
 
 
@@ -364,7 +364,7 @@ class backspace(EditCommand):
     def do(self):
         r = self.reader
         b = r.buffer
-        for i in range(r.get_arg()):
+        for _i in range(r.get_arg()):
             if r.pos > 0:
                 r.pos -= 1
                 del b[r.pos]
@@ -385,7 +385,7 @@ class delete(EditCommand):
             r.update_screen()
             r.console.finish()
             raise EOFError
-        for i in range(r.get_arg()):
+        for _i in range(r.get_arg()):
             if r.pos != len(b):
                 del b[r.pos]
                 r.dirty = 1
@@ -423,15 +423,12 @@ class qIHelp(Command):
 
         r = self.reader
         pending = r.console.getpending().data
-        disp = disp_str((self.event + pending))[0]
+        disp = disp_str(self.event + pending)[0]
         r.insert(disp * r.get_arg())
         r.pop_input_trans()
 
 
-from pyrepl import input
-
-
-class QITrans(object):
+class QITrans:
     def push(self, evt):
         self.evt = evt
 

@@ -134,5 +134,3 @@ reader_keymaps = {
     "vi-insert": reader_vi_insert_keymap,
     "vi-command": reader_vi_command_keymap,
 }
-
-del c  # from the listcomps

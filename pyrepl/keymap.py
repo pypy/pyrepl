@@ -182,10 +182,7 @@ def _parse_key1(key, s):
         if len(ret) > 1:
             raise KeySpecError("\\C- must be followed by a character")
         ret = chr(ord(ret) & 0x1F)  # curses.ascii.ctrl()
-    if meta:
-        ret = ["\033", ret]
-    else:
-        ret = [ret]
+    ret = ["\x1b", ret] if meta else [ret]
     return ret, s
 
 
@@ -201,16 +198,13 @@ def parse_keys(key):
 def compile_keymap(keymap, empty=b""):
     r = {}
     for key, value in list(keymap.items()):
-        if isinstance(key, bytes):
-            first = key[:1]
-        else:
-            first = key[0]
+        first = key[:1] if isinstance(key, bytes) else key[0]
         r.setdefault(first, {})[key[1:]] = value
     for key, value in list(r.items()):
         if empty in value:
             if len(value) != 1:
                 raise KeySpecError(
-                    "key definitions for %s clash" % (list(value.values()),)
+                    f"key definitions for {list(value.values())} clash"
                 )
             else:
                 r[key] = value[empty]

@@ -47,11 +47,7 @@ def run_multiline_interactive_console(mainmodule=None, future_flags=0):
         console.compile.compiler.flags |= future_flags
 
     def more_lines(unicodetext):
-        if sys.version_info < (3,):
-            # ooh, look at the hack:
-            src = "#coding:utf-8\n" + unicodetext.encode("utf-8")
-        else:
-            src = unicodetext
+        src = unicodetext
         try:
             code = console.compile(src, "<stdin>", "single")
         except (OverflowError, SyntaxError, ValueError):

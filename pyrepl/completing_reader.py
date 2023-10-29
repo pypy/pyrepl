@@ -86,7 +86,7 @@ def build_menu(cons, wordlist, start, use_brackets, sort_in_column):
     i = start
     for r in range(rows):
         row = []
-        for col in range(cols):
+        for _col in range(cols):
             row.append(item % left_align(wordlist[i], maxlen))
             i += 1
             if i >= len(wordlist):
@@ -222,10 +222,10 @@ class CompletingReader(Reader):
     sort_in_column = False
 
     def collect_keymap(self):
-        return super(CompletingReader, self).collect_keymap() + ((r"\t", "complete"),)
+        return super().collect_keymap() + ((r"\t", "complete"),)
 
     def __init__(self, console):
-        super(CompletingReader, self).__init__(console)
+        super().__init__(console)
         self.cmpltn_menu = ["[ menu 1 ]", "[ menu 2 ]"]
         self.cmpltn_menu_vis = 0
         self.cmpltn_menu_end = 0
@@ -234,12 +234,12 @@ class CompletingReader(Reader):
             self.commands[c.__name__.replace("_", "-")] = c
 
     def after_command(self, cmd):
-        super(CompletingReader, self).after_command(cmd)
+        super().after_command(cmd)
         if not isinstance(cmd, (complete, self_insert)):
             self.cmpltn_reset()
 
     def calc_screen(self):
-        screen = super(CompletingReader, self).calc_screen()
+        screen = super().calc_screen()
         if self.cmpltn_menu_vis:
             ly = self.lxy[1]
             screen[ly:ly] = self.cmpltn_menu
@@ -248,7 +248,7 @@ class CompletingReader(Reader):
         return screen
 
     def finish(self):
-        super(CompletingReader, self).finish()
+        super().finish()
         self.cmpltn_reset()
 
     def cmpltn_reset(self):

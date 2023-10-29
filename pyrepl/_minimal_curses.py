@@ -45,17 +45,15 @@ ERR = -1
 
 try:
     from __pypy__ import builtinify
-
-    builtinify  # silence broken pyflakes
 except ImportError:
-    builtinify = lambda f: f
+    def builtinify(f):
+        return f
 
 
 @builtinify
 def setupterm(termstr, fd):
-    if termstr is not None:
-        if not isinstance(termstr, bytes):
-            termstr = termstr.encode()
+    if termstr is not None and not isinstance(termstr, bytes):
+        termstr = termstr.encode()
     err = ctypes.c_int(0)
     result = clib.setupterm(termstr, fd, ctypes.byref(err))
     if result == ERR:

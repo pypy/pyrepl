@@ -13,7 +13,7 @@ import pytest
 try:
     import pexpect
 except ImportError as exc:
-    pytest.skip("could not import pexpect: {}".format(exc), allow_module_level=True)
+    pytest.skip(f"could not import pexpect: {exc}", allow_module_level=True)
 
 
 @pytest.fixture
@@ -27,10 +27,7 @@ def start_child():
         if env_update:
             env.update(env_update)
         child = pexpect.spawn(sys.executable, timeout=5, env=env)
-        if sys.version_info >= (3,):
-            child.logfile = sys.stdout.buffer
-        else:
-            child.logfile = sys.stdout
+        child.logfile = sys.stdout.buffer
         child.expect_exact(">>> ")
         child.sendline("from pyrepl.python_reader import main")
         ret_childs.append(child)

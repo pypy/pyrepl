@@ -43,7 +43,7 @@ isearch_keymap = tuple(
 )
 
 if "c" in globals():
-    del c
+    del c  # noqa: F821
 
 ISEARCH_DIRECTION_NONE = ""
 ISEARCH_DIRECTION_BACKWARDS = "r"
@@ -71,11 +71,10 @@ class previous_history(commands.Command):
 class restore_history(commands.Command):
     def do(self):
         r = self.reader
-        if r.historyi != len(r.history):
-            if r.get_unicode() != r.history[r.historyi]:
-                r.buffer = list(r.history[r.historyi])
-                r.pos = len(r.buffer)
-                r.dirty = 1
+        if r.historyi != len(r.history) and r.get_unicode() != r.history[r.historyi]:
+            r.buffer = list(r.history[r.historyi])
+            r.pos = len(r.buffer)
+            r.dirty = 1
 
 
 class first_history(commands.Command):
@@ -111,10 +110,7 @@ class yank_arg(commands.Command):
             return
         w = words[a]
         b = r.buffer
-        if r.yank_arg_i > 0:
-            o = len(r.yank_arg_yanked)
-        else:
-            o = 0
+        o = len(r.yank_arg_yanked) if r.yank_arg_i > 0 else 0
         b[r.pos - o : r.pos] = list(w)
         r.yank_arg_yanked = w
         r.pos += len(w) - o
@@ -212,7 +208,7 @@ class HistoricalReader(R):
     """
 
     def collect_keymap(self):
-        return super(HistoricalReader, self).collect_keymap() + (
+        return super().collect_keymap() + (
             (r"\C-n", "next-history"),
             (r"\C-p", "previous-history"),
             (r"\C-o", "operate-and-get-next"),
@@ -225,7 +221,7 @@ class HistoricalReader(R):
         )
 
     def __init__(self, console):
-        super(HistoricalReader, self).__init__(console)
+        super().__init__(console)
         self.history = []
         self.historyi = 0
         self.transient_history = {}
@@ -274,7 +270,7 @@ class HistoricalReader(R):
             return self.transient_history.get(i, self.get_unicode())
 
     def prepare(self):
-        super(HistoricalReader, self).prepare()
+        super().prepare()
         try:
             self.transient_history = {}
             if self.next_history is not None and self.next_history < len(self.history):
@@ -292,9 +288,9 @@ class HistoricalReader(R):
     def get_prompt(self, lineno, cursor_on_line):
         if cursor_on_line and self.isearch_direction != ISEARCH_DIRECTION_NONE:
             d = "rf"[self.isearch_direction == ISEARCH_DIRECTION_FORWARDS]
-            return "(%s-search `%s') " % (d, self.isearch_term)
+            return f"({d}-search `{self.isearch_term}') "
         else:
-            return super(HistoricalReader, self).get_prompt(lineno, cursor_on_line)
+            return super().get_prompt(lineno, cursor_on_line)
 
     def isearch_next(self):
         st = self.isearch_term
@@ -303,10 +299,7 @@ class HistoricalReader(R):
         s = self.get_unicode()
         forwards = self.isearch_direction == ISEARCH_DIRECTION_FORWARDS
         while 1:
-            if forwards:
-                p = s.find(st, p + 1)
-            else:
-                p = s.rfind(st, 0, p + len(st) - 1)
+            p = s.find(st, p + 1) if forwards else s.rfind(st, 0, p + len(st) - 1)
             if p != -1:
                 self.select_item(i)
                 self.pos = p
@@ -325,7 +318,7 @@ class HistoricalReader(R):
                     p = len(s)
 
     def finish(self):
-        super(HistoricalReader, self).finish()
+        super().finish()
         ret = self.get_unicode()
         for i, t in list(self.transient_history.items()):
             if i < len(self.history) and i != self.historyi:

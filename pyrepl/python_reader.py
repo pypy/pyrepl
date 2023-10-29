@@ -31,15 +31,9 @@ import sys
 import traceback
 import warnings
 
-from pyrepl import (commands, completer, completing_reader, module_lister,
-                    reader)
+from pyrepl import commands, completer, completing_reader, module_lister, reader
 from pyrepl.completing_reader import CompletingReader
 from pyrepl.historical_reader import HistoricalReader
-
-try:
-    str
-except:
-    str = str
 
 try:
     imp.find_module("twisted")
@@ -56,21 +50,10 @@ def eat_it(*args):
     pass
 
 
-if sys.version_info >= (3, 0):
-
-    def _reraise(cls, val, tb):
-        __tracebackhide__ = True
-        assert hasattr(val, "__traceback__")
-        raise val
-
-else:
-    exec(
-        """
 def _reraise(cls, val, tb):
     __tracebackhide__ = True
-    raise cls, val, tb
-"""
-    )
+    assert hasattr(val, "__traceback__")
+    raise val
 
 
 class maybe_accept(commands.Command):
@@ -101,20 +84,20 @@ def saver(reader=reader):
             fp.write(
                 b"\n".join(item.encode("unicode_escape") for item in reader.history)
             )
-    except IOError as e:
+    except OSError as e:
         print(e)
         pass
 
 
 class PythonicReader(CompletingReader, HistoricalReader):
     def collect_keymap(self):
-        return super(PythonicReader, self).collect_keymap() + (
+        return super().collect_keymap() + (
             (r"\n", "maybe-accept"),
             (r"\M-\n", "insert-nl"),
         )
 
     def __init__(self, console, locals, compiler=None):
-        super(PythonicReader, self).__init__(console)
+        super().__init__(console)
         self.completer = completer.Completer(locals)
         st = self.syntax_table
         for c in "._0123456789":
@@ -124,18 +107,17 @@ class PythonicReader(CompletingReader, HistoricalReader):
             self.compiler = CommandCompiler()
         else:
             self.compiler = compiler
+
         try:
-            file = open(os.path.expanduser("~/.pythoni.hist"), "rb")
-        except IOError:
+            with open(os.path.expanduser("~/.pythoni.hist"), "rb") as fh:
+                lines = fh.readlines()
+            self.history = [
+                line.rstrip(b"\n").decode("unicode_escape") for line in lines
+            ]
+        except FileNotFoundError:
             self.history = []
-        else:
-            try:
-                lines = file.readlines()
-                self.history = [x.rstrip(b"\n").decode("unicode_escape") for x in lines]
-            except:
-                self.history = []
-            self.historyi = len(self.history)
-            file.close()
+        self.historyi = len(self.history)
+
         atexit.register(lambda: saver(self))
         for c in [maybe_accept]:
             self.commands[c.__name__] = c
@@ -194,7 +176,7 @@ class ReaderConsole(code.InteractiveInterpreter):
         else:
             return
         try:
-            with open(initfile, "r") as f:
+            with open(initfile) as f:
                 exec(compile(f.read(), initfile, "exec"), self.locals, self.locals)
         except:
             etype, value, tb = sys.exc_info()
@@ -381,9 +363,8 @@ def main(
 ):
     si, se, so = sys.stdin, sys.stderr, sys.stdout
     try:
-        if 0 and use_pygame_console:  # pygame currently borked
-            from pyrepl.pygame_console import (FakeStdin, FakeStdout,
-                                               PyGameConsole)
+        if False:  # pygame currently borked
+            from pyrepl.pygame_console import FakeStdin, FakeStdout, PyGameConsole
 
             con = PyGameConsole()
             sys.stderr = sys.stdout = FakeStdout(con)

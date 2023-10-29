@@ -36,6 +36,8 @@
 # XXX it's actually possible to test this module, so it should have a
 # XXX test suite.
 
+# ruff: noqa: F405, F403
+
 from pygame.locals import *
 
 _escapes = {
@@ -186,7 +188,7 @@ def _compile_keymap(keymap):
         if () in value:
             if len(value) != 1:
                 raise KeySpecError(
-                    "key definitions for %s clash" % (list(value.values()),)
+                    f"key definitions for {list(value.values())} clash"
                 )
             else:
                 r[key] = value[()]
@@ -242,11 +244,11 @@ def unparse_key(keyseq):
         elif c in _unescapes:
             p = _unescapes[c]
         elif ord(c) < ord(" "):
-            p = "\\C-%s" % (chr(ord(c) + 96),)
+            p = f"\\C-{chr(ord(c) + 96)}"
         elif ord(" ") <= ord(c) <= ord("~"):
             p = c
         else:
-            p = "\\%03o" % (ord(c),)
+            p = f"\\{ord(c):03o}"
         return p + unparse_key(r)
 
 
@@ -268,11 +270,11 @@ def _unparse_keyf(keyseq):
         elif c in _unescapes:
             p = _unescapes[c]
         elif ord(c) < ord(" "):
-            p = "C-%s" % (chr(ord(c) + 96),)
+            p = f"C-{chr(ord(c) + 96)}"
         elif ord(" ") <= ord(c) <= ord("~"):
             p = c
         else:
-            p = "\\%03o" % (ord(c),)
+            p = f"\\{ord(c):03o}"
         return [p] + _unparse_keyf(r)
 
 

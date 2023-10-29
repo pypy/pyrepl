@@ -18,7 +18,7 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 
-class Event(object):
+class Event:
     """An Event.  `evt' is 'key' or somesuch."""
 
     __slots__ = "evt", "data", "raw"
@@ -29,7 +29,7 @@ class Event(object):
         self.raw = raw
 
     def __repr__(self):
-        return "Event(%r, %r)" % (self.evt, self.data)
+        return "Event({self.evt}, {self.data})"
 
     def __eq__(self, other):
         return (
@@ -37,7 +37,7 @@ class Event(object):
         )
 
 
-class Console(object):
+class Console:
     """Attributes:
 
     screen,

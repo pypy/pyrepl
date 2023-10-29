@@ -25,7 +25,7 @@
 # during command execution and zap the executor process.  Making this
 # work on non-Unix is expected to be even more entertaining.
 
-import types
+# ruff: noqa: F405, F403
 
 import pygame
 from pygame.locals import *
@@ -226,7 +226,7 @@ class PyGameConsole(Console):
         )
 
     def tr_event(self, pyg_event):
-        shift = bool(pyg_event.mod & KMOD_SHIFT)
+        bool(pyg_event.mod & KMOD_SHIFT)
         ctrl = bool(pyg_event.mod & KMOD_CTRL)
         meta = bool(pyg_event.mod & (KMOD_ALT | KMOD_META))
 
@@ -326,8 +326,8 @@ class PyGameConsole(Console):
         # perhaps we should consolidate grobs?
         self.pygame_screen.fill(colors.bg)
         self.paint_margin()
-        for (y, x), surf, text in self.grobs:
-            if surf and 0 < y + self.scroll:
+        for (y, x), surf, _text in self.grobs:
+            if surf and y + self.scroll > 0:
                 self.pygame_screen.blit(surf, (lmargin + x, tmargin + y + self.scroll))
         pygame.display.update()
 

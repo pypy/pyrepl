@@ -42,13 +42,13 @@ from pyrepl.completing_reader import CompletingReader as CR
 
 class CmdReader(CR):
     def collect_keymap(self):
-        return super(CmdReader, self).collect_keymap() + (
+        return super().collect_keymap() + (
             ("\\M-\\n", "invalid-key"),
             ("\\n", "accept"),
         )
 
     def __init__(self, completions):
-        super(CmdReader, self).__init__()
+        super().__init__()
         self.completions = completions
 
     def get_completions(self, stem):
@@ -75,21 +75,21 @@ def replize(klass, history_across_invocations=1):
     #    if klass.cmdloop.im_class is not cmd.Cmd:
     #        print "this may not work"
 
-    class MultiHist(object):
+    class MultiHist:
         __history = []
 
         def __init__(self, *args, **kw):
-            super(MultiHist, self).__init__(*args, **kw)
+            super().__init__(*args, **kw)
             self.__reader = CmdReader(completions)
             self.__reader.history = self.__history
             self.__reader.historyi = len(self.__history)
 
-    class SimpleHist(object):
+    class SimpleHist:
         def __init__(self, *args, **kw):
-            super(SimpleHist, self).__init__(*args, **kw)
+            super().__init__(*args, **kw)
             self.__reader = CmdReader(completions)
 
-    class CmdLoopMixin(object):
+    class CmdLoopMixin:
         def cmdloop(self, intro=None):
             self.preloop()
             if intro is not None:
@@ -115,6 +115,6 @@ def replize(klass, history_across_invocations=1):
     hist = MultiHist if history_across_invocations else SimpleHist
 
     class CmdRepl(hist, CmdLoopMixin, klass):
-        __name__ = "replize(%s.%s)" % (klass.__module__, klass.__name__)
+        __name__ = f"replize({klass.__module__}.{klass.__name__})"
 
     return CmdRepl

@@ -22,7 +22,7 @@ from pyrepl.console import Console, Event
 from pyrepl.reader import Reader
 
 
-class EqualsAnything(object):
+class EqualsAnything:
     def __eq__(self, other):
         return True
 
@@ -42,10 +42,8 @@ class TestConsole(Console):
 
     def refresh(self, screen, xy):
         if self.next_screen is not None:
-            assert screen == self.next_screen, "[ %s != %s after %r ]" % (
-                screen,
-                self.next_screen,
-                self.last_event_name,
+            assert screen == self.next_screen, (
+                f"[ {screen} != {self.next_screen}" "after {self.last_event_name} ]"
             )
 
     def get_event(self, block=1):

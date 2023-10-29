@@ -30,12 +30,6 @@ from pyrepl.console import Event
 
 from .trace import trace
 
-try:
-    str
-except NameError:
-    str = str
-
-
 _keynames = {
     "delete": "kdch1",
     "down": "kcud1",
@@ -89,13 +83,13 @@ def EventQueue(fd, encoding):
     keycodes = general_keycodes()
     if os.isatty(fd):
         backspace = tcgetattr(fd)[6][VERASE]
-        keycodes[backspace] = str("backspace")
+        keycodes[backspace] = "backspace"
     k = keymap.compile_keymap(keycodes)
     trace("keymap {k!r}", k=k)
     return EncodedQueue(k, encoding)
 
 
-class EncodedQueue(object):
+class EncodedQueue:
     def __init__(self, keymap, encoding):
         self.k = self.ck = keymap
         self.events = deque()
