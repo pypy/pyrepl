@@ -21,92 +21,53 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          # Linux
-          - tox_env: "py39-coverage"
-            python: "3.9"
-            os: ubuntu-20.04
-          - tox_env: "py38-coverage"
-            python: "3.8"
-            os: ubuntu-20.04
-          - tox_env: "py37-coverage"
-            python: "3.7"
-            os: ubuntu-20.04
-          - tox_env: "py36-coverage"
-            python: "3.6"
-            os: ubuntu-20.04
-          - tox_env: "py35-coverage"
-            python: "3.5"
-            os: ubuntu-20.04
-
-          - tox_env: "py27-coverage"
-            python: "2.7"
-            os: ubuntu-20.04
-
-          - tox_env: "pypy3-coverage"
-            python: "pypy-3.7"
-            os: ubuntu-20.04
-          - tox_env: "pypy-coverage"
-            python: "pypy-2.7"
-            os: ubuntu-20.04
+        os: [ubuntu-latest]
+        python: ["3.8", "3.9", "3.10", "3.11"]
 
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
 
-      # Caching.
+      - name: Set tox_env
+        run: |
+          pyv=$(echo ${{matrix.python}} | sed 's/\.//')
+          tox_env=py${pyv}-coverage
+          echo "tox env name: ${tox_env}"
+          echo "tox_env=${tox_env}">> $GITHUB_ENV
+
       - name: set PY_CACHE_KEY
         run: echo "PY_CACHE_KEY=$(python -c 'import hashlib, sys;print(hashlib.sha256(sys.version.encode()+sys.executable.encode()).hexdigest())')" >> $GITHUB_ENV
       - name: Cache .tox
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
-          path: ${{ github.workspace }}/.tox/${{ matrix.tox_env }}
-          key: "tox|${{ matrix.os }}|${{ matrix.tox_env }}|${{ env.PY_CACHE_KEY }}|${{ hashFiles('tox.ini', 'setup.*') }}"
+          path: ${{ github.workspace }}/.tox/${{ env.tox_env }}
+          key: "tox|${{ matrix.os }}|${{ env.tox_env }}|${{ env.PY_CACHE_KEY }}|${{ hashFiles('tox.ini', 'setup.*') }}"
 
-      - name: (Initial) version information/pinning
+      - name: Install/update tools
         run: |
-          set -x
-          python -m site
-          python -m pip --version
-          python -m pip list
-          if [[ "${{ matrix.python }}" == "3.4" ]]; then
-            # Install latest available pip.
-            # 7.1.2 (installed) is too old to not install too new packages,
-            # including pip itself.  19.2 dropped support for Python 3.4.
-            python -m pip install -U pip==19.1.1
-          fi
-          python -m pip install -U setuptools==42.0.2
-          python -m pip install -U virtualenv==20.4.3
-
-      - name: Install tox
-        run: python -m pip install git+https://github.com/blueyed/tox@master
-
-      - name: Version information
-        run: python -m pip list
+          pip install -U pip setuptools virtualenv tox
 
       - name: Setup tox environment
         id: setup-tox
-        run: python -m tox --notest -v --durations -e ${{ matrix.tox_env }}
+        run: tox --notest -v -e ${{ env.tox_env }}
 
       - name: Test
         env:
-          COLUMNS: "90"  # better alignment (working around https://github.com/blueyed/pytest/issues/491).
+          COLUMNS: "90" # better alignment (working around https://github.com/blueyed/pytest/issues/491).
           PY_COLORS: "1"
           # UTF-8 mode for Windows (https://docs.python.org/3/using/windows.html#utf-8-mode).
           PYTHONUTF8: "1"
           TOX_TESTENV_PASSENV: "PYTHONUTF8"
-        run: python -m tox -v --durations -e ${{ matrix.tox_env }}
+        run: tox -v -e ${{ env.tox_env }}
 
       - name: Report coverage
-        if: always() && (steps.setup-tox.outcome == 'success' && contains(matrix.tox_env, '-coverage'))
-        uses: codecov/codecov-action@v1
+        if: always() && (steps.setup-tox.outcome == 'success' && contains(env.tox_env, '-coverage'))
+        uses: codecov/codecov-action@v3
         with:
           files: ./coverage.xml
           flags: ${{ runner.os }}
-          name: ${{ matrix.tox_env }}
+          name: ${{ env.tox_env }}
           fail_ci_if_error: true
