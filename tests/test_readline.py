@@ -12,46 +12,38 @@ def readline_wrapper():
     return _ReadlineWrapper(slave, slave)
 
 
-if sys.version_info < (3, ):
-    bytes_type = str
-    unicode_type = str  # noqa: F821
-else:
-    bytes_type = bytes
-    unicode_type = str
-
-
 def test_readline():
     master, slave = pty.openpty()
     readline_wrapper = _ReadlineWrapper(slave, slave)
-    os.write(master, b'input\n')
+    os.write(master, b"input\n")
 
     result = readline_wrapper.get_reader().readline()
-    assert result == b'input'
-    assert isinstance(result, bytes_type)
+    assert result == b"input"
+    assert isinstance(result, bytes)
 
 
 def test_readline_returns_unicode():
     master, slave = pty.openpty()
     readline_wrapper = _ReadlineWrapper(slave, slave)
-    os.write(master, b'input\n')
+    os.write(master, b"input\n")
 
     result = readline_wrapper.get_reader().readline(returns_unicode=True)
-    assert result == 'input'
-    assert isinstance(result, unicode_type)
+    assert result == "input"
+    assert isinstance(result, str)
 
 
 def test_raw_input():
     master, slave = pty.openpty()
     readline_wrapper = _ReadlineWrapper(slave, slave)
-    os.write(master, b'input\n')
+    os.write(master, b"input\n")
 
-    result = readline_wrapper.raw_input('prompt:')
-    if sys.version_info < (3, ):
-        assert result == b'input'
-        assert isinstance(result, bytes_type)
+    result = readline_wrapper.raw_input("prompt:")
+    if sys.version_info < (3,):
+        assert result == b"input"
+        assert isinstance(result, bytes)
     else:
-        assert result == 'input'
-        assert isinstance(result, unicode_type)
+        assert result == "input"
+        assert isinstance(result, str)
 
 
 def test_read_history_file(readline_wrapper, tmp_path):

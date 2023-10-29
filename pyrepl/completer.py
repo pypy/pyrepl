@@ -17,22 +17,19 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-try:
-    import builtins as builtins
-    builtins  # silence broken pyflakes
-except ImportError:
-    import builtins
+import builtins
 
 
-class Completer(object):
+class Completer:
     def __init__(self, ns):
+        print(f"init with {ns=}")
         self.ns = ns
 
     def complete(self, text):
         if "." in text:
             return self.attr_matches(text)
-        else:
-            return self.global_matches(text)
+
+        return self.global_matches(text)
 
     def global_matches(self, text):
         """Compute matches when text is a simple name.
@@ -42,11 +39,15 @@ class Completer(object):
 
         """
         import keyword
+
         matches = []
-        for list in [keyword.kwlist,
-                     list(builtins.__dict__.keys()),
-                     list(self.ns.keys())]:
-            for word in list:
+
+        for list_ in [
+            keyword.kwlist,
+            list(builtins.__dict__.keys()),
+            list(self.ns.keys()),
+        ]:
+            for word in list_:
                 if word.startswith(text) and word != "__builtins__":
                     matches.append(word)
         return matches
@@ -65,14 +66,15 @@ class Completer(object):
 
         """
         import re
+
         m = re.match(r"(\w+(\.\w+)*)\.(\w*)", text)
         if not m:
             return []
         expr, attr = m.group(1, 3)
         object = eval(expr, self.ns)
         words = dir(object)
-        if hasattr(object, '__class__'):
-            words.append('__class__')
+        if hasattr(object, "__class__"):
+            words.append("__class__")
             words = words + get_class_members(object.__class__)
         matches = []
         n = len(attr)
@@ -84,7 +86,7 @@ class Completer(object):
 
 def get_class_members(klass):
     ret = dir(klass)
-    if hasattr(klass, '__bases__'):
+    if hasattr(klass, "__bases__"):
         for base in klass.__bases__:
             ret = ret + get_class_members(base)
     return ret

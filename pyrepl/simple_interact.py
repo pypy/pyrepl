@@ -24,10 +24,11 @@ allowing multiline input and multiline history entries.
 """
 
 import sys
-from pyrepl.readline import multiline_input, _error, _get_reader
+
+from pyrepl.readline import _error, _get_reader, multiline_input
 
 
-def check():     # returns False if there is a problem initializing the state
+def check():  # returns False if there is a problem initializing the state
     try:
         _get_reader()
     except _error:
@@ -37,20 +38,22 @@ def check():     # returns False if there is a problem initializing the state
 
 def run_multiline_interactive_console(mainmodule=None, future_flags=0):
     import code
+
     import __main__
+
     mainmodule = mainmodule or __main__
-    console = code.InteractiveConsole(mainmodule.__dict__, filename='<stdin>')
+    console = code.InteractiveConsole(mainmodule.__dict__, filename="<stdin>")
     if future_flags:
         console.compile.compiler.flags |= future_flags
 
     def more_lines(unicodetext):
-        if sys.version_info < (3, ):
+        if sys.version_info < (3,):
             # ooh, look at the hack:
-            src = "#coding:utf-8\n"+unicodetext.encode('utf-8')
+            src = "#coding:utf-8\n" + unicodetext.encode("utf-8")
         else:
             src = unicodetext
         try:
-            code = console.compile(src, '<stdin>', 'single')
+            code = console.compile(src, "<stdin>", "single")
         except (OverflowError, SyntaxError, ValueError):
             return False
         else:
@@ -58,11 +61,10 @@ def run_multiline_interactive_console(mainmodule=None, future_flags=0):
 
     while 1:
         try:
-            ps1 = getattr(sys, 'ps1', '>>> ')
-            ps2 = getattr(sys, 'ps2', '... ')
+            ps1 = getattr(sys, "ps1", ">>> ")
+            ps2 = getattr(sys, "ps2", "... ")
             try:
-                statement = multiline_input(more_lines, ps1, ps2,
-                                            returns_unicode=True)
+                statement = multiline_input(more_lines, ps1, ps2, returns_unicode=True)
             except EOFError:
                 break
             more = console.push(statement)

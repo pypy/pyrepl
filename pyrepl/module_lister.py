@@ -17,45 +17,50 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import os, sys
+import os
+import sys
 
 # for the completion support.
 # this is all quite nastily written.
 _packages = {}
 
-def _make_module_list_dir(dir, suffs, prefix=''):
+
+def _make_module_list_dir(dir, suffs, prefix=""):
     l = []
     for fname in os.listdir(dir):
         file = os.path.join(dir, fname)
         if os.path.isfile(file):
             for suff in suffs:
                 if fname.endswith(suff):
-                    l.append( prefix + fname[:-len(suff)] )
+                    l.append(prefix + fname[: -len(suff)])
                     break
-        elif os.path.isdir(file) \
-             and os.path.exists(os.path.join(file, "__init__.py")):
-            l.append( prefix + fname )
+        elif os.path.isdir(file) and os.path.exists(os.path.join(file, "__init__.py")):
+            l.append(prefix + fname)
             _packages[prefix + fname] = _make_module_list_dir(
-                file, suffs, prefix + fname + '.' )
+                file, suffs, prefix + fname + "."
+            )
     return sorted(set(l))
+
 
 def _make_module_list():
     import imp
-    suffs = [x[0] for x in imp.get_suffixes() if x[0] != '.pyc']
+
+    suffs = [x[0] for x in imp.get_suffixes() if x[0] != ".pyc"]
     suffs.sort(reverse=True)
-    _packages[''] = list(sys.builtin_module_names)
+    _packages[""] = list(sys.builtin_module_names)
     for dir in sys.path:
-        if dir == '':
-            dir = '.'
+        if dir == "":
+            dir = "."
         if os.path.isdir(dir):
-            _packages[''] += _make_module_list_dir(dir, suffs)
-    _packages[''].sort()
+            _packages[""] += _make_module_list_dir(dir, suffs)
+    _packages[""].sort()
+
 
 def find_modules(stem):
-    l = stem.split('.')
-    pack = '.'.join(l[:-1])
+    l = stem.split(".")
+    pack = ".".join(l[:-1])
     try:
         mods = _packages[pack]
     except KeyError:
-        raise ImportError("can't find \"%s\" package" % pack)
+        raise ImportError('can\'t find "%s" package' % pack)
     return [mod for mod in mods if mod.startswith(stem)]

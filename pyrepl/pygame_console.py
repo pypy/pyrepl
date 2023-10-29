@@ -25,11 +25,13 @@
 # during command execution and zap the executor process.  Making this
 # work on non-Unix is expected to be even more entertaining.
 
-from pygame.locals import *
-from pyrepl.console import Console, Event
-from pyrepl import pygame_keymap
-import pygame
 import types
+
+import pygame
+from pygame.locals import *
+
+from pyrepl import pygame_keymap
+from pyrepl.console import Console, Event
 
 lmargin = 5
 rmargin = 5
@@ -39,46 +41,59 @@ bmargin = 5
 try:
     bool
 except NameError:
+
     def bool(x):
         return not not x
 
-modcolors = {K_LCTRL:1,
-             K_RCTRL:1,
-             K_LMETA:1,
-             K_RMETA:1,
-             K_LALT:1,
-             K_RALT:1,
-             K_LSHIFT:1,
-             K_RSHIFT:1}
+
+modcolors = {
+    K_LCTRL: 1,
+    K_RCTRL: 1,
+    K_LMETA: 1,
+    K_RMETA: 1,
+    K_LALT: 1,
+    K_RALT: 1,
+    K_LSHIFT: 1,
+    K_RSHIFT: 1,
+}
+
 
 class colors:
-    fg = 250,240,230
+    fg = 250, 240, 230
     bg = 5, 5, 5
     cursor = 230, 0, 230
     margin = 5, 5, 15
 
+
 class FakeStdout:
     def __init__(self, con):
         self.con = con
+
     def write(self, text):
         self.con.write(text)
+
     def flush(self):
         pass
+
 
 class FakeStdin:
     def __init__(self, con):
         self.con = con
+
     def read(self, n=None):
         # argh!
         raise NotImplementedError
+
     def readline(self, n=None):
         from .reader import Reader
+
         try:
             # this isn't quite right: it will clobber any prompt that's
             # been printed.  Not sure how to get around this...
             return Reader(self.con).readline()
         except EOFError:
-            return ''
+            return ""
+
 
 class PyGameConsole(Console):
     """Attributes:
@@ -89,13 +104,12 @@ class PyGameConsole(Console):
     height,
     width,
     """
-    
+
     def __init__(self):
         self.pygame_screen = pygame.display.set_mode((800, 600))
         pygame.font.init()
         pygame.key.set_repeat(500, 30)
-        self.font = pygame.font.Font(
-            "/usr/X11R6/lib/X11/fonts/TTF/luximr.ttf", 15)
+        self.font = pygame.font.Font("/usr/X11R6/lib/X11/fonts/TTF/luximr.ttf", 15)
         self.fw, self.fh = self.fontsize = self.font.size("X")
         self.cursor = pygame.Surface(self.fontsize)
         self.cursor.fill(colors.cursor)
@@ -105,7 +119,7 @@ class PyGameConsole(Console):
         pygame.display.update()
         pygame.event.set_allowed(None)
         pygame.event.set_allowed(KEYDOWN)
-        
+
     def install_keymap(self, keymap):
         """Install a given keymap.
 
@@ -119,8 +133,10 @@ class PyGameConsole(Console):
         return self.char_pos(x, y), self.fontsize
 
     def char_pos(self, x, y):
-        return (lmargin + x*self.fw,
-                tmargin + y*self.fh + self.cur_top + self.scroll)
+        return (
+            lmargin + x * self.fw,
+            tmargin + y * self.fh + self.cur_top + self.scroll,
+        )
 
     def paint_margin(self):
         s = self.pygame_screen
@@ -133,9 +149,9 @@ class PyGameConsole(Console):
     def refresh(self, screen, xxx_todo_changeme):
         (cx, cy) = xxx_todo_changeme
         self.screen = screen
-        self.pygame_screen.fill(colors.bg,
-                                [0, tmargin + self.cur_top + self.scroll,
-                                 800, 600])
+        self.pygame_screen.fill(
+            colors.bg, [0, tmargin + self.cur_top + self.scroll, 800, 600]
+        )
         self.paint_margin()
 
         line_top = self.cur_top
@@ -143,7 +159,7 @@ class PyGameConsole(Console):
         self.cxy = (cx, cy)
         cp = self.char_pos(cx, cy)
         if cp[1] < tmargin:
-            self.scroll = - (cy*self.fh + self.cur_top)
+            self.scroll = -(cy * self.fh + self.cur_top)
             self.repaint()
         elif cp[1] + self.fh > 600 - bmargin:
             self.scroll += (600 - bmargin) - (cp[1] + self.fh)
@@ -154,13 +170,14 @@ class PyGameConsole(Console):
             if 0 <= line_top + self.scroll <= (600 - bmargin - tmargin - self.fh):
                 if line:
                     ren = self.font.render(line, 1, colors.fg)
-                    self.pygame_screen.blit(ren, (lmargin,
-                                                  tmargin + line_top + self.scroll))
+                    self.pygame_screen.blit(
+                        ren, (lmargin, tmargin + line_top + self.scroll)
+                    )
             line_top += self.fh
         pygame.display.update()
 
     def prepare(self):
-        self.cmd_buf = ''
+        self.cmd_buf = ""
         self.k = self.keymap
         self.height, self.width = self.getheightwidth()
         self.curs_vis = 1
@@ -179,7 +196,7 @@ class PyGameConsole(Console):
     def move_cursor(self, x, y):
         cp = self.char_pos(x, y)
         if cp[1] < tmargin or cp[1] + self.fh > 600 - bmargin:
-            self.event_queue.append(Event('refresh', '', ''))
+            self.event_queue.append(Event("refresh", "", ""))
         else:
             if self.curs_vis:
                 cx, cy = self.cxy
@@ -203,13 +220,15 @@ class PyGameConsole(Console):
     def getheightwidth(self):
         """Return (height, width) where height and width are the height
         and width of the terminal window in characters."""
-        return ((600 - tmargin - bmargin)/self.fh,
-                (800 - lmargin - rmargin)/self.fw)
+        return (
+            (600 - tmargin - bmargin) / self.fh,
+            (800 - lmargin - rmargin) / self.fw,
+        )
 
     def tr_event(self, pyg_event):
         shift = bool(pyg_event.mod & KMOD_SHIFT)
         ctrl = bool(pyg_event.mod & KMOD_CTRL)
-        meta = bool(pyg_event.mod & (KMOD_ALT|KMOD_META))
+        meta = bool(pyg_event.mod & (KMOD_ALT | KMOD_META))
 
         try:
             return self.k[(pyg_event.str, meta, ctrl)], pyg_event.str
@@ -237,13 +256,13 @@ class PyGameConsole(Console):
                 continue
 
             k, c = self.tr_event(pyg_event)
-            self.cmd_buf += c.encode('ascii', 'replace')
+            self.cmd_buf += c.encode("ascii", "replace")
             self.k = k
 
             if not isinstance(k, dict):
                 e = Event(k, self.cmd_buf, [])
                 self.k = self.keymap
-                self.cmd_buf = ''
+                self.cmd_buf = ""
                 return e
 
     def beep(self):
@@ -254,7 +273,7 @@ class PyGameConsole(Console):
     def clear(self):
         """Wipe the screen"""
         self.pygame_screen.fill(colors.bg)
-        #self.screen = []
+        # self.screen = []
         self.pos = [0, 0]
         self.grobs = []
         self.cur_top = 0
@@ -270,9 +289,10 @@ class PyGameConsole(Console):
         for line in self.screen:
             self.write_line(line, 1)
         if self.curs_vis:
-            self.pygame_screen.blit(self.cursor,
-                                    (lmargin + self.pos[1],
-                                     tmargin + self.pos[0] + self.scroll))
+            self.pygame_screen.blit(
+                self.cursor,
+                (lmargin + self.pos[1], tmargin + self.pos[0] + self.scroll),
+            )
         pygame.display.update()
 
     def flushoutput(self):
@@ -285,7 +305,7 @@ class PyGameConsole(Console):
         """Forget all pending, but not yet processed input."""
         while pygame.event.poll().type != NOEVENT:
             pass
-    
+
     def getpending(self):
         """Return the characters that have been typed but not yet
         processed."""
@@ -308,21 +328,20 @@ class PyGameConsole(Console):
         self.paint_margin()
         for (y, x), surf, text in self.grobs:
             if surf and 0 < y + self.scroll:
-                self.pygame_screen.blit(surf, (lmargin + x,
-                                               tmargin + y + self.scroll))
+                self.pygame_screen.blit(surf, (lmargin + x, tmargin + y + self.scroll))
         pygame.display.update()
 
     def write_line(self, line, ret):
-        charsleft = (self.width*self.fw - self.pos[1])/self.fw
+        charsleft = (self.width * self.fw - self.pos[1]) / self.fw
         while len(line) > charsleft:
             self.write_line(line[:charsleft], 1)
             line = line[charsleft:]
         if line:
             ren = self.font.render(line, 1, colors.fg, colors.bg)
             self.grobs.append((self.pos[:], ren, line))
-            self.pygame_screen.blit(ren,
-                                    (lmargin + self.pos[1],
-                                     tmargin + self.pos[0] + self.scroll))
+            self.pygame_screen.blit(
+                ren, (lmargin + self.pos[1], tmargin + self.pos[0] + self.scroll)
+            )
         else:
             self.grobs.append((self.pos[:], None, line))
         if ret:
@@ -332,22 +351,28 @@ class PyGameConsole(Console):
                 self.repaint()
             self.pos[1] = 0
         else:
-            self.pos[1] += self.fw*len(line)
+            self.pos[1] += self.fw * len(line)
 
     def write(self, text):
         lines = text.split("\n")
         if self.curs_vis:
-            self.pygame_screen.fill(colors.bg,
-                                    (lmargin + self.pos[1],
-                                     tmargin + self.pos[0] + self.scroll,
-                                     self.fw, self.fh))
+            self.pygame_screen.fill(
+                colors.bg,
+                (
+                    lmargin + self.pos[1],
+                    tmargin + self.pos[0] + self.scroll,
+                    self.fw,
+                    self.fh,
+                ),
+            )
         for line in lines[:-1]:
             self.write_line(line, 1)
         self.write_line(lines[-1], 0)
         if self.curs_vis:
-            self.pygame_screen.blit(self.cursor,
-                                    (lmargin + self.pos[1],
-                                     tmargin + self.pos[0] + self.scroll))
+            self.pygame_screen.blit(
+                self.cursor,
+                (lmargin + self.pos[1], tmargin + self.pos[0] + self.scroll),
+            )
         pygame.display.update()
 
     def flush(self):

@@ -1,6 +1,7 @@
 import pytest
-from pyrepl.curses import setupterm
+
 import pyrepl
+from pyrepl.curses import setupterm
 
 
 def test_setupterm(monkeypatch):
@@ -12,10 +13,10 @@ def test_setupterm(monkeypatch):
     ):
         setupterm("term_does_not_exist", 0)
 
-    monkeypatch.setenv('TERM', 'xterm')
+    monkeypatch.setenv("TERM", "xterm")
     assert setupterm(None, 0) is None
 
-    monkeypatch.delenv('TERM')
+    monkeypatch.delenv("TERM")
     with pytest.raises(
         pyrepl._minimal_curses.error,
         match=r"setupterm\(None, 0\) failed \(err=-1\)",

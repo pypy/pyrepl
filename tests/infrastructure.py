@@ -18,8 +18,8 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 
-from pyrepl.reader import Reader
 from pyrepl.console import Console, Event
+from pyrepl.reader import Reader
 
 
 class EqualsAnything(object):
@@ -33,7 +33,7 @@ EA = EqualsAnything()
 class TestConsole(Console):
     height = 24
     width = 80
-    encoding = 'utf-8'
+    encoding = "utf-8"
 
     def __init__(self, events, verbose=False):
         self.events = events
@@ -42,8 +42,11 @@ class TestConsole(Console):
 
     def refresh(self, screen, xy):
         if self.next_screen is not None:
-                assert screen == self.next_screen, "[ %s != %s after %r ]" % (
-                    screen, self.next_screen, self.last_event_name)
+            assert screen == self.next_screen, "[ %s != %s after %r ]" % (
+                screen,
+                self.next_screen,
+                self.last_event_name,
+            )
 
     def get_event(self, block=1):
         ev, sc = self.events.pop(0)
@@ -57,14 +60,14 @@ class TestConsole(Console):
 
     def getpending(self):
         """Nothing pending, but do not return None here."""
-        return Event('key', '', b'')
+        return Event("key", "", b"")
 
 
 class TestReader(Reader):
     __test__ = False
 
     def get_prompt(self, lineno, cursor_on_line):
-        return ''
+        return ""
 
     def refresh(self):
         Reader.refresh(self)

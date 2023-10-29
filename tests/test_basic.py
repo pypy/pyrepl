@@ -17,98 +17,142 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 import pytest
+
 from .infrastructure import read_spec
 
 
 def test_basic():
-    read_spec([(('self-insert', 'a'), ['a']),
-               ( 'accept',            ['a'])])
+    read_spec([(("self-insert", "a"), ["a"]), ("accept", ["a"])])
 
 
 def test_repeat():
-    read_spec([(('digit-arg', '3'),   ['']),
-               (('self-insert', 'a'), ['aaa']),
-               ( 'accept',            ['aaa'])])
+    read_spec(
+        [
+            (("digit-arg", "3"), [""]),
+            (("self-insert", "a"), ["aaa"]),
+            ("accept", ["aaa"]),
+        ]
+    )
 
 
 def test_kill_line():
-    read_spec([(('self-insert', 'abc'), ['abc']),
-               ( 'left',                None),
-               ( 'kill-line',           ['ab']),
-               ( 'accept',              ['ab'])])
+    read_spec(
+        [
+            (("self-insert", "abc"), ["abc"]),
+            ("left", None),
+            ("kill-line", ["ab"]),
+            ("accept", ["ab"]),
+        ]
+    )
 
 
 def test_unix_line_discard():
-    read_spec([(('self-insert', 'abc'), ['abc']),
-               ( 'left',                None),
-               ( 'unix-word-rubout',    ['c']),
-               ( 'accept',              ['c'])])
+    read_spec(
+        [
+            (("self-insert", "abc"), ["abc"]),
+            ("left", None),
+            ("unix-word-rubout", ["c"]),
+            ("accept", ["c"]),
+        ]
+    )
 
 
 def test_kill_word():
-    read_spec([(('self-insert', 'ab cd'), ['ab cd']),
-               ( 'beginning-of-line',     ['ab cd']),
-               ( 'kill-word',             [' cd']),
-               ( 'accept',                [' cd'])])
+    read_spec(
+        [
+            (("self-insert", "ab cd"), ["ab cd"]),
+            ("beginning-of-line", ["ab cd"]),
+            ("kill-word", [" cd"]),
+            ("accept", [" cd"]),
+        ]
+    )
 
 
 def test_backward_kill_word():
-    read_spec([(('self-insert', 'ab cd'), ['ab cd']),
-               ( 'backward-kill-word',    ['ab ']),
-               ( 'accept',                ['ab '])])
+    read_spec(
+        [
+            (("self-insert", "ab cd"), ["ab cd"]),
+            ("backward-kill-word", ["ab "]),
+            ("accept", ["ab "]),
+        ]
+    )
 
 
 def test_yank():
-    read_spec([(('self-insert', 'ab cd'), ['ab cd']),
-               ( 'backward-kill-word',    ['ab ']),
-               ( 'beginning-of-line',     ['ab ']),
-               ( 'yank',                  ['cdab ']),
-               ( 'accept',                ['cdab '])])
+    read_spec(
+        [
+            (("self-insert", "ab cd"), ["ab cd"]),
+            ("backward-kill-word", ["ab "]),
+            ("beginning-of-line", ["ab "]),
+            ("yank", ["cdab "]),
+            ("accept", ["cdab "]),
+        ]
+    )
 
 
 def test_yank_pop():
-    read_spec([(('self-insert', 'ab cd'), ['ab cd']),
-               ( 'backward-kill-word',    ['ab ']),
-               ( 'left',                  ['ab ']),
-               ( 'backward-kill-word',    [' ']),
-               ( 'yank',                  ['ab ']),
-               ( 'yank-pop',              ['cd ']),
-               ( 'accept',                ['cd '])])
+    read_spec(
+        [
+            (("self-insert", "ab cd"), ["ab cd"]),
+            ("backward-kill-word", ["ab "]),
+            ("left", ["ab "]),
+            ("backward-kill-word", [" "]),
+            ("yank", ["ab "]),
+            ("yank-pop", ["cd "]),
+            ("accept", ["cd "]),
+        ]
+    )
 
 
 def test_interrupt():
     with pytest.raises(KeyboardInterrupt):
-        read_spec([('interrupt', [''])])
+        read_spec([("interrupt", [""])])
 
 
 # test_suspend -- hah
 def test_up():
-    read_spec([(('self-insert', 'ab\ncd'), ['ab', 'cd']),
-               ( 'up',                     ['ab', 'cd']),
-               (('self-insert', 'e'),      ['abe', 'cd']),
-               ( 'accept',                 ['abe', 'cd'])])
+    read_spec(
+        [
+            (("self-insert", "ab\ncd"), ["ab", "cd"]),
+            ("up", ["ab", "cd"]),
+            (("self-insert", "e"), ["abe", "cd"]),
+            ("accept", ["abe", "cd"]),
+        ]
+    )
 
 
 def test_down():
-    read_spec([(('self-insert', 'ab\ncd'), ['ab', 'cd']),
-               ( 'up',                     ['ab', 'cd']),
-               (('self-insert', 'e'),      ['abe', 'cd']),
-               ( 'down',                   ['abe', 'cd']),
-               (('self-insert', 'f'),      ['abe', 'cdf']),
-               ( 'accept',                 ['abe', 'cdf'])])
+    read_spec(
+        [
+            (("self-insert", "ab\ncd"), ["ab", "cd"]),
+            ("up", ["ab", "cd"]),
+            (("self-insert", "e"), ["abe", "cd"]),
+            ("down", ["abe", "cd"]),
+            (("self-insert", "f"), ["abe", "cdf"]),
+            ("accept", ["abe", "cdf"]),
+        ]
+    )
 
 
 def test_left():
-    read_spec([(('self-insert', 'ab'), ['ab']),
-               ( 'left',               ['ab']),
-               (('self-insert', 'c'),  ['acb']),
-               ( 'accept',             ['acb'])])
+    read_spec(
+        [
+            (("self-insert", "ab"), ["ab"]),
+            ("left", ["ab"]),
+            (("self-insert", "c"), ["acb"]),
+            ("accept", ["acb"]),
+        ]
+    )
 
 
 def test_right():
-    read_spec([(('self-insert', 'ab'), ['ab']),
-               ( 'left',               ['ab']),
-               (('self-insert', 'c'),  ['acb']),
-               ( 'right',              ['acb']),
-               (('self-insert', 'd'),  ['acbd']),
-               ( 'accept',             ['acbd'])])
+    read_spec(
+        [
+            (("self-insert", "ab"), ["ab"]),
+            ("left", ["ab"]),
+            (("self-insert", "c"), ["acb"]),
+            ("right", ["acb"]),
+            (("self-insert", "d"), ["acbd"]),
+            ("accept", ["acbd"]),
+        ]
+    )

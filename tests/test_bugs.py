@@ -17,31 +17,31 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+import pytest
+
 from pyrepl.historical_reader import HistoricalReader
+
 from .infrastructure import EA, TestReader, read_spec
 
 # this test case should contain as-verbatim-as-possible versions of
 # (applicable) bug reports
 
-import pytest
 
 
 class HistoricalTestReader(HistoricalReader, TestReader):
     pass
 
 
-@pytest.mark.xfail(reason='event missing', run=False)
+@pytest.mark.xfail(reason="event missing", run=False)
 def test_transpose_at_start():
-    read_spec([
-        ('transpose', [EA, '']),
-        ('accept',    [''])])
+    read_spec([("transpose", [EA, ""]), ("accept", [""])])
 
 
 def test_cmd_instantiation_crash():
     spec = [
-        ('reverse-history-isearch', ["(r-search `') "]),
-        (('key', 'left'), ['']),
-        ('accept', [''])
+        ("reverse-history-isearch", ["(r-search `') "]),
+        (("key", "left"), [""]),
+        ("accept", [""]),
     ]
     read_spec(spec, HistoricalTestReader)
 
@@ -50,6 +50,7 @@ def test_signal_failure(monkeypatch):
     import os
     import pty
     import signal
+
     from pyrepl.unix_console import UnixConsole
 
     def failing_signal(a, b):
@@ -63,9 +64,9 @@ def test_signal_failure(monkeypatch):
         c = UnixConsole(sfd, sfd)
         c.prepare()
         c.restore()
-        monkeypatch.setattr(signal, 'signal', failing_signal)
+        monkeypatch.setattr(signal, "signal", failing_signal)
         c.prepare()
-        monkeypatch.setattr(signal, 'signal', really_failing_signal)
+        monkeypatch.setattr(signal, "signal", really_failing_signal)
         c.restore()
     finally:
         os.close(mfd)

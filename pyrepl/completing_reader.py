@@ -19,6 +19,7 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import re
+
 from pyrepl import commands, reader
 from pyrepl.reader import Reader
 
@@ -40,8 +41,9 @@ def prefix(wordlist, j=0):
 
 STRIPCOLOR_REGEX = re.compile(r"\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[m|K]")
 
+
 def stripcolor(s):
-    return STRIPCOLOR_REGEX.sub('', s)
+    return STRIPCOLOR_REGEX.sub("", s)
 
 
 def real_len(s):
@@ -54,7 +56,7 @@ def left_align(s, maxlen):
         # too bad, we remove the color
         return stripped[:maxlen]
     padding = maxlen - len(stripped)
-    return s + ' '*padding
+    return s + " " * padding
 
 
 def build_menu(cons, wordlist, start, use_brackets, sort_in_column):
@@ -66,7 +68,7 @@ def build_menu(cons, wordlist, start, use_brackets, sort_in_column):
         padding = 2
     maxlen = min(max(list(map(real_len, wordlist))), cons.width - padding)
     cols = int(cons.width / (maxlen + padding))
-    rows = int((len(wordlist) - 1)/cols + 1)
+    rows = int((len(wordlist) - 1) / cols + 1)
 
     if sort_in_column:
         # sort_in_column=False (default)     sort_in_column=True
@@ -76,8 +78,8 @@ def build_menu(cons, wordlist, start, use_brackets, sort_in_column):
         #
         # "fill" the table with empty words, so we always have the same amout
         # of rows for each column
-        missing = cols*rows - len(wordlist)
-        wordlist = wordlist + ['']*missing
+        missing = cols * rows - len(wordlist)
+        wordlist = wordlist + [""] * missing
         indexes = [(i % cols) * rows + i // cols for i in range(len(wordlist))]
         wordlist = [wordlist[i] for i in indexes]
     menu = []
@@ -89,7 +91,7 @@ def build_menu(cons, wordlist, start, use_brackets, sort_in_column):
             i += 1
             if i >= len(wordlist):
                 break
-        menu.append(''.join(row))
+        menu.append("".join(row))
         if i >= len(wordlist):
             i = 0
             break
@@ -97,6 +99,7 @@ def build_menu(cons, wordlist, start, use_brackets, sort_in_column):
             menu.append("   %d more... " % (len(wordlist) - i))
             break
     return menu, i
+
 
 # this gets somewhat user interface-y, and as a result the logic gets
 # very convoluted.
@@ -163,7 +166,7 @@ class complete(commands.Command):
             if completions_unchangable and len(completions[0]) == len(stem):
                 r.msg = "[ sole completion ]"
                 r.dirty = 1
-            r.insert(completions[0][len(stem):])
+            r.insert(completions[0][len(stem) :])
         else:
             p = prefix(completions, len(stem))
             if p:
@@ -172,8 +175,12 @@ class complete(commands.Command):
                 if not r.cmpltn_menu_vis:
                     r.cmpltn_menu_vis = 1
                 r.cmpltn_menu, r.cmpltn_menu_end = build_menu(
-                    r.console, completions, r.cmpltn_menu_end,
-                    r.use_brackets, r.sort_in_column)
+                    r.console,
+                    completions,
+                    r.cmpltn_menu_end,
+                    r.use_brackets,
+                    r.sort_in_column,
+                )
                 r.dirty = 1
             elif stem + p in completions:
                 r.msg = "[ complete but not unique ]"
@@ -192,12 +199,11 @@ class self_insert(commands.self_insert):
             if len(stem) < 1:
                 r.cmpltn_reset()
             else:
-                completions = [w for w in r.cmpltn_menu_choices
-                               if w.startswith(stem)]
+                completions = [w for w in r.cmpltn_menu_choices if w.startswith(stem)]
                 if completions:
                     r.cmpltn_menu, r.cmpltn_menu_end = build_menu(
-                        r.console, completions, 0,
-                        r.use_brackets, r.sort_in_column)
+                        r.console, completions, 0, r.use_brackets, r.sort_in_column
+                    )
                 else:
                     r.cmpltn_reset()
 
@@ -209,14 +215,14 @@ class CompletingReader(Reader):
       * cmpltn_menu, cmpltn_menu_vis, cmpltn_menu_end, cmpltn_choices:
       *
     """
+
     # see the comment for the complete command
     assume_immutable_completions = True
     use_brackets = True  # display completions inside []
     sort_in_column = False
 
     def collect_keymap(self):
-        return super(CompletingReader, self).collect_keymap() + (
-            (r'\t', 'complete'),)
+        return super(CompletingReader, self).collect_keymap() + ((r"\t", "complete"),)
 
     def __init__(self, console):
         super(CompletingReader, self).__init__(console)
@@ -225,7 +231,7 @@ class CompletingReader(Reader):
         self.cmpltn_menu_end = 0
         for c in (complete, self_insert):
             self.commands[c.__name__] = c
-            self.commands[c.__name__.replace('_', '-')] = c
+            self.commands[c.__name__.replace("_", "-")] = c
 
     def after_command(self, cmd):
         super(CompletingReader, self).after_command(cmd)
@@ -237,7 +243,7 @@ class CompletingReader(Reader):
         if self.cmpltn_menu_vis:
             ly = self.lxy[1]
             screen[ly:ly] = self.cmpltn_menu
-            self.screeninfo[ly:ly] = [(0, [])]*len(self.cmpltn_menu)
+            self.screeninfo[ly:ly] = [(0, [])] * len(self.cmpltn_menu)
             self.cxy = self.cxy[0], self.cxy[1] + len(self.cmpltn_menu)
         return screen
 
@@ -258,7 +264,7 @@ class CompletingReader(Reader):
         p = self.pos - 1
         while p >= 0 and st.get(b[p], SW) == SW:
             p -= 1
-        return ''.join(b[p+1:self.pos])
+        return "".join(b[p + 1 : self.pos])
 
     def get_completions(self, stem):
         return []
@@ -267,9 +273,9 @@ class CompletingReader(Reader):
 def test():
     class TestReader(CompletingReader):
         def get_completions(self, stem):
-            return [s for l in self.history
-                    for s in l.split()
-                    if s and s.startswith(stem)]
+            return [
+                s for l in self.history for s in l.split() if s and s.startswith(stem)
+            ]
 
     reader = TestReader()
     reader.ps1 = "c**> "
@@ -280,5 +286,5 @@ def test():
         pass
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test()

@@ -39,105 +39,133 @@
 from pygame.locals import *
 
 _escapes = {
-    '\\': K_BACKSLASH,
-    "'" : K_QUOTE,
-    '"' : K_QUOTEDBL,
-#    'a' : '\a',
-    'b' : K_BACKSLASH,
-    'e' : K_ESCAPE,
-#    'f' : '\f',
-    'n' : K_RETURN,
-    'r' : K_RETURN,
-    't' : K_TAB,
-#    'v' : '\v'
-    }
+    "\\": K_BACKSLASH,
+    "'": K_QUOTE,
+    '"': K_QUOTEDBL,
+    #    'a' : '\a',
+    "b": K_BACKSLASH,
+    "e": K_ESCAPE,
+    #    'f' : '\f',
+    "n": K_RETURN,
+    "r": K_RETURN,
+    "t": K_TAB,
+    #    'v' : '\v'
+}
 
 _keynames = {
-    'backspace' : K_BACKSPACE,
-    'delete'    : K_DELETE,
-    'down'      : K_DOWN,
-    'end'       : K_END,
-    'enter'     : K_KP_ENTER,
-    'escape'    : K_ESCAPE,
-    'f1' : K_F1, 'f2' : K_F2, 'f3' : K_F3, 'f4' : K_F4,
-    'f5' : K_F5, 'f6' : K_F6, 'f7' : K_F7, 'f8' : K_F8,
-    'f9' : K_F9, 'f10': K_F10,'f11': K_F11,'f12': K_F12,
-    'f13': K_F13,'f14': K_F14,'f15': K_F15,
-    'home'   : K_HOME,
-    'insert' : K_INSERT,
-    'left'   : K_LEFT,
-    'pgdown' : K_PAGEDOWN, 'page down' : K_PAGEDOWN,
-    'pgup'   : K_PAGEUP,   'page up'   : K_PAGEUP,
-    'return' : K_RETURN,
-    'right'  : K_RIGHT,
-    'space'  : K_SPACE,
-    'tab'    : K_TAB,
-    'up'     : K_UP,
-    }
+    "backspace": K_BACKSPACE,
+    "delete": K_DELETE,
+    "down": K_DOWN,
+    "end": K_END,
+    "enter": K_KP_ENTER,
+    "escape": K_ESCAPE,
+    "f1": K_F1,
+    "f2": K_F2,
+    "f3": K_F3,
+    "f4": K_F4,
+    "f5": K_F5,
+    "f6": K_F6,
+    "f7": K_F7,
+    "f8": K_F8,
+    "f9": K_F9,
+    "f10": K_F10,
+    "f11": K_F11,
+    "f12": K_F12,
+    "f13": K_F13,
+    "f14": K_F14,
+    "f15": K_F15,
+    "home": K_HOME,
+    "insert": K_INSERT,
+    "left": K_LEFT,
+    "pgdown": K_PAGEDOWN,
+    "page down": K_PAGEDOWN,
+    "pgup": K_PAGEUP,
+    "page up": K_PAGEUP,
+    "return": K_RETURN,
+    "right": K_RIGHT,
+    "space": K_SPACE,
+    "tab": K_TAB,
+    "up": K_UP,
+}
+
 
 class KeySpecError(Exception):
     pass
 
+
 def _parse_key1(key, s):
     ctrl = 0
     meta = 0
-    ret = ''
+    ret = ""
     while not ret and s < len(key):
-        if key[s] == '\\':
-            c = key[s+1].lower()
+        if key[s] == "\\":
+            c = key[s + 1].lower()
             if c in _escapes:
                 ret = _escapes[c]
                 s += 2
             elif c == "c":
-                if key[s + 2] != '-':
-                    raise KeySpecError("\\C must be followed by `-' (char %d of %s)"%(
-                        s + 2, repr(key)))
+                if key[s + 2] != "-":
+                    raise KeySpecError(
+                        "\\C must be followed by `-' (char %d of %s)"
+                        % (s + 2, repr(key))
+                    )
                 if ctrl:
-                    raise KeySpecError("doubled \\C- (char %d of %s)"%(
-                        s + 1, repr(key)))
+                    raise KeySpecError(
+                        "doubled \\C- (char %d of %s)" % (s + 1, repr(key))
+                    )
                 ctrl = 1
                 s += 3
             elif c == "m":
-                if key[s + 2] != '-':
-                    raise KeySpecError("\\M must be followed by `-' (char %d of %s)"%(
-                        s + 2, repr(key)))
+                if key[s + 2] != "-":
+                    raise KeySpecError(
+                        "\\M must be followed by `-' (char %d of %s)"
+                        % (s + 2, repr(key))
+                    )
                 if meta:
-                    raise KeySpecError("doubled \\M- (char %d of %s)"%(
-                        s + 1, repr(key)))
+                    raise KeySpecError(
+                        "doubled \\M- (char %d of %s)" % (s + 1, repr(key))
+                    )
                 meta = 1
                 s += 3
             elif c.isdigit():
-                n = key[s+1:s+4]
+                n = key[s + 1 : s + 4]
                 ret = chr(int(n, 8))
                 s += 4
-            elif c == 'x':
-                n = key[s+2:s+4]
+            elif c == "x":
+                n = key[s + 2 : s + 4]
                 ret = chr(int(n, 16))
                 s += 4
-            elif c == '<':
-                t = key.find('>', s)
+            elif c == "<":
+                t = key.find(">", s)
                 if t == -1:
-                    raise KeySpecError("unterminated \\< starting at char %d of %s"%(
-                        s + 1, repr(key)))
+                    raise KeySpecError(
+                        "unterminated \\< starting at char %d of %s"
+                        % (s + 1, repr(key))
+                    )
                 try:
-                    ret = _keynames[key[s+2:t].lower()]
+                    ret = _keynames[key[s + 2 : t].lower()]
                     s = t + 1
                 except KeyError:
-                    raise KeySpecError("unrecognised keyname `%s' at char %d of %s"%(
-                        key[s+2:t], s + 2, repr(key)))
+                    raise KeySpecError(
+                        "unrecognised keyname `%s' at char %d of %s"
+                        % (key[s + 2 : t], s + 2, repr(key))
+                    )
                 if ret is None:
                     return None, s
             else:
-                raise KeySpecError("unknown backslash escape %s at char %d of %s"%(
-                    repr(c), s + 2, repr(key)))
+                raise KeySpecError(
+                    "unknown backslash escape %s at char %d of %s"
+                    % (repr(c), s + 2, repr(key))
+                )
         else:
             if ctrl:
-                ret = chr(ord(key[s]) & 0x1f)   # curses.ascii.ctrl()
+                ret = chr(ord(key[s]) & 0x1F)  # curses.ascii.ctrl()
                 ret = str(ret)
             else:
                 ret = str(key[s])
             s += 1
     return (ret, meta, ctrl), s
+
 
 def parse_keys(key):
     s = 0
@@ -149,6 +177,7 @@ def parse_keys(key):
         r.append(k)
     return tuple(r)
 
+
 def _compile_keymap(keymap):
     r = {}
     for key, value in list(keymap.items()):
@@ -156,12 +185,15 @@ def _compile_keymap(keymap):
     for key, value in list(r.items()):
         if () in value:
             if len(value) != 1:
-                raise KeySpecError("key definitions for %s clash"%(list(value.values()),))
+                raise KeySpecError(
+                    "key definitions for %s clash" % (list(value.values()),)
+                )
             else:
                 r[key] = value[()]
         else:
             r[key] = _compile_keymap(value)
     return r
+
 
 def compile_keymap(keymap):
     r = {}
@@ -173,12 +205,12 @@ def compile_keymap(keymap):
             r[k] = value
     return _compile_keymap(r)
 
+
 def keyname(key):
-    longest_match = ''
-    longest_match_name = ''
+    longest_match = ""
+    longest_match_name = ""
     for name, keyseq in list(keyset.items()):
-        if keyseq and key.startswith(keyseq) and \
-               len(keyseq) > len(longest_match):
+        if keyseq and key.startswith(keyseq) and len(keyseq) > len(longest_match):
             longest_match = keyseq
             longest_match_name = name
     if len(longest_match) > 0:
@@ -186,59 +218,63 @@ def keyname(key):
     else:
         return None, 0
 
-_unescapes = {'\r':'\\r', '\n':'\\n', '\177':'^?'}
 
-#for k,v in _escapes.items():
+_unescapes = {"\r": "\\r", "\n": "\\n", "\177": "^?"}
+
+# for k,v in _escapes.items():
 #    _unescapes[v] = k
+
 
 def unparse_key(keyseq):
     if not keyseq:
-        return ''
+        return ""
     name, s = keyname(keyseq)
     if name:
-        if name != 'escape' or s == len(keyseq):
-            return '\\<' + name + '>' + unparse_key(keyseq[s:])
+        if name != "escape" or s == len(keyseq):
+            return "\\<" + name + ">" + unparse_key(keyseq[s:])
         else:
-            return '\\M-' + unparse_key(keyseq[1:])
+            return "\\M-" + unparse_key(keyseq[1:])
     else:
         c = keyseq[0]
         r = keyseq[1:]
-        if c == '\\':
-            p = '\\\\'
+        if c == "\\":
+            p = "\\\\"
         elif c in _unescapes:
             p = _unescapes[c]
-        elif ord(c) < ord(' '):
-            p = '\\C-%s'%(chr(ord(c)+96),)
-        elif ord(' ') <= ord(c) <= ord('~'):
+        elif ord(c) < ord(" "):
+            p = "\\C-%s" % (chr(ord(c) + 96),)
+        elif ord(" ") <= ord(c) <= ord("~"):
             p = c
         else:
-            p = '\\%03o'%(ord(c),)
+            p = "\\%03o" % (ord(c),)
         return p + unparse_key(r)
+
 
 def _unparse_keyf(keyseq):
     if not keyseq:
         return []
     name, s = keyname(keyseq)
     if name:
-        if name != 'escape' or s == len(keyseq):
+        if name != "escape" or s == len(keyseq):
             return [name] + _unparse_keyf(keyseq[s:])
         else:
             rest = _unparse_keyf(keyseq[1:])
-            return ['M-'+rest[0]] + rest[1:]
+            return ["M-" + rest[0]] + rest[1:]
     else:
         c = keyseq[0]
         r = keyseq[1:]
-        if c == '\\':
-            p = '\\'
+        if c == "\\":
+            p = "\\"
         elif c in _unescapes:
             p = _unescapes[c]
-        elif ord(c) < ord(' '):
-            p = 'C-%s'%(chr(ord(c)+96),)
-        elif ord(' ') <= ord(c) <= ord('~'):
+        elif ord(c) < ord(" "):
+            p = "C-%s" % (chr(ord(c) + 96),)
+        elif ord(" ") <= ord(c) <= ord("~"):
             p = c
         else:
-            p = '\\%03o'%(ord(c),)
+            p = "\\%03o" % (ord(c),)
         return [p] + _unparse_keyf(r)
+
 
 def unparse_keyf(keyseq):
     return " ".join(_unparse_keyf(keyseq))
