@@ -72,7 +72,7 @@ class FakeStdin:
         # argh!
         raise NotImplementedError
     def readline(self, n=None):
-        from reader import Reader
+        from .reader import Reader
         try:
             # this isn't quite right: it will clobber any prompt that's
             # been printed.  Not sure how to get around this...
@@ -130,7 +130,8 @@ class PyGameConsole(Console):
         s.fill(c, [0, 600 - bmargin, 800, bmargin])
         s.fill(c, [800 - rmargin, 0, lmargin, 600])
 
-    def refresh(self, screen, (cx, cy)):
+    def refresh(self, screen, xxx_todo_changeme):
+        (cx, cy) = xxx_todo_changeme
         self.screen = screen
         self.pygame_screen.fill(colors.bg,
                                 [0, tmargin + self.cur_top + self.scroll,
@@ -211,12 +212,12 @@ class PyGameConsole(Console):
         meta = bool(pyg_event.mod & (KMOD_ALT|KMOD_META))
 
         try:
-            return self.k[(pyg_event.unicode, meta, ctrl)], pyg_event.unicode
+            return self.k[(pyg_event.str, meta, ctrl)], pyg_event.str
         except KeyError:
             try:
-                return self.k[(pyg_event.key, meta, ctrl)], pyg_event.unicode
+                return self.k[(pyg_event.key, meta, ctrl)], pyg_event.str
             except KeyError:
-                return "invalid-key", pyg_event.unicode
+                return "invalid-key", pyg_event.str
 
     def get_event(self, block=1):
         """Return an Event instance.  Returns None if |block| is false
@@ -239,7 +240,7 @@ class PyGameConsole(Console):
             self.cmd_buf += c.encode('ascii', 'replace')
             self.k = k
 
-            if not isinstance(k, types.DictType):
+            if not isinstance(k, dict):
                 e = Event(k, self.cmd_buf, [])
                 self.k = self.keymap
                 self.cmd_buf = ''
@@ -282,7 +283,7 @@ class PyGameConsole(Console):
 
     def forgetinput(self):
         """Forget all pending, but not yet processed input."""
-        while pygame.event.poll().type <> NOEVENT:
+        while pygame.event.poll().type != NOEVENT:
             pass
     
     def getpending(self):
@@ -299,7 +300,7 @@ class PyGameConsole(Console):
 
     def wait(self):
         """Wait for an event."""
-        raise Exception, "erp!"
+        raise Exception("erp!")
 
     def repaint(self):
         # perhaps we should consolidate grobs?

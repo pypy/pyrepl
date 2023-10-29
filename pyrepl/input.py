@@ -32,7 +32,7 @@
 # executive, temporary decision: [tab] and [C-i] are distinct, but
 # [meta-key] is identified with [esc key].  We demand that any console
 # class does quite a lot towards emulating a unix terminal.
-from __future__ import print_function
+
 import unicodedata
 from collections import deque
 import pprint

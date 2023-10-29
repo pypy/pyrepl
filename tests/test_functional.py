@@ -24,7 +24,7 @@ def start_child():
     def start_child_func(env_update=None):
         assert not ret_childs, "child started already"
 
-        env = {k: v for k, v in os.environ.items() if k in (
+        env = {k: v for k, v in list(os.environ.items()) if k in (
             "TERM",
         )}
         if env_update:

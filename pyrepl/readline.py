@@ -33,13 +33,13 @@ from pyrepl.historical_reader import HistoricalReader
 from pyrepl.completing_reader import CompletingReader
 from pyrepl.unix_console import UnixConsole, _error
 try:
-    unicode
+    str
     PY3 = False
 except NameError:
     PY3 = True
-    unicode = str
-    unichr = chr
-    basestring = bytes, str
+    str = str
+    chr = chr
+    str = bytes, str
 
 
 ENCODING = sys.getfilesystemencoding() or 'latin1'     # XXX review
@@ -232,7 +232,7 @@ class _ReadlineWrapper(object):
 
         # Unicode/str is required for Python 3 (3.5.2).
         # Ref: https://bitbucket.org/pypy/pyrepl/issues/20/#comment-30647029
-        return unicode(ret, ENCODING)
+        return str(ret, ENCODING)
 
     def multiline_input(self, more_lines, ps1, ps2, returns_unicode=False):
         """Read an input on possibly multiple lines, asking for more
@@ -272,9 +272,9 @@ class _ReadlineWrapper(object):
             return line
 
         try:
-            return unicode(line, ENCODING)
+            return str(line, ENCODING)
         except UnicodeDecodeError:   # bah, silently fall back...
-            return unicode(line, 'utf-8', 'replace')
+            return str(line, 'utf-8', 'replace')
 
     def get_history_length(self):
         return self.saved_history_length
@@ -312,7 +312,7 @@ class _ReadlineWrapper(object):
         for entry in history:
             # if we are on py3k, we don't need to encode strings before
             # writing it to a file
-            if isinstance(entry, unicode) and sys.version_info < (3,):
+            if isinstance(entry, str) and sys.version_info < (3,):
                 entry = entry.encode('utf-8')
             entry = entry.replace('\n', '\r\n')   # multiline history support
             entries += entry + '\n'
@@ -421,7 +421,7 @@ def _make_stub(_name, _ret):
     def stub(*args, **kwds):
         import warnings
         warnings.warn("readline.%s() not implemented" % _name, stacklevel=2)
-    stub.func_name = _name
+    stub.__name__ = _name
     globals()[_name] = stub
 
 for _name, _ret in [
@@ -463,15 +463,15 @@ def _setup():
                 del sys.__raw_input__
             except AttributeError:
                 pass
-            return raw_input(prompt)
+            return input(prompt)
         sys.__raw_input__ = _wrapper.raw_input
 
     else:
         # this is not really what readline.c does.  Better than nothing I guess
         try:
-            import __builtin__
-            _old_raw_input = __builtin__.raw_input
-            __builtin__.raw_input = _wrapper.raw_input
+            import builtins
+            _old_raw_input = builtins.raw_input
+            builtins.raw_input = _wrapper.raw_input
         except ImportError:
             import builtins
             _old_raw_input = builtins.input

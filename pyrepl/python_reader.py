@@ -20,8 +20,8 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 # one impressive collections of imports:
-from __future__ import print_function
-from __future__ import unicode_literals
+
+
 from pyrepl.completing_reader import CompletingReader
 from pyrepl.historical_reader import HistoricalReader
 from pyrepl import completing_reader, reader
@@ -31,9 +31,9 @@ import imp, sys, os, re, code, traceback
 import atexit, warnings
 
 try:
-    unicode
+    str
 except:
-    unicode = str
+    str = str
 
 try:
     imp.find_module("twisted")
@@ -204,7 +204,7 @@ class ReaderConsole(code.InteractiveInterpreter):
                         # can't have warnings spewed onto terminal
                         sv = warnings.showwarning
                         warnings.showwarning = eat_it
-                        l = unicode(self.reader.readline(), 'utf-8')
+                        l = str(self.reader.readline(), 'utf-8')
                     finally:
                         warnings.showwarning = sv
                 except KeyboardInterrupt:
@@ -302,7 +302,7 @@ class ReaderConsole(code.InteractiveInterpreter):
                     self.prepare()
                     try:
                         while 1:
-                            if sys.modules.has_key("_tkinter"):
+                            if "_tkinter" in sys.modules:
                                 self.really_tkinteract()
                                 # really_tkinteract is not expected to
                                 # return except via an exception, but:

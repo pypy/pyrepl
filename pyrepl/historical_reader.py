@@ -23,7 +23,7 @@ from pyrepl.reader import Reader as R
 isearch_keymap = tuple(
     [('\\%03o'%c, 'isearch-end') for c in range(256) if chr(c) != '\\'] + \
     [(c, 'isearch-add-character')
-     for c in map(chr, range(32, 127)) if c != '\\'] + \
+     for c in map(chr, list(range(32, 127))) if c != '\\'] + \
     [('\\%03o'%c, 'isearch-add-character')
      for c in range(256) if chr(c).isalpha() and chr(c) != '\\'] + \
     [('\\\\', 'self-insert'),
@@ -292,7 +292,7 @@ class HistoricalReader(R):
     def finish(self):
         super(HistoricalReader, self).finish()
         ret = self.get_unicode()
-        for i, t in self.transient_history.items():
+        for i, t in list(self.transient_history.items()):
             if i < len(self.history) and i != self.historyi:
                 self.history[i] = t
         if ret:

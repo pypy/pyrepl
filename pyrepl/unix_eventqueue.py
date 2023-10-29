@@ -30,9 +30,9 @@ from .trace import trace
 from termios import tcgetattr, VERASE
 import os
 try:
-    unicode
+    str
 except NameError:
-    unicode = str
+    str = str
 
 
 _keynames = {
@@ -74,7 +74,7 @@ CTRL_ARROW_KEYCODE = {
 
 def general_keycodes():
     keycodes = {}
-    for key, tiname in _keynames.items():
+    for key, tiname in list(_keynames.items()):
         keycode = curses.tigetstr(tiname)
         trace('key {key} tiname {tiname} keycode {keycode!r}', **locals())
         if keycode:
@@ -87,7 +87,7 @@ def EventQueue(fd, encoding):
     keycodes = general_keycodes()
     if os.isatty(fd):
         backspace = tcgetattr(fd)[6][VERASE]
-        keycodes[backspace] = unicode('backspace')
+        keycodes[backspace] = str('backspace')
     k = keymap.compile_keymap(keycodes)
     trace('keymap {k!r}', k=k)
     return EncodedQueue(k, encoding)

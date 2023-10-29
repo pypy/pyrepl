@@ -174,17 +174,17 @@ def parse_keys(key):
 
 def compile_keymap(keymap, empty=b''):
     r = {}
-    for key, value in keymap.items():
+    for key, value in list(keymap.items()):
         if isinstance(key, bytes):
             first = key[:1]
         else:
             first = key[0]
         r.setdefault(first, {})[key[1:]] = value
-    for key, value in r.items():
+    for key, value in list(r.items()):
         if empty in value:
             if len(value) != 1:
                 raise KeySpecError(
-                      "key definitions for %s clash"%(value.values(),))
+                      "key definitions for %s clash"%(list(value.values()),))
             else:
                 r[key] = value[empty]
         else:

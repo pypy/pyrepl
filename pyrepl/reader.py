@@ -19,32 +19,32 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-from __future__ import unicode_literals
+
 import unicodedata
 from pyrepl import commands
 from pyrepl import input
 try:
-    unicode
+    str
 except NameError:
-    unicode = str
-    unichr = chr
-    basestring = bytes, str
+    str = str
+    chr = chr
+    str = bytes, str
 
 
 def _make_unctrl_map():
     uc_map = {}
-    for c in map(unichr, range(256)):
+    for c in map(chr, list(range(256))):
         if unicodedata.category(c)[0] != 'C':
             uc_map[c] = c
     for i in range(32):
-        c = unichr(i)
-        uc_map[c] = '^' + unichr(ord('A') + i - 1)
+        c = chr(i)
+        uc_map[c] = '^' + chr(ord('A') + i - 1)
     uc_map[b'\t'] = '    '  # display TABs as 4 characters
-    uc_map[b'\177'] = unicode('^?')
+    uc_map[b'\177'] = str('^?')
     for i in range(256):
-        c = unichr(i)
+        c = chr(i)
         if c not in uc_map:
-            uc_map[c] = unicode('\\%03o') % i
+            uc_map[c] = str('\\%03o') % i
     return uc_map
 
 
@@ -87,17 +87,17 @@ del _make_unctrl_map
 
 [SYNTAX_WHITESPACE,
  SYNTAX_WORD,
- SYNTAX_SYMBOL] = range(3)
+ SYNTAX_SYMBOL] = list(range(3))
 
 
 def make_default_syntax_table():
     # XXX perhaps should use some unicodedata here?
     st = {}
-    for c in map(unichr, range(256)):
+    for c in map(chr, list(range(256))):
         st[c] = SYNTAX_SYMBOL
-    for c in [a for a in map(unichr, range(256)) if a.isalpha()]:
+    for c in [a for a in map(chr, list(range(256))) if a.isalpha()]:
         st[c] = SYNTAX_WORD
-    st[unicode('\n')] = st[unicode(' ')] = SYNTAX_WHITESPACE
+    st[str('\n')] = st[str(' ')] = SYNTAX_WHITESPACE
     return st
 
 default_keymap = tuple(
@@ -145,9 +145,9 @@ default_keymap = tuple(
      #(r'\M-\n', 'insert-nl'),
      ('\\\\', 'self-insert')] +
     [(c, 'self-insert')
-     for c in map(chr, range(32, 127)) if c != '\\'] +
+     for c in map(chr, list(range(32, 127))) if c != '\\'] +
     [(c, 'self-insert')
-     for c in map(chr, range(128, 256)) if c.isalpha()] +
+     for c in map(chr, list(range(128, 256))) if c.isalpha()] +
     [(r'\<up>', 'up'),
      (r'\<down>', 'down'),
      (r'\<left>', 'left'),
@@ -245,7 +245,7 @@ feeling more loquacious than I am now."""
         self.console = console
         self.commands = {}
         self.msg = ''
-        for v in vars(commands).values():
+        for v in list(vars(commands).values()):
             if (isinstance(v, type) and
                     issubclass(v, commands.Command) and
                     v.__name__[0].islower()):
@@ -273,7 +273,7 @@ feeling more loquacious than I am now."""
         screeninfo = []
         w = self.console.width - 1
         p = self.pos
-        for ln, line in zip(range(len(lines)), lines):
+        for ln, line in zip(list(range(len(lines))), lines):
             ll = len(line)
             if 0 <= p <= ll:
                 if self.msg and not self.msg_at_bottom:
@@ -523,7 +523,7 @@ feeling more loquacious than I am now."""
 
     def do_cmd(self, cmd):
         #print cmd
-        if isinstance(cmd[0], basestring):
+        if isinstance(cmd[0], str):
             #XXX: unify to text
             cmd = self.commands.get(cmd[0],
                                     commands.invalid_command)(self, *cmd)
@@ -619,11 +619,11 @@ feeling more loquacious than I am now."""
     def get_buffer(self, encoding=None):
         if encoding is None:
             encoding = self.console.encoding
-        return unicode('').join(self.buffer).encode(self.console.encoding)
+        return str('').join(self.buffer).encode(self.console.encoding)
 
     def get_unicode(self):
         """Return the current buffer as a unicode string."""
-        return unicode('').join(self.buffer)
+        return str('').join(self.buffer)
 
 
 def test():

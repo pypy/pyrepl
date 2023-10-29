@@ -18,7 +18,7 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 try:
-    import __builtin__ as builtins
+    import builtins as builtins
     builtins  # silence broken pyflakes
 except ImportError:
     import builtins
@@ -44,8 +44,8 @@ class Completer(object):
         import keyword
         matches = []
         for list in [keyword.kwlist,
-                     builtins.__dict__.keys(),
-                     self.ns.keys()]:
+                     list(builtins.__dict__.keys()),
+                     list(self.ns.keys())]:
             for word in list:
                 if word.startswith(text) and word != "__builtins__":
                     matches.append(word)

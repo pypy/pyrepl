@@ -33,7 +33,7 @@ It was designed to let you do this:
 which is in fact done by the `pythoni' script that comes with
 pyrepl."""
 
-from __future__ import print_function
+
 
 from pyrepl import completer
 from pyrepl.completing_reader import CompletingReader as CR

@@ -14,7 +14,7 @@ def readline_wrapper():
 
 if sys.version_info < (3, ):
     bytes_type = str
-    unicode_type = unicode  # noqa: F821
+    unicode_type = str  # noqa: F821
 else:
     bytes_type = bytes
     unicode_type = str

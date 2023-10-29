@@ -64,7 +64,7 @@ def build_menu(cons, wordlist, start, use_brackets, sort_in_column):
     else:
         item = "%s  "
         padding = 2
-    maxlen = min(max(map(real_len, wordlist)), cons.width - padding)
+    maxlen = min(max(list(map(real_len, wordlist))), cons.width - padding)
     cols = int(cons.width / (maxlen + padding))
     rows = int((len(wordlist) - 1)/cols + 1)
 

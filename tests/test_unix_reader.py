@@ -1,11 +1,11 @@
-from __future__ import unicode_literals
+
 from pyrepl.unix_eventqueue import EncodedQueue, Event
 
 
 def test_simple():
     q = EncodedQueue({}, 'utf-8')
 
-    a = u'\u1234'
+    a = '\u1234'
     b = a.encode('utf-8')
     for c in b:
         q.push(c)

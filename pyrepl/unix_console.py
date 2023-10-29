@@ -40,9 +40,9 @@ class InvalidTerminal(RuntimeError):
     pass
 
 try:
-    unicode
+    str
 except NameError:
-    unicode = str
+    str = str
 
 _error = (termios.error, curses.error, InvalidTerminal)
 
@@ -221,7 +221,7 @@ class UnixConsole(Console):
 
         self.__offset = offset
 
-        for y, oldline, newline, in zip(range(offset, offset + height),
+        for y, oldline, newline, in zip(list(range(offset, offset + height)),
                                         oldscr,
                                         newscr):
             if oldline != newline:
@@ -538,7 +538,7 @@ class UnixConsole(Console):
             amount = struct.unpack(
                 "i", ioctl(self.input_fd, FIONREAD, "\0\0\0\0"))[0]
             data = os.read(self.input_fd, amount)
-            raw = unicode(data, self.encoding, 'replace')
+            raw = str(data, self.encoding, 'replace')
             #XXX: something is wrong here
             e.data += raw
             e.raw += raw
@@ -554,7 +554,7 @@ class UnixConsole(Console):
 
             amount = 10000
             data = os.read(self.input_fd, amount)
-            raw = unicode(data, self.encoding, 'replace')
+            raw = str(data, self.encoding, 'replace')
             #XXX: something is wrong here
             e.data += raw
             e.raw += raw
