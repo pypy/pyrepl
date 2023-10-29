@@ -22,7 +22,6 @@ import builtins
 
 class Completer:
     def __init__(self, ns):
-        print(f"init with {ns=}")
         self.ns = ns
 
     def complete(self, text):
