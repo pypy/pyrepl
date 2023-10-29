@@ -19,32 +19,33 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-from __future__ import unicode_literals
+
 import unicodedata
-from pyrepl import commands
-from pyrepl import input
+
+from pyrepl import commands, input
+
 try:
-    unicode
+    str
 except NameError:
-    unicode = str
-    unichr = chr
-    basestring = bytes, str
+    str = str
+    chr = chr
+    str = bytes, str
 
 
 def _make_unctrl_map():
     uc_map = {}
-    for c in map(unichr, range(256)):
-        if unicodedata.category(c)[0] != 'C':
+    for c in map(chr, list(range(256))):
+        if unicodedata.category(c)[0] != "C":
             uc_map[c] = c
     for i in range(32):
-        c = unichr(i)
-        uc_map[c] = '^' + unichr(ord('A') + i - 1)
-    uc_map[b'\t'] = '    '  # display TABs as 4 characters
-    uc_map[b'\177'] = unicode('^?')
+        c = chr(i)
+        uc_map[c] = "^" + chr(ord("A") + i - 1)
+    uc_map[b"\t"] = "    "  # display TABs as 4 characters
+    uc_map[b"\177"] = str("^?")
     for i in range(256):
-        c = unichr(i)
+        c = chr(i)
         if c not in uc_map:
-            uc_map[c] = unicode('\\%03o') % i
+            uc_map[c] = str("\\%03o") % i
     return uc_map
 
 
@@ -52,14 +53,14 @@ def _my_unctrl(c, u=_make_unctrl_map()):
     if c in u:
         return u[c]
     else:
-        if unicodedata.category(c).startswith('C'):
-            return br'\u%04x' % ord(c)
+        if unicodedata.category(c).startswith("C"):
+            return rb"\u%04x" % ord(c)
         else:
             return c
 
 
-def disp_str(buffer, join=''.join, uc=_my_unctrl):
-    """ disp_str(buffer:string) -> (string, [int])
+def disp_str(buffer, join="".join, uc=_my_unctrl):
+    """disp_str(buffer:string) -> (string, [int])
 
     Return the string that should be the printed represenation of
     |buffer| and a list detailing where the characters of |buffer|
@@ -79,98 +80,95 @@ def disp_str(buffer, join=''.join, uc=_my_unctrl):
         b.extend([0] * (len(x) - 1))
     return join(s), b
 
+
 del _my_unctrl
 
 del _make_unctrl_map
 
 # syntax classes:
 
-[SYNTAX_WHITESPACE,
- SYNTAX_WORD,
- SYNTAX_SYMBOL] = range(3)
+[SYNTAX_WHITESPACE, SYNTAX_WORD, SYNTAX_SYMBOL] = list(range(3))
 
 
 def make_default_syntax_table():
     # XXX perhaps should use some unicodedata here?
     st = {}
-    for c in map(unichr, range(256)):
+    for c in map(chr, list(range(256))):
         st[c] = SYNTAX_SYMBOL
-    for c in [a for a in map(unichr, range(256)) if a.isalpha()]:
+    for c in [a for a in map(chr, list(range(256))) if a.isalpha()]:
         st[c] = SYNTAX_WORD
-    st[unicode('\n')] = st[unicode(' ')] = SYNTAX_WHITESPACE
+    st[str("\n")] = st[str(" ")] = SYNTAX_WHITESPACE
     return st
 
+
 default_keymap = tuple(
-    [(r'\C-a', 'beginning-of-line'),
-     (r'\C-b', 'left'),
-     (r'\C-c', 'interrupt'),
-     (r'\C-d', 'delete'),
-     (r'\C-e', 'end-of-line'),
-     (r'\C-f', 'right'),
-     (r'\C-g', 'cancel'),
-     (r'\C-h', 'backspace'),
-     (r'\C-j', 'accept'),
-     (r'\<return>', 'accept'),
-     (r'\C-k', 'kill-line'),
-     (r'\C-l', 'clear-screen'),
-     (r'\C-m', 'accept'),
-     (r'\C-q', 'quoted-insert'),
-     (r'\C-t', 'transpose-characters'),
-     (r'\C-u', 'unix-line-discard'),
-     (r'\C-v', 'quoted-insert'),
-     (r'\C-w', 'unix-word-rubout'),
-     (r'\C-x\C-u', 'upcase-region'),
-     (r'\C-y', 'yank'),
-     (r'\C-z', 'suspend'),
+    [
+        (r"\C-a", "beginning-of-line"),
+        (r"\C-b", "left"),
+        (r"\C-c", "interrupt"),
+        (r"\C-d", "delete"),
+        (r"\C-e", "end-of-line"),
+        (r"\C-f", "right"),
+        (r"\C-g", "cancel"),
+        (r"\C-h", "backspace"),
+        (r"\C-j", "accept"),
+        (r"\<return>", "accept"),
+        (r"\C-k", "kill-line"),
+        (r"\C-l", "clear-screen"),
+        (r"\C-m", "accept"),
+        (r"\C-q", "quoted-insert"),
+        (r"\C-t", "transpose-characters"),
+        (r"\C-u", "unix-line-discard"),
+        (r"\C-v", "quoted-insert"),
+        (r"\C-w", "unix-word-rubout"),
+        (r"\C-x\C-u", "upcase-region"),
+        (r"\C-y", "yank"),
+        (r"\C-z", "suspend"),
+        (r"\M-b", "backward-word"),
+        (r"\M-c", "capitalize-word"),
+        (r"\M-d", "kill-word"),
+        (r"\M-f", "forward-word"),
+        (r"\M-l", "downcase-word"),
+        (r"\M-t", "transpose-words"),
+        (r"\M-u", "upcase-word"),
+        (r"\M-y", "yank-pop"),
+        (r"\M--", "digit-arg"),
+        (r"\M-0", "digit-arg"),
+        (r"\M-1", "digit-arg"),
+        (r"\M-2", "digit-arg"),
+        (r"\M-3", "digit-arg"),
+        (r"\M-4", "digit-arg"),
+        (r"\M-5", "digit-arg"),
+        (r"\M-6", "digit-arg"),
+        (r"\M-7", "digit-arg"),
+        (r"\M-8", "digit-arg"),
+        (r"\M-9", "digit-arg"),
+        # (r'\M-\n', 'insert-nl'),
+        ("\\\\", "self-insert"),
+    ]
+    + [(c, "self-insert") for c in map(chr, list(range(32, 127))) if c != "\\"]
+    + [(c, "self-insert") for c in map(chr, list(range(128, 256))) if c.isalpha()]
+    + [
+        (r"\<up>", "up"),
+        (r"\<down>", "down"),
+        (r"\<left>", "left"),
+        (r"\<right>", "right"),
+        (r"\<insert>", "quoted-insert"),
+        (r"\<delete>", "delete"),
+        (r"\<backspace>", "backspace"),
+        (r"\M-\<backspace>", "backward-kill-word"),
+        (r"\<end>", "end-of-line"),  # was 'end'
+        (r"\<home>", "beginning-of-line"),  # was 'home'
+        (r"\<f1>", "help"),
+        (r"\EOF", "end"),  # the entries in the terminfo database for xterms
+        (r"\EOH", "home"),  # seem to be wrong.  this is a less than ideal
+        # workaround
+        (r"\<ctrl left>", "backward-word"),
+        (r"\<ctrl right>", "forward-word"),
+    ]
+)
 
-     (r'\M-b', 'backward-word'),
-     (r'\M-c', 'capitalize-word'),
-     (r'\M-d', 'kill-word'),
-     (r'\M-f', 'forward-word'),
-     (r'\M-l', 'downcase-word'),
-     (r'\M-t', 'transpose-words'),
-     (r'\M-u', 'upcase-word'),
-     (r'\M-y', 'yank-pop'),
-     (r'\M--', 'digit-arg'),
-     (r'\M-0', 'digit-arg'),
-     (r'\M-1', 'digit-arg'),
-     (r'\M-2', 'digit-arg'),
-     (r'\M-3', 'digit-arg'),
-     (r'\M-4', 'digit-arg'),
-     (r'\M-5', 'digit-arg'),
-     (r'\M-6', 'digit-arg'),
-     (r'\M-7', 'digit-arg'),
-     (r'\M-8', 'digit-arg'),
-     (r'\M-9', 'digit-arg'),
-     #(r'\M-\n', 'insert-nl'),
-     ('\\\\', 'self-insert')] +
-    [(c, 'self-insert')
-     for c in map(chr, range(32, 127)) if c != '\\'] +
-    [(c, 'self-insert')
-     for c in map(chr, range(128, 256)) if c.isalpha()] +
-    [(r'\<up>', 'up'),
-     (r'\<down>', 'down'),
-     (r'\<left>', 'left'),
-     (r'\<right>', 'right'),
-     (r'\<insert>', 'quoted-insert'),
-     (r'\<delete>', 'delete'),
-     (r'\<backspace>', 'backspace'),
-     (r'\M-\<backspace>', 'backward-kill-word'),
-     (r'\<end>', 'end-of-line'),         # was 'end'
-     (r'\<home>', 'beginning-of-line'),  # was 'home'
-     (r'\<f1>', 'help'),
-     (r'\EOF', 'end'),   # the entries in the terminfo database for xterms
-     (r'\EOH', 'home'),  # seem to be wrong.  this is a less than ideal
-                         # workaround
-     (r'\<ctrl left>',  'backward-word'),
-     (r'\<ctrl right>', 'forward-word'),
-     ])
-
-if 'c' in globals():  # only on python 2.x
-    del c  # from the listcomps
-
-
-class Reader(object):
+class Reader:
     """The Reader class implements the bare bones of a command reader,
     handling such details as editing and cursor motion.  What it does
     not support are such things as completion or history support -
@@ -244,20 +242,21 @@ feeling more loquacious than I am now."""
         self.finished = 0
         self.console = console
         self.commands = {}
-        self.msg = ''
-        for v in vars(commands).values():
-            if (isinstance(v, type) and
-                    issubclass(v, commands.Command) and
-                    v.__name__[0].islower()):
+        self.msg = ""
+        for v in list(vars(commands).values()):
+            if (
+                isinstance(v, type)
+                and issubclass(v, commands.Command)
+                and v.__name__[0].islower()
+            ):
                 self.commands[v.__name__] = v
-                self.commands[v.__name__.replace('_', '-')] = v
+                self.commands[v.__name__.replace("_", "-")] = v
         self.syntax_table = make_default_syntax_table()
         self.input_trans_stack = []
         self.keymap = self.collect_keymap()
         self.input_trans = input.KeymapTranslator(
-            self.keymap,
-            invalid_cls='invalid-key',
-            character_cls='self-insert')
+            self.keymap, invalid_cls="invalid-key", character_cls="self-insert"
+        )
 
     def collect_keymap(self):
         return default_keymap
@@ -273,7 +272,7 @@ feeling more loquacious than I am now."""
         screeninfo = []
         w = self.console.width - 1
         p = self.pos
-        for ln, line in zip(range(len(lines)), lines):
+        for ln, line in zip(list(range(len(lines))), lines):
             ll = len(line)
             if 0 <= p <= ll:
                 if self.msg and not self.msg_at_bottom:
@@ -282,8 +281,8 @@ feeling more loquacious than I am now."""
                         screeninfo.append((0, []))
                 self.lxy = p, ln
             prompt = self.get_prompt(ln, ll >= p >= 0)
-            while '\n' in prompt:
-                pre_prompt, _, prompt = prompt.partition('\n')
+            while "\n" in prompt:
+                pre_prompt, _, prompt = prompt.partition("\n")
                 screen.append(pre_prompt)
                 screeninfo.append((0, []))
             p -= ll + 1
@@ -294,13 +293,13 @@ feeling more loquacious than I am now."""
                 screen.append(prompt + l)
                 screeninfo.append((lp, l2 + [1]))
             else:
-                screen.append(prompt + l[:w - lp] + "\\")
-                screeninfo.append((lp, l2[:w - lp]))
+                screen.append(prompt + l[: w - lp] + "\\")
+                screeninfo.append((lp, l2[: w - lp]))
                 for i in range(-lp + w, -lp + wrapcount * w, w):
-                    screen.append(l[i:i + w] + "\\")
-                    screeninfo.append((0, l2[i:i + w]))
-                screen.append(l[wrapcount * w - lp:])
-                screeninfo.append((0, l2[wrapcount * w - lp:] + [1]))
+                    screen.append(l[i : i + w] + "\\")
+                    screeninfo.append((0, l2[i : i + w]))
+                screen.append(l[wrapcount * w - lp :])
+                screeninfo.append((0, l2[wrapcount * w - lp :] + [1]))
         self.screeninfo = screeninfo
         self.cxy = self.pos2xy(self.pos)
         if self.msg and self.msg_at_bottom:
@@ -310,26 +309,26 @@ feeling more loquacious than I am now."""
         return screen
 
     def process_prompt(self, prompt):
-        """ Process the prompt.
+        """Process the prompt.
 
         This means calculate the length of the prompt. The character \x01
         and \x02 are used to bracket ANSI control sequences and need to be
         excluded from the length calculation.  So also a copy of the prompt
-        is returned with these control characters removed.  """
+        is returned with these control characters removed."""
 
-        out_prompt = ''
+        out_prompt = ""
         l = len(prompt)
         pos = 0
         while True:
-            s = prompt.find('\x01', pos)
+            s = prompt.find("\x01", pos)
             if s == -1:
                 break
-            e = prompt.find('\x02', s)
+            e = prompt.find("\x02", s)
             if e == -1:
                 break
             # Found start and end brackets, subtract from string length
             l = l - (e - s + 1)
-            out_prompt += prompt[pos:s] + prompt[s + 1:e]
+            out_prompt += prompt[pos:s] + prompt[s + 1 : e]
             pos = e + 1
         out_prompt += prompt[pos:]
         return out_prompt, l
@@ -377,7 +376,7 @@ feeling more loquacious than I am now."""
             p = self.pos
         b = self.buffer
         p -= 1
-        while p >= 0 and b[p] != '\n':
+        while p >= 0 and b[p] != "\n":
             p -= 1
         return p + 1
 
@@ -389,7 +388,7 @@ feeling more loquacious than I am now."""
         if p is None:
             p = self.pos
         b = self.buffer
-        while p < len(b) and b[p] != '\n':
+        while p < len(b) and b[p] != "\n":
             p += 1
         return p
 
@@ -458,7 +457,7 @@ feeling more loquacious than I am now."""
 
     def insert(self, text):
         """Insert 'text' at the insertion point."""
-        self.buffer[self.pos:self.pos] = list(text)
+        self.buffer[self.pos : self.pos] = list(text)
         self.pos += len(text)
         self.dirty = 1
 
@@ -522,11 +521,10 @@ feeling more loquacious than I am now."""
         self.dirty = 0  # forgot this for a while (blush)
 
     def do_cmd(self, cmd):
-        #print cmd
-        if isinstance(cmd[0], basestring):
-            #XXX: unify to text
-            cmd = self.commands.get(cmd[0],
-                                    commands.invalid_command)(self, *cmd)
+        # print cmd
+        if isinstance(cmd[0], str):
+            # XXX: unify to text
+            cmd = self.commands.get(cmd[0], commands.invalid_command)(self, *cmd)
         elif isinstance(cmd[0], type):
             cmd = cmd[0](self, *cmd)
         else:
@@ -555,7 +553,7 @@ feeling more loquacious than I am now."""
         pending."""
 
         if self.msg:
-            self.msg = ''
+            self.msg = ""
             self.dirty = 1
 
         while 1:
@@ -565,19 +563,16 @@ feeling more loquacious than I am now."""
 
             translate = True
 
-            if event.evt == 'key':
+            if event.evt == "key":
                 self.input_trans.push(event)
-            elif event.evt == 'scroll':
+            elif event.evt == "scroll":
                 self.refresh()
-            elif event.evt == 'resize':
+            elif event.evt == "resize":
                 self.refresh()
             else:
                 translate = False
 
-            if translate:
-                cmd = self.input_trans.get()
-            else:
-                cmd = event.evt, event.data
+            cmd = self.input_trans.get() if translate else (event.evt, event.data)
 
             if cmd is None:
                 if block:
@@ -612,22 +607,22 @@ feeling more loquacious than I am now."""
     def bind(self, spec, command):
         self.keymap = self.keymap + ((spec, command),)
         self.input_trans = input.KeymapTranslator(
-            self.keymap,
-            invalid_cls='invalid-key',
-            character_cls='self-insert')
+            self.keymap, invalid_cls="invalid-key", character_cls="self-insert"
+        )
 
     def get_buffer(self, encoding=None):
         if encoding is None:
             encoding = self.console.encoding
-        return unicode('').join(self.buffer).encode(self.console.encoding)
+        return str("").join(self.buffer).encode(self.console.encoding)
 
     def get_unicode(self):
         """Return the current buffer as a unicode string."""
-        return unicode('').join(self.buffer)
+        return "".join(self.buffer)
 
 
 def test():
     from pyrepl.unix_console import UnixConsole
+
     reader = Reader(UnixConsole())
     reader.ps1 = "**> "
     reader.ps2 = "/*> "
@@ -637,5 +632,5 @@ def test():
         pass
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test()

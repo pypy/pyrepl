@@ -17,7 +17,7 @@ class error(Exception):
 
 
 def _find_clib():
-    trylibs = ['ncursesw', 'ncurses', 'curses']
+    trylibs = ["ncursesw", "ncurses", "curses"]
 
     for lib in trylibs:
         path = ctypes.util.find_library(lib)
@@ -25,11 +25,11 @@ def _find_clib():
             return path
     raise ImportError("curses library not found")
 
+
 _clibpath = _find_clib()
 clib = ctypes.cdll.LoadLibrary(_clibpath)
 
-clib.setupterm.argtypes = [ctypes.c_char_p, ctypes.c_int,
-                           ctypes.POINTER(ctypes.c_int)]
+clib.setupterm.argtypes = [ctypes.c_char_p, ctypes.c_int, ctypes.POINTER(ctypes.c_int)]
 clib.setupterm.restype = ctypes.c_int
 
 clib.tigetstr.argtypes = [ctypes.c_char_p]
@@ -45,27 +45,25 @@ ERR = -1
 
 try:
     from __pypy__ import builtinify
-    builtinify  # silence broken pyflakes
 except ImportError:
-    builtinify = lambda f: f
+    def builtinify(f):
+        return f
 
 
 @builtinify
 def setupterm(termstr, fd):
-    if termstr is not None:
-        if not isinstance(termstr, bytes):
-            termstr = termstr.encode()
+    if termstr is not None and not isinstance(termstr, bytes):
+        termstr = termstr.encode()
     err = ctypes.c_int(0)
     result = clib.setupterm(termstr, fd, ctypes.byref(err))
     if result == ERR:
-        raise error("setupterm(%r, %d) failed (err=%d)" % (
-            termstr, fd, err.value))
+        raise error("setupterm(%r, %d) failed (err=%d)" % (termstr, fd, err.value))
 
 
 @builtinify
 def tigetstr(cap):
     if not isinstance(cap, bytes):
-        cap = cap.encode('ascii')
+        cap = cap.encode("ascii")
     result = clib.tigetstr(cap)
     if ctypes.cast(result, ctypes.c_void_p).value == ERR:
         return None

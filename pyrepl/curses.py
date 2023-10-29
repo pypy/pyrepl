@@ -1,4 +1,3 @@
-
 #   Copyright 2000-2010 Michael Hudson-Doyle <micahel@gmail.com>
 #                       Armin Rigo
 #
@@ -20,4 +19,4 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 
-from ._minimal_curses import setupterm, tigetstr, tparm, error
+from ._minimal_curses import error, setupterm, tigetstr, tparm

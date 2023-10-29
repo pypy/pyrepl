@@ -10,10 +10,10 @@ import sys
 from pyrepl import readline
 from pyrepl.simple_interact import run_multiline_interactive_console
 
-sys.modules['readline'] = readline
+sys.modules["readline"] = readline
 
-if os.getenv('PYTHONSTARTUP'):
-    exec(open(os.getenv('PYTHONSTARTUP')).read())
+if os.getenv("PYTHONSTARTUP"):
+    exec(open(os.getenv("PYTHONSTARTUP")).read())
 
-print('Python', sys.version)
+print("Python", sys.version)
 run_multiline_interactive_console()

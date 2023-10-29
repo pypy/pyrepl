@@ -20,20 +20,20 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 # one impressive collections of imports:
-from __future__ import print_function
-from __future__ import unicode_literals
+
+
+import atexit
+import code
+import imp
+import os
+import re
+import sys
+import traceback
+import warnings
+
+from pyrepl import commands, completer, completing_reader, module_lister, reader
 from pyrepl.completing_reader import CompletingReader
 from pyrepl.historical_reader import HistoricalReader
-from pyrepl import completing_reader, reader
-from pyrepl import commands, completer
-from pyrepl import module_lister
-import imp, sys, os, re, code, traceback
-import atexit, warnings
-
-try:
-    unicode
-except:
-    unicode = str
 
 try:
     imp.find_module("twisted")
@@ -44,23 +44,16 @@ else:
 
 CommandCompiler = code.CommandCompiler
 
+
 def eat_it(*args):
     """this function eats warnings, if you were wondering"""
     pass
 
-if sys.version_info >= (3,0):
-    def _reraise(cls, val, tb):
-        __tracebackhide__ = True
-        assert hasattr(val, '__traceback__')
-        raise val
-else:
-    exec ("""
+
 def _reraise(cls, val, tb):
     __tracebackhide__ = True
-    raise cls, val, tb
-""")
-
-
+    assert hasattr(val, "__traceback__")
+    raise val
 
 
 class maybe_accept(commands.Command):
@@ -78,29 +71,33 @@ class maybe_accept(commands.Command):
             else:
                 self.finish = 1
 
+
 from_line_prog = re.compile(
-    "^from\s+(?P<mod>[A-Za-z_.0-9]*)\s+import\s+(?P<name>[A-Za-z_.0-9]*)")
-import_line_prog = re.compile(
-    "^(?:import|from)\s+(?P<mod>[A-Za-z_.0-9]*)\s*$")
+    "^from\s+(?P<mod>[A-Za-z_.0-9]*)\s+import\s+(?P<name>[A-Za-z_.0-9]*)"
+)
+import_line_prog = re.compile("^(?:import|from)\s+(?P<mod>[A-Za-z_.0-9]*)\s*$")
+
 
 def saver(reader=reader):
     try:
         with open(os.path.expanduser("~/.pythoni.hist"), "wb") as fp:
-            fp.write(b'\n'.join(item.encode('unicode_escape')
-                                for item in reader.history))
-    except IOError as e:
+            fp.write(
+                b"\n".join(item.encode("unicode_escape") for item in reader.history)
+            )
+    except OSError as e:
         print(e)
         pass
 
+
 class PythonicReader(CompletingReader, HistoricalReader):
     def collect_keymap(self):
-        return super(PythonicReader, self).collect_keymap() + (
-            (r'\n', 'maybe-accept'),
-            (r'\M-\n', 'insert-nl'))
-    
-    def __init__(self, console, locals,
-                 compiler=None):
-        super(PythonicReader, self).__init__(console)
+        return super().collect_keymap() + (
+            (r"\n", "maybe-accept"),
+            (r"\M-\n", "insert-nl"),
+        )
+
+    def __init__(self, console, locals, compiler=None):
+        super().__init__(console)
         self.completer = completer.Completer(locals)
         st = self.syntax_table
         for c in "._0123456789":
@@ -110,23 +107,22 @@ class PythonicReader(CompletingReader, HistoricalReader):
             self.compiler = CommandCompiler()
         else:
             self.compiler = compiler
+
         try:
-            file = open(os.path.expanduser("~/.pythoni.hist"), 'rb')
-        except IOError:
+            with open(os.path.expanduser("~/.pythoni.hist"), "rb") as fh:
+                lines = fh.readlines()
+            self.history = [
+                line.rstrip(b"\n").decode("unicode_escape") for line in lines
+            ]
+        except FileNotFoundError:
             self.history = []
-        else:
-            try:
-                lines = file.readlines()
-                self.history = [ x.rstrip(b'\n').decode('unicode_escape') for x in lines]
-            except:
-                self.history = []
-            self.historyi = len(self.history)
-            file.close()
+        self.historyi = len(self.history)
+
         atexit.register(lambda: saver(self))
         for c in [maybe_accept]:
             self.commands[c.__name__] = c
-            self.commands[c.__name__.replace('_', '-')] = c        
-    
+            self.commands[c.__name__.replace("_", "-")] = c
+
     def get_completions(self, stem):
         b = self.get_unicode()
         m = import_line_prog.match(b)
@@ -147,21 +143,22 @@ class PythonicReader(CompletingReader, HistoricalReader):
                 l = module_lister._packages[mod]
             except KeyError:
                 try:
-                    mod = __import__(mod, self.locals, self.locals, [''])
+                    mod = __import__(mod, self.locals, self.locals, [""])
                     return [x for x in dir(mod) if x.startswith(name)]
                 except ImportError:
                     pass
             else:
-                return [x[len(mod) + 1:]
-                        for x in l if x.startswith(mod + '.' + name)]
+                return [x[len(mod) + 1 :] for x in l if x.startswith(mod + "." + name)]
         try:
             l = sorted(set(self.completer.complete(stem)))
             return l
         except (NameError, AttributeError):
             return []
 
+
 class ReaderConsole(code.InteractiveInterpreter):
     II_init = code.InteractiveInterpreter.__init__
+
     def __init__(self, console, locals=None):
         if locals is None:
             locals = {}
@@ -169,7 +166,7 @@ class ReaderConsole(code.InteractiveInterpreter):
         self.compiler = CommandCompiler()
         self.compile = self.compiler.compiler
         self.reader = PythonicReader(console, locals, self.compiler)
-        locals['Reader'] = self.reader
+        locals["Reader"] = self.reader
 
     def run_user_init_file(self):
         for key in "PYREPLSTARTUP", "PYTHONSTARTUP":
@@ -179,7 +176,7 @@ class ReaderConsole(code.InteractiveInterpreter):
         else:
             return
         try:
-            with open(initfile, "r") as f:
+            with open(initfile) as f:
                 exec(compile(f.read(), initfile, "exec"), self.locals, self.locals)
         except:
             etype, value, tb = sys.exc_info()
@@ -188,7 +185,7 @@ class ReaderConsole(code.InteractiveInterpreter):
     def execute(self, text):
         try:
             # ooh, look at the hack:
-            code = self.compile(text, '<stdin>', 'single')
+            code = self.compile(text, "<stdin>", "single")
         except (OverflowError, SyntaxError, ValueError):
             self.showsyntaxerror("<stdin>")
         else:
@@ -198,13 +195,13 @@ class ReaderConsole(code.InteractiveInterpreter):
 
     def interact(self):
         while 1:
-            try: # catches EOFError's and KeyboardInterrupts during execution
-                try: # catches KeyboardInterrupts during editing
-                    try: # warning saver
+            try:  # catches EOFError's and KeyboardInterrupts during execution
+                try:  # catches KeyboardInterrupts during editing
+                    try:  # warning saver
                         # can't have warnings spewed onto terminal
                         sv = warnings.showwarning
                         warnings.showwarning = eat_it
-                        l = unicode(self.reader.readline(), 'utf-8')
+                        l = str(self.reader.readline(), "utf-8")
                     finally:
                         warnings.showwarning = sv
                 except KeyboardInterrupt:
@@ -221,7 +218,7 @@ class ReaderConsole(code.InteractiveInterpreter):
         self.sv_sw = warnings.showwarning
         warnings.showwarning = eat_it
         self.reader.prepare()
-        self.reader.refresh() # we want :after methods...
+        self.reader.refresh()  # we want :after methods...
 
     def restore(self):
         self.reader.restore()
@@ -254,10 +251,11 @@ class ReaderConsole(code.InteractiveInterpreter):
     # createfilehandler)?  threads, I guess
     def really_tkinteract(self):
         import _tkinter
+
         _tkinter.createfilehandler(
-            self.reader.console.input_fd, _tkinter.READABLE,
-            self.tkfilehandler)
-        
+            self.reader.console.input_fd, _tkinter.READABLE, self.tkfilehandler
+        )
+
         self.exc_info = None
         while 1:
             # dooneevent will return 0 without blocking if there are
@@ -270,13 +268,13 @@ class ReaderConsole(code.InteractiveInterpreter):
                 type, value, tb = self.exc_info
                 self.exc_info = None
                 _reraise(type, value, tb)
-        
+
     def tkinteract(self):
         """Run a Tk-aware Python interactive session.
 
         This function simulates the Python top-level in a way that
         allows Tk's mainloop to run."""
-        
+
         # attempting to understand the control flow of this function
         # without help may cause internal injuries.  so, some
         # explanation.
@@ -295,14 +293,14 @@ class ReaderConsole(code.InteractiveInterpreter):
         # KeyboardInterrupts cause a restart.  All other exceptions
         # are likely bugs in pyrepl (well, 'cept for SystemExit, of
         # course).
-        
+
         while 1:
             try:
                 try:
                     self.prepare()
                     try:
                         while 1:
-                            if sys.modules.has_key("_tkinter"):
+                            if "_tkinter" in sys.modules:
                                 self.really_tkinteract()
                                 # really_tkinteract is not expected to
                                 # return except via an exception, but:
@@ -318,13 +316,16 @@ class ReaderConsole(code.InteractiveInterpreter):
                 break
 
     def twistedinteract(self):
+        import signal
+
         from twisted.internet import reactor
         from twisted.internet.abstract import FileDescriptor
-        import signal
+
         outerself = self
+
         class Me(FileDescriptor):
             def fileno(self):
-                """ We want to select on FD 0 """
+                """We want to select on FD 0"""
                 return 0
 
             def doRead(self):
@@ -335,67 +336,79 @@ class ReaderConsole(code.InteractiveInterpreter):
                     reactor.stop()
 
         reactor.addReader(Me())
-        reactor.callWhenRunning(signal.signal,
-                                signal.SIGINT,
-                                signal.default_int_handler)
+        reactor.callWhenRunning(
+            signal.signal, signal.SIGINT, signal.default_int_handler
+        )
         self.prepare()
         try:
             reactor.run()
         finally:
             self.restore()
-        
 
     def cocoainteract(self, inputfilehandle=None, outputfilehandle=None):
         # only call this when there's a run loop already going!
         # note that unlike the other *interact methods, this returns immediately
         from cocoasupport import CocoaInteracter
-        self.cocoainteracter = CocoaInteracter.alloc().init(self, inputfilehandle, outputfilehandle)
-        
-        
-def main(use_pygame_console=0, interactmethod=default_interactmethod, print_banner=True, clear_main=True):
+
+        self.cocoainteracter = CocoaInteracter.alloc().init(
+            self, inputfilehandle, outputfilehandle
+        )
+
+
+def main(
+    use_pygame_console=0,
+    interactmethod=default_interactmethod,
+    print_banner=True,
+    clear_main=True,
+):
     si, se, so = sys.stdin, sys.stderr, sys.stdout
     try:
-        if 0 and use_pygame_console: # pygame currently borked
-            from pyrepl.pygame_console import PyGameConsole, FakeStdin, FakeStdout
+        if False:  # pygame currently borked
+            from pyrepl.pygame_console import FakeStdin, FakeStdout, PyGameConsole
+
             con = PyGameConsole()
             sys.stderr = sys.stdout = FakeStdout(con)
             sys.stdin = FakeStdin(con)
         else:
             from pyrepl.unix_console import UnixConsole
+
             try:
                 import locale
             except ImportError:
                 encoding = None
             else:
-                if hasattr(locale, 'nl_langinfo') \
-                       and hasattr(locale, 'CODESET'):
+                if hasattr(locale, "nl_langinfo") and hasattr(locale, "CODESET"):
                     encoding = locale.nl_langinfo(locale.CODESET)
-                elif os.environ.get('TERM_PROGRAM') == 'Apple_Terminal':
+                elif os.environ.get("TERM_PROGRAM") == "Apple_Terminal":
                     # /me whistles innocently...
-                    code = int(os.popen(
-                        "defaults read com.apple.Terminal StringEncoding"
-                        ).read())
+                    code = int(
+                        os.popen(
+                            "defaults read com.apple.Terminal StringEncoding"
+                        ).read()
+                    )
                     if code == 4:
-                        encoding = 'utf-8'
+                        encoding = "utf-8"
                         # More could go here -- and what's here isn't
                         # bulletproof.  What would be?  AppleScript?
                         # Doesn't seem to be possible.
                     else:
                         encoding = None
                 else:
-                    encoding = None # so you get ASCII...
+                    encoding = None  # so you get ASCII...
             con = UnixConsole(os.dup(0), os.dup(1), None, encoding)
         if print_banner:
             print("Python", sys.version, "on", sys.platform)
-            print('Type "help", "copyright", "credits" or "license" '\
-                  'for more information.')
+            print(
+                'Type "help", "copyright", "credits" or "license" '
+                "for more information."
+            )
         sys.path.insert(0, os.getcwd())
 
-        if clear_main and __name__ != '__main__':
-            mainmod = imp.new_module('__main__')
-            sys.modules['__main__'] = mainmod
+        if clear_main and __name__ != "__main__":
+            mainmod = imp.new_module("__main__")
+            sys.modules["__main__"] = mainmod
         else:
-            mainmod = sys.modules['__main__']
+            mainmod = sys.modules["__main__"]
 
         rc = ReaderConsole(con, mainmod.__dict__)
         rc.reader._module_list_ready = False
@@ -404,5 +417,6 @@ def main(use_pygame_console=0, interactmethod=default_interactmethod, print_bann
     finally:
         sys.stdin, sys.stderr, sys.stdout = si, se, so
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

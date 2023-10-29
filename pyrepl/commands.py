@@ -19,7 +19,9 @@
 # CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import sys, os
+import os
+
+from pyrepl import input  # noqa: F401
 
 # Catgories of actions:
 #  killing
@@ -30,7 +32,8 @@ import sys, os
 #  finishing
 # [completion]
 
-class Command(object):
+
+class Command:
     finish = 0
     kills_digit_arg = 1
 
@@ -41,6 +44,7 @@ class Command(object):
 
     def do(self):
         pass
+
 
 class KillCommand(Command):
     def kill_range(self, start, end):
@@ -60,29 +64,38 @@ class KillCommand(Command):
         r.pos = start
         r.dirty = 1
 
+
 class YankCommand(Command):
     pass
+
 
 class MotionCommand(Command):
     pass
 
+
 class EditCommand(Command):
     pass
+
 
 class FinishCommand(Command):
     finish = 1
     pass
 
+
 def is_kill(command):
     return command and issubclass(command, KillCommand)
+
 
 def is_yank(command):
     return command and issubclass(command, YankCommand)
 
+
 # etc
+
 
 class digit_arg(Command):
     kills_digit_arg = 0
+
     def do(self):
         r = self.reader
         c = self.event[-1]
@@ -97,10 +110,11 @@ class digit_arg(Command):
                 r.arg = d
             else:
                 if r.arg < 0:
-                    r.arg = 10*r.arg - d
+                    r.arg = 10 * r.arg - d
                 else:
-                    r.arg = 10*r.arg + d
+                    r.arg = 10 * r.arg + d
         r.dirty = 1
+
 
 class clear_screen(Command):
     def do(self):
@@ -108,52 +122,61 @@ class clear_screen(Command):
         r.console.clear()
         r.dirty = 1
 
+
 class refresh(Command):
     def do(self):
         self.reader.dirty = 1
+
 
 class repaint(Command):
     def do(self):
         self.reader.dirty = 1
         self.reader.console.repaint_prep()
 
+
 class kill_line(KillCommand):
     def do(self):
         r = self.reader
         b = r.buffer
         eol = r.eol()
-        for c in b[r.pos:eol]:
+        for c in b[r.pos : eol]:
             if not c.isspace():
                 self.kill_range(r.pos, eol)
                 return
         else:
-            self.kill_range(r.pos, eol+1)
+            self.kill_range(r.pos, eol + 1)
+
 
 class unix_line_discard(KillCommand):
     def do(self):
         r = self.reader
         self.kill_range(r.bol(), r.pos)
 
+
 # XXX unix_word_rubout and backward_kill_word should actually
 # do different things...
+
 
 class unix_word_rubout(KillCommand):
     def do(self):
         r = self.reader
-        for i in range(r.get_arg()):
+        for _i in range(r.get_arg()):
             self.kill_range(r.bow(), r.pos)
+
 
 class kill_word(KillCommand):
     def do(self):
         r = self.reader
-        for i in range(r.get_arg()):
+        for _i in range(r.get_arg()):
             self.kill_range(r.pos, r.eow())
+
 
 class backward_kill_word(KillCommand):
     def do(self):
         r = self.reader
-        for i in range(r.get_arg()):
+        for _i in range(r.get_arg()):
             self.kill_range(r.bow(), r.pos)
+
 
 class yank(YankCommand):
     def do(self):
@@ -162,6 +185,7 @@ class yank(YankCommand):
             r.error("nothing to yank")
             return
         r.insert(r.kill_ring[-1])
+
 
 class yank_pop(YankCommand):
     def do(self):
@@ -176,19 +200,23 @@ class yank_pop(YankCommand):
         repl = len(r.kill_ring[-1])
         r.kill_ring.insert(0, r.kill_ring.pop())
         t = r.kill_ring[-1]
-        b[r.pos - repl:r.pos] = t
+        b[r.pos - repl : r.pos] = t
         r.pos = r.pos - repl + len(t)
         r.dirty = 1
+
 
 class interrupt(FinishCommand):
     def do(self):
         import signal
+
         self.reader.console.finish()
         os.kill(os.getpid(), signal.SIGINT)
+
 
 class suspend(Command):
     def do(self):
         import signal
+
         r = self.reader
         p = r.pos
         r.console.finish()
@@ -201,10 +229,11 @@ class suspend(Command):
         r.dirty = 1
         r.console.screen = []
 
+
 class up(MotionCommand):
     def do(self):
         r = self.reader
-        for i in range(r.get_arg()):
+        for _i in range(r.get_arg()):
             bol1 = r.bol()
             if bol1 == 0:
                 if r.historyi > 0:
@@ -213,7 +242,7 @@ class up(MotionCommand):
                 r.pos = 0
                 r.error("start of buffer")
                 return
-            bol2 = r.bol(bol1-1)
+            bol2 = r.bol(bol1 - 1)
             line_pos = r.pos - bol1
             if line_pos > bol1 - bol2 - 1:
                 r.sticky_y = line_pos
@@ -221,11 +250,12 @@ class up(MotionCommand):
             else:
                 r.pos = bol2 + line_pos
 
+
 class down(MotionCommand):
     def do(self):
         r = self.reader
         b = r.buffer
-        for i in range(r.get_arg()):
+        for _i in range(r.get_arg()):
             bol1 = r.bol()
             eol1 = r.eol()
             if eol1 == len(b):
@@ -236,71 +266,81 @@ class down(MotionCommand):
                 r.pos = len(b)
                 r.error("end of buffer")
                 return
-            eol2 = r.eol(eol1+1)
+            eol2 = r.eol(eol1 + 1)
             if r.pos - bol1 > eol2 - eol1 - 1:
                 r.pos = eol2
             else:
                 r.pos = eol1 + (r.pos - bol1) + 1
 
+
 class left(MotionCommand):
     def do(self):
         r = self.reader
-        for i in range(r.get_arg()):        
+        for _i in range(r.get_arg()):
             p = r.pos - 1
             if p >= 0:
                 r.pos = p
             else:
                 self.reader.error("start of buffer")
 
+
 class right(MotionCommand):
     def do(self):
         r = self.reader
         b = r.buffer
-        for i in range(r.get_arg()):
+        for _i in range(r.get_arg()):
             p = r.pos + 1
             if p <= len(b):
                 r.pos = p
             else:
                 self.reader.error("end of buffer")
 
+
 class beginning_of_line(MotionCommand):
     def do(self):
         self.reader.pos = self.reader.bol()
 
+
 class end_of_line(MotionCommand):
     def do(self):
-        r = self.reader
         self.reader.pos = self.reader.eol()
+
 
 class home(MotionCommand):
     def do(self):
         self.reader.pos = 0
-        
+
+
 class end(MotionCommand):
     def do(self):
         self.reader.pos = len(self.reader.buffer)
-        
+
+
 class forward_word(MotionCommand):
     def do(self):
         r = self.reader
-        for i in range(r.get_arg()):
+        for _i in range(r.get_arg()):
             r.pos = r.eow()
-    
+
+
 class backward_word(MotionCommand):
     def do(self):
         r = self.reader
-        for i in range(r.get_arg()):
+        for _i in range(r.get_arg()):
             r.pos = r.bow()
+
 
 class self_insert(EditCommand):
     def do(self):
         r = self.reader
         r.insert(self.event * r.get_arg())
 
+
 class insert_nl(EditCommand):
     def do(self):
         r = self.reader
         r.insert("\n" * r.get_arg())
+
 
 class transpose_characters(EditCommand):
     def do(self):
@@ -319,11 +359,12 @@ class transpose_characters(EditCommand):
             r.pos = t
             r.dirty = 1
 
+
 class backspace(EditCommand):
     def do(self):
         r = self.reader
         b = r.buffer
-        for i in range(r.get_arg()):
+        for _i in range(r.get_arg()):
             if r.pos > 0:
                 r.pos -= 1
                 del b[r.pos]
@@ -331,41 +372,50 @@ class backspace(EditCommand):
             else:
                 self.reader.error("can't backspace at start")
 
+
 class delete(EditCommand):
     def do(self):
         r = self.reader
         b = r.buffer
-        if  ( r.pos == 0 and len(b) == 0 # this is something of a hack
-              and self.event[-1] == "\004"):
+        if (
+            r.pos == 0
+            and len(b) == 0  # this is something of a hack
+            and self.event[-1] == "\004"
+        ):
             r.update_screen()
             r.console.finish()
             raise EOFError
-        for i in range(r.get_arg()):
+        for _i in range(r.get_arg()):
             if r.pos != len(b):
                 del b[r.pos]
                 r.dirty = 1
             else:
                 self.reader.error("end of buffer")
 
+
 class accept(FinishCommand):
     def do(self):
         pass
+
 
 class help(Command):
     def do(self):
         self.reader.msg = self.reader.help_text
         self.reader.dirty = 1
 
+
 class invalid_key(Command):
     def do(self):
         pending = self.reader.console.getpending()
-        s = ''.join(self.event) + pending.data
-        self.reader.error("`%r' not bound"%s)
+        s = "".join(self.event) + pending.data
+        self.reader.error("`%r' not bound" % s)
+
 
 class invalid_command(Command):
     def do(self):
         s = self.event_name
-        self.reader.error("command `%s' not known"%s)
+        self.reader.error("command `%s' not known" % s)
+
 
 class qIHelp(Command):
     def do(self):
@@ -373,19 +423,21 @@ class qIHelp(Command):
 
         r = self.reader
         pending = r.console.getpending().data
-        disp = disp_str((self.event + pending))[0]
+        disp = disp_str(self.event + pending)[0]
         r.insert(disp * r.get_arg())
         r.pop_input_trans()
 
-from pyrepl import input
 
-class QITrans(object):
+class QITrans:
     def push(self, evt):
         self.evt = evt
+
     def get(self):
-        return ('qIHelp', self.evt.data)
+        return ("qIHelp", self.evt.data)
+
 
 class quoted_insert(Command):
     kills_digit_arg = 0
+
     def do(self):
         self.reader.push_input_trans(QITrans())

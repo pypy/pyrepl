@@ -21,19 +21,14 @@
 # Bah, this would be easier to test if curses/terminfo didn't have so
 # much non-introspectable global state.
 
-from collections import deque
-
-from pyrepl import keymap
-from pyrepl.console import Event
-from pyrepl import curses
-from .trace import trace
-from termios import tcgetattr, VERASE
 import os
-try:
-    unicode
-except NameError:
-    unicode = str
+from collections import deque
+from termios import VERASE, tcgetattr
 
+from pyrepl import curses, keymap
+from pyrepl.console import Event
+
+from .trace import trace
 
 _keynames = {
     "delete": "kdch1",
@@ -50,8 +45,8 @@ _keynames = {
 }
 
 
-#function keys x in 1-20 -> fX: kfX
-_keynames.update(('f%d' % i, 'kf%d' % i) for i in range(1, 21))
+# function keys x in 1-20 -> fX: kfX
+_keynames.update(("f%d" % i, "kf%d" % i) for i in range(1, 21))
 
 # this is a bit of a hack: CTRL-left and CTRL-right are not standardized
 # termios sequences: each terminal emulator implements its own slightly
@@ -65,18 +60,19 @@ _keynames.update(('f%d' % i, 'kf%d' % i) for i in range(1, 21))
 #
 CTRL_ARROW_KEYCODE = {
     # for xterm, gnome-terminal, xfce terminal, etc.
-    b'\033[1;5D': 'ctrl left',
-    b'\033[1;5C': 'ctrl right',
+    b"\033[1;5D": "ctrl left",
+    b"\033[1;5C": "ctrl right",
     # for rxvt
-    b'\033Od': 'ctrl left',
-    b'\033Oc': 'ctrl right',
+    b"\033Od": "ctrl left",
+    b"\033Oc": "ctrl right",
 }
+
 
 def general_keycodes():
     keycodes = {}
-    for key, tiname in _keynames.items():
+    for key, tiname in list(_keynames.items()):
         keycode = curses.tigetstr(tiname)
-        trace('key {key} tiname {tiname} keycode {keycode!r}', **locals())
+        trace("key {key} tiname {tiname} keycode {keycode!r}", **locals())
         if keycode:
             keycodes[keycode] = key
     keycodes.update(CTRL_ARROW_KEYCODE)
@@ -87,13 +83,13 @@ def EventQueue(fd, encoding):
     keycodes = general_keycodes()
     if os.isatty(fd):
         backspace = tcgetattr(fd)[6][VERASE]
-        keycodes[backspace] = unicode('backspace')
+        keycodes[backspace] = "backspace"
     k = keymap.compile_keymap(keycodes)
-    trace('keymap {k!r}', k=k)
+    trace("keymap {k!r}", k=k)
     return EncodedQueue(k, encoding)
 
 
-class EncodedQueue(object):
+class EncodedQueue:
     def __init__(self, keymap, encoding):
         self.k = self.ck = keymap
         self.events = deque()
@@ -115,7 +111,7 @@ class EncodedQueue(object):
         return old
 
     def insert(self, event):
-        trace('added event {event}', event=event)
+        trace("added event {event}", event=event)
         self.events.append(event)
 
     def push(self, char):
@@ -124,23 +120,23 @@ class EncodedQueue(object):
         self.buf.append(ord_char)
         if char in self.k:
             if self.k is self.ck:
-                #sanity check, buffer is empty when a special key comes
+                # sanity check, buffer is empty when a special key comes
                 assert len(self.buf) == 1
             k = self.k[char]
-            trace('found map {k!r}', k=k)
+            trace("found map {k!r}", k=k)
             if isinstance(k, dict):
                 self.k = k
             else:
-                self.insert(Event('key', k, self.flush_buf()))
+                self.insert(Event("key", k, self.flush_buf()))
                 self.k = self.ck
 
         elif self.buf and self.buf[0] == 27:  # escape
             # escape sequence not recognized by our keymap: propagate it
             # outside so that i can be recognized as an M-... key (see also
             # the docstring in keymap.py, in particular the line \\E.
-            trace('unrecognized escape sequence, propagating...')
+            trace("unrecognized escape sequence, propagating...")
             self.k = self.ck
-            self.insert(Event('key', '\033', bytearray(b'\033')))
+            self.insert(Event("key", "\033", bytearray(b"\033")))
             for c in self.flush_buf()[1:]:
                 self.push(chr(c))
 
@@ -150,5 +146,5 @@ class EncodedQueue(object):
             except UnicodeError:
                 return
             else:
-                self.insert(Event('key', decoded, self.flush_buf()))
+                self.insert(Event("key", decoded, self.flush_buf()))
             self.k = self.ck

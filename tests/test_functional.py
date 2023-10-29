@@ -13,8 +13,7 @@ import pytest
 try:
     import pexpect
 except ImportError as exc:
-    pytest.skip("could not import pexpect: {}".format(exc),
-                allow_module_level=True)
+    pytest.skip(f"could not import pexpect: {exc}", allow_module_level=True)
 
 
 @pytest.fixture
@@ -24,18 +23,13 @@ def start_child():
     def start_child_func(env_update=None):
         assert not ret_childs, "child started already"
 
-        env = {k: v for k, v in os.environ.items() if k in (
-            "TERM",
-        )}
+        env = {k: v for k, v in list(os.environ.items()) if k in ("TERM",)}
         if env_update:
             env.update(env_update)
         child = pexpect.spawn(sys.executable, timeout=5, env=env)
-        if sys.version_info >= (3, ):
-            child.logfile = sys.stdout.buffer
-        else:
-            child.logfile = sys.stdout
+        child.logfile = sys.stdout.buffer
         child.expect_exact(">>> ")
-        child.sendline('from pyrepl.python_reader import main')
+        child.sendline("from pyrepl.python_reader import main")
         ret_childs.append(child)
         return child
 
@@ -62,10 +56,10 @@ def child(start_child):
 
 def test_basic(child):
     child.expect_exact("->> ")
-    child.sendline('a = 40 + 2')
+    child.sendline("a = 40 + 2")
     child.expect_exact("->> ")
-    child.sendline('a')
-    child.expect_exact('42')
+    child.sendline("a")
+    child.expect_exact("42")
     child.expect_exact("->> ")
 
 
@@ -76,8 +70,9 @@ def test_sigwinch_default(child):
 
 def test_sigwinch_forwarded(start_child, tmpdir):
     with open(str(tmpdir.join("initfile")), "w") as initfile:
-        initfile.write(textwrap.dedent(
-            """
+        initfile.write(
+            textwrap.dedent(
+                """
             import signal
 
             called = []
@@ -89,7 +84,8 @@ def test_sigwinch_forwarded(start_child, tmpdir):
 
             print("PYREPLSTARTUP called")
             """
-        ))
+            )
+        )
 
     child = start_child(env_update={"PYREPLSTARTUP": initfile.name})
     child.sendline("main()")

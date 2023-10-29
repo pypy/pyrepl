@@ -18,24 +18,26 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 
-class Event(object):
+class Event:
     """An Event.  `evt' is 'key' or somesuch."""
-    __slots__ = 'evt', 'data', 'raw'
 
-    def __init__(self, evt, data, raw=''):
+    __slots__ = "evt", "data", "raw"
+
+    def __init__(self, evt, data, raw=""):
         self.evt = evt
         self.data = data
         self.raw = raw
 
     def __repr__(self):
-        return 'Event(%r, %r)' % (self.evt, self.data)
+        return "Event({self.evt}, {self.data})"
 
     def __eq__(self, other):
-        return (self.evt == other.evt and
-                self.data == other.data and
-                self.raw == other.raw)
+        return (
+            self.evt == other.evt and self.data == other.data and self.raw == other.raw
+        )
 
-class Console(object):
+
+class Console:
     """Attributes:
 
     screen,
